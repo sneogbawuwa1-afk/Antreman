@@ -10,14 +10,28 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a12;color:#e2e2e8;min-height:100vh;padding-bottom:60px}
 .nav{background:#0d0d1a;border-bottom:1px solid #1e1e30;padding:14px 16px 0;position:sticky;top:0;z-index:100}
-.nav-header{max-width:680px;margin:0 auto}
-.nav-title{font-size:11px;letter-spacing:3px;color:#444;text-transform:uppercase;margin-bottom:4px}
+.nav-header{max-width:680px;margin:0 auto;position:relative}
+.nav-title{font-size:11px;letter-spacing:3px;color:#666;text-transform:uppercase;margin-bottom:4px}
 .nav-sub{font-size:19px;font-weight:700;color:#fff;margin-bottom:14px}
+
+/* Ana Sayfa Butonu Stili */
+.home-btn {position:absolute;top:0;right:0;background:#161625;border:1px solid #222235;border-radius:8px;padding:6px 12px;color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer;text-decoration:none;transition:background .15s}
+.home-btn:hover {background:#1e1e33}
+
+/* Hafta Seçici Stilleri */
+.week-selector-title {font-size:10px;letter-spacing:1px;color:#555;text-transform:uppercase;margin-bottom:6px;font-weight:700}
+.week-nav-tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:8px;margin-bottom:8px;scrollbar-width:none}
+.week-nav-tabs::-webkit-scrollbar{display:none}
+.week-nav-tab{background:#161625;border:1px solid #222235;border-radius:6px;padding:6px 12px;color:#777;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
+.week-nav-tab.active{background:#fff;color:#000;border-color:#fff}
+
 .day-tabs{display:flex;gap:2px;border-top:1px solid #1e1e30;margin:0 -16px}
 .day-tab{flex:1;background:none;border:none;border-bottom:2px solid transparent;padding:10px 4px 10px;color:#444;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .15s;font-family:inherit}
 .day-tab.active{color:#fff}
 .main{max-width:680px;margin:0 auto;padding:14px 16px 0}
-.day-banner{border-radius:12px;padding:14px 16px;margin-bottom:12px;border-left:3px solid;display:flex;align-items:center;gap:14px}
+
+/* Hatalı tırnak işareti düzeltildi */
+.day-banner {border-radius:12px;padding:14px 16px;margin-bottom:12px;border-left:3px solid;display:flex;align-items:center;gap:14px}
 .day-banner-text{flex:1}
 .day-focus{font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:3px}
 .day-name{font-size:15px;font-weight:800;color:#fff}
@@ -31,12 +45,12 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a12;color:#e2
 .tab-sec.active{color:#fff;border-color:#333}
 
 .exercise-card{background:#0f0f1c;border:1px solid #1e1e30;border-radius:12px;margin-bottom:8px;overflow:hidden;transition:border-color .2s}
-.exercise-card.done{opacity:.65;border-color:#111}
+.exercise-card.done{opacity:.85;border-color:#223322}
 .ex-main{padding:13px 14px;display:flex;align-items:center;gap:12px}
 .ex-check{width:22px;height:22px;border-radius:7px;border:2px solid #2a2a3a;background:transparent;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:#000;font-weight:800;transition:all .15s}
 .ex-info{flex:1;min-width:0}
 .ex-name{font-size:13px;font-weight:700;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.done .ex-name{text-decoration:line-through;color:#444}
+.done .ex-name{text-decoration:line-through;color:#666}
 .badges{display:flex;gap:5px;flex-wrap:wrap}
 .badge{border-radius:5px;padding:2px 8px;font-size:10px;font-weight:700}
 .ex-controls{display:flex;gap:8px;align-items:center;flex-shrink:0}
@@ -48,13 +62,21 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a12;color:#e2
 .rpe-select{width:42px;height:36px;background:#16161f;border:1px solid #2a2a3a;border-radius:8px;color:#888;font-size:12px;font-weight:700;text-align:center;outline:none;cursor:pointer;font-family:inherit}
 .ex-footer{padding:9px 14px;border-top:1px solid #141420;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
 .machine-label{font-size:10px;color:#444;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ex-expand{background:#0c0c18}
+.ex-expand{background:#0c0c18;border-top:1px solid #141420}
 .tip-box{padding:12px 14px 10px}
 .tip-title{font-size:10px;color:#444;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
 .tip-text{font-size:12px;color:#888;line-height:1.7}
 .yt-link{display:flex;align-items:center;gap:10px;background:#ff000015;border:1px solid #ff000040;border-radius:10px;padding:11px 14px;text-decoration:none;margin:0 14px 14px;cursor:pointer}
 .yt-title{font-size:12px;font-weight:700;color:#ff4444;margin-bottom:1px}
 .yt-sub{font-size:10px;color:#555}
+
+/* Geçmiş Performans Tablosu Stilleri */
+.history-box{padding:0 14px 12px}
+.history-title{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700}
+.history-list{display:flex;flex-direction:column;gap:4px;background:#131322;border-radius:8px;padding:8px}
+.history-row{display:flex;justify-content:space-between;font-size:11px;color:#aaa}
+.history-row span{flex:1}
+.history-row span:last-child{text-align:right;color:#888}
 
 .week-section{margin-top:4px}
 .week-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
@@ -105,6 +127,14 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <div class="nav-header">
   <div class="nav-title">Antrenman Takip</div>
   <div class="nav-sub">5 Günlük Program</div>
+  
+  <a href="javascript:void(0);" class="home-btn" id="homeBtn">
+    <i class="ti ti-home"></i> Ana Sayfa
+  </a>
+  
+  <div class="week-selector-title">Aktif Takip Haftası</div>
+  <div class="week-nav-tabs" id="weekNavTabs"></div>
+
   <div class="day-tabs" id="dayTabs"></div>
 </div>
 </div>
@@ -163,7 +193,7 @@ const DAYS = [
       { name:"One Arm Machine Row", sets:3, reps:"10-12", target:"Sırt Simetri", machine:"Tek Kol Row Makinesi", tip:"Vücudu döndürmeden sadece sırt kasının gücüyle çek.", yt:"tek kol makine row form" },
       { name:"Face Pull", sets:3, reps:"15", target:"Arka Omuz", machine:"Üst Makara Halat", tip:"Omuz kuşağının arkasını doldurmak için yüksek tekrarlı.", yt:"face pull form" },
       { name:"Rear Delt Fly Machine", sets:3, reps:"15", target:"Arka Omuz", machine:"Ters Kelebek Makinesi", tip:"Kürek kemiklerini çok fazla birbirine çarpma.", yt:"ters kelebek makinesi arka omuz" },
-      { name:"Machine Preacher Curl", sets:3, reps:"10-12", target:"Biceps Kısa Baş", machine:"Scott Curl Makinesi", tip:"Makinede tepe noktasındaki gerilimi kaçırmazsın.", yt:"preacher curl scott makinesi" },
+      { name:"Machine Preacher Curl", sets:3, reps:"10-12", target:"Biceps Kısa Baş", machine:"Scott Curl Makinesi", tip:"Makinede tepe noktrasındaki gerilimi kaçırmazsın.", yt:"preacher curl scott makinesi" },
       { name:"Cable Hammer Curl", sets:3, reps:"10-12", target:"Ön Kol", machine:"Alçak Makara Halat", tip:"Ön kollar tamamen yanana kadar tempo kontrollü.", yt:"cable hammer curl form" },
     ]},
 ];
@@ -174,23 +204,43 @@ const PROG_RULES = [
   { label:"Deload Haftası", desc:"4 haftada 1 %20 azalt, sonra devam", pct:-20, weeks:[1,2,3,-1,4,5,6,-1,7,8,9,-1,10,11,12,-1] },
 ];
 
+let currentTrackingWeek = 0;
 let activeDay = 0;
 let activeSection = "workout";
 let expandedEx = null;
-let data = JSON.parse(localStorage.getItem("gym_tracker_data")) || {};
+let data = {};
+try {
+  data = JSON.parse(localStorage.getItem("gym_tracker_data_v2")) || {};
+} catch(e) {
+  data = {};
+}
 let progressionWeek = 0;
 let selectedExChart = 0;
 
-function getKey(dayId, exIdx, field){return `${dayId}_${exIdx}_${field}`;}
-function getData(dayId, exIdx, field, def=""){
-  const k=getKey(dayId,exIdx,field);
+function getKey(week, dayId, exIdx, field){return `W${week}_${dayId}_${exIdx}_${field}`;}
+
+function getData(week, dayId, exIdx, field, def=""){
+  const k=getKey(week, dayId, exIdx, field);
   return data[k] !== undefined ? data[k] : def;
 }
-function setData(dayId, exIdx, field, val){
-  data[getKey(dayId,exIdx,field)]=val;
+function setData(week, dayId, exIdx, field, val){
+  data[getKey(week, dayId, exIdx, field)]=val;
 }
+
+function getPastPerformance(dayId, exIdx) {
+  let perfList = [];
+  for(let w = 0; w < 12; w++) {
+    const weight = getData(w, dayId, exIdx, "weight", "");
+    const rpe = getData(w, dayId, exIdx, "rpe", "");
+    if(weight) {
+      perfList.push({ week: w + 1, weight, rpe });
+    }
+  }
+  return perfList;
+}
+
 function getWeekWeight(dayId, exIdx, week){
-  const base = parseFloat(getData(dayId,exIdx,"weight",0))||0;
+  const base = parseFloat(getData(currentTrackingWeek, dayId,exIdx,"weight",0))||0;
   if(!base) return null;
   let w = base;
   for(let i=0;i<week;i++){
@@ -199,8 +249,25 @@ function getWeekWeight(dayId, exIdx, week){
   return w;
 }
 
+function renderWeekSelector(){
+  const container = document.getElementById("weekNavTabs");
+  if(!container) return;
+  let html = "";
+  for(let w=0; w<12; w++){
+    html += `<div class="week-nav-tab${currentTrackingWeek === w ? ' active' : ''}" data-widx="${w}">Hafta ${w+1}</div>`;
+  }
+  container.innerHTML = html;
+  container.querySelectorAll(".week-nav-tab").forEach(tab => {
+    tab.onclick = function() {
+      currentTrackingWeek = parseInt(this.dataset.widx);
+      render();
+    }
+  });
+}
+
 function renderDayTabs(){
   const tabs = document.getElementById("dayTabs");
+  if(!tabs) return;
   tabs.innerHTML = DAYS.map((d,i)=>`
     <button class="day-tab${activeDay===i?" active":""}" style="${activeDay===i?`border-bottom-color:${d.color}`:""}">
       ${d.label}
@@ -210,13 +277,13 @@ function renderDayTabs(){
 
 function renderMain(){
   const day = DAYS[activeDay];
-  const done = day.exercises.filter((_,i)=>getData(day.id,i,"done")==="1").length;
+  const done = day.exercises.filter((_,i)=>getData(currentTrackingWeek, day.id,i,"done")==="1").length;
   const pct = Math.round(done/day.exercises.length*100);
 
   let html = `
   <div class="day-banner" style="background:${day.color}15;border-left-color:${day.color}">
     <div class="day-banner-text">
-      <div class="day-focus" style="color:${day.color}">${day.full}</div>
+      <div class="day-focus" style="color:${day.color}">${day.full} (HAFTA ${currentTrackingWeek+1})</div>
       <div class="day-name">${day.focus}</div>
       <div class="progress-wrap">
         <div class="progress-bar"><div class="progress-fill" style="background:${day.color};width:${pct}%"></div></div>
@@ -239,7 +306,9 @@ function renderMain(){
   }
 
   html += renderWeeklyOverview();
-  document.getElementById("main").innerHTML = html;
+  
+  const mainEl = document.getElementById("main");
+  if(mainEl) mainEl.innerHTML = html;
 
   document.querySelectorAll(".tab-sec").forEach((t,i)=>{
     const sections=["workout","progress","progression"];
@@ -254,11 +323,13 @@ function renderMain(){
 
 function renderWorkout(day){
   return day.exercises.map((ex,i)=>{
-    const isDone = getData(day.id,i,"done")==="1";
-    const w = getData(day.id,i,"weight","");
-    const rpe = getData(day.id,i,"rpe","");
-    const note = getData(day.id,i,"note","");
+    const isDone = getData(currentTrackingWeek, day.id,i,"done")==="1";
+    const w = getData(currentTrackingWeek, day.id,i,"weight","");
+    const rpe = getData(currentTrackingWeek, day.id,i,"rpe","");
+    const note = getData(currentTrackingWeek, day.id,i,"note","");
     const isOpen = expandedEx===i;
+    const pastPerformance = getPastPerformance(day.id, i);
+
     return `
     <div class="exercise-card${isDone?" done":""}" id="excard_${i}">
       <div class="ex-main">
@@ -302,6 +373,22 @@ function renderWorkout(day){
             <textarea id="note_${i}" rows="2" style="width:100%;background:#16161f;border:1px solid #2a2a3a;border-radius:8px;color:#e2e2e8;font-size:12px;padding:8px;resize:none;outline:none;font-family:inherit" placeholder="Bugünkü his, öneri…">${note}</textarea>
           </div>
         </div>
+        
+        <div class="history-box">
+          <div class="history-title"><i class="ti ti-history" style="font-size:12px;vertical-align:-1px" aria-hidden="true"></i> Geçmiş Performanslar</div>
+          <div class="history-list">
+            ${pastPerformance.length === 0 ? '<div style="font-size:11px;color:#444;text-align:center">Henüz geçmiş veri yok.</div>' : 
+              pastPerformance.map(p => `
+                <div class="history-row" style="${p.week === currentTrackingWeek + 1 ? 'font-weight:bold;color:#fff;' : ''}">
+                  <span>Hafta ${p.week}</span>
+                  <span>${p.weight} KG</span>
+                  <span>RPE: ${p.rpe || '—'}</span>
+                </div>
+              `).join('')
+            }
+          </div>
+        </div>
+
         <a class="yt-link" href="https://www.youtube.com/results?search_query=${encodeURIComponent(ex.yt)}" target="_blank" rel="noopener">
           <svg width="22" height="16" viewBox="0 0 22 16" fill="none" aria-hidden="true"><rect width="22" height="16" rx="3.5" fill="#FF0000"/><path d="M9 4.5L15 8L9 11.5V4.5Z" fill="white"/></svg>
           <div><div class="yt-title">Nasıl Yapılır?</div><div class="yt-sub">YouTube'da Türkçe video ara</div></div>
@@ -310,40 +397,75 @@ function renderWorkout(day){
       </div>`:""}
     </div>`;
   }).join("")+`
-  <button class="save-btn" id="saveBtn" style="background:${day.color}">KAYDET</button>`;
+  <button class="save-btn" id="saveBtn" style="background:${day.color}">DEĞİŞİKLİKLERİ KAYDET</button>`;
 }
 
+/* Siyah Ekranı Önleyen Güvenli Bind (Element Kontrollü) ve Anlık Kayıt */
 function bindWorkout(day){
   day.exercises.forEach((_,i)=>{
-    document.getElementById(`chk_${i}`).onclick=()=>{
-      const cur = getData(day.id,i,"done")==="1";
-      setData(day.id,i,"done",cur?"0":"1");
-      render();
-    };
-    document.getElementById(`w_${i}`).oninput=function(){
-      setData(day.id,i,"weight",this.value);
-      this.style.borderColor=this.value?day.color+"60":"#2a2a3a";
-      this.style.color=this.value?day.color:"#555";
-    };
-    document.getElementById(`rpe_${i}`).onchange=function(){
-      setData(day.id,i,"rpe",this.value);
-    };
-    document.getElementById(`expand_${i}`).onclick=()=>{
-      expandedEx = expandedEx===i?null:i;
-      render();
-    };
+    const chkEl = document.getElementById(`chk_${i}`);
+    if(chkEl) {
+      chkEl.onclick=()=>{
+        const cur = getData(currentTrackingWeek, day.id,i,"done")==="1";
+        setData(currentTrackingWeek, day.id,i,"done",cur?"0":"1");
+        // ANLIK KAYIT TETİKLEYİCİSİ
+        localStorage.setItem("gym_tracker_data_v2", JSON.stringify(data));
+        render(); 
+      };
+    }
+
+    const wInp = document.getElementById(`w_${i}`);
+    if(wInp) {
+      wInp.oninput=function(){
+        setData(currentTrackingWeek, day.id,i,"weight",this.value);
+        this.style.borderColor=this.value?day.color+"60":"#2a2a3a";
+        this.style.color=this.value?day.color:"#555";
+        // ANLIK KAYIT TETİKLEYİCİSİ
+        localStorage.setItem("gym_tracker_data_v2", JSON.stringify(data));
+      };
+    }
+
+    const rpeSel = document.getElementById(`rpe_${i}`);
+    if(rpeSel) {
+      rpeSel.onchange=function(){
+        setData(currentTrackingWeek, day.id,i,"rpe",this.value);
+        // ANLIK KAYIT TETİKLEYİCİSİ
+        localStorage.setItem("gym_tracker_data_v2", JSON.stringify(data));
+      };
+    }
+
+    const expBtn = document.getElementById(`expand_${i}`);
+    if(expBtn) {
+      expBtn.onclick=()=>{
+        expandedEx = expandedEx===i?null:i;
+        render();
+      };
+    }
+
     if(expandedEx===i){
-      const na = document.getElementById(`note_${i}`);
-      if(na) na.oninput=function(){setData(day.id,i,"note",this.value);};
+      const noteTxt = document.getElementById(`note_${i}`);
+      if(noteTxt) {
+        noteTxt.oninput=function(){
+          setData(currentTrackingWeek, day.id,i,"note",this.value);
+          // ANLIK KAYIT TETİKLEYİCİSİ
+          localStorage.setItem("gym_tracker_data_v2", JSON.stringify(data));
+        };
+      }
     }
   });
-  document.getElementById("saveBtn").onclick=()=>{
-    localStorage.setItem("gym_tracker_data", JSON.stringify(data));
-    const toast=document.getElementById("toast");
-    toast.style.background=day.color;
-    toast.style.display="block";
-    setTimeout(()=>toast.style.display="none",2000);
-  };
+
+  const saveBtn = document.getElementById("saveBtn");
+  if(saveBtn) {
+    saveBtn.onclick=()=>{
+      localStorage.setItem("gym_tracker_data_v2", JSON.stringify(data));
+      const toast=document.getElementById("toast");
+      if(toast) {
+        toast.style.background=day.color;
+        toast.style.display="block";
+        setTimeout(()=>toast.style.display="none",2000);
+      }
+    };
+  }
 }
 
 function renderProgress(day){
@@ -391,11 +513,11 @@ function renderProgress(day){
   <div class="chart-wrap">
     <div class="chart-title">Ağırlık Tahmini (12 Hafta)</div>
     <select class="ex-select" id="exChartSelect">${exOptions}</select>
-    <div style="position:relative;height:220px"><canvas id="progressChart" role="img" aria-label="12 haftalık ağırlık ilerleme grafiği">Ağırlık ilerleme tahmini</canvas></div>
+    <div style="position:relative;height:220px"><canvas id="progressChart"></canvas></div>
   </div>
   <div class="chart-wrap">
     <div class="chart-title">Haftalık Tamamlanma Oranı</div>
-    <div style="position:relative;height:160px"><canvas id="completionChart" role="img" aria-label="Günlük tamamlanma grafiği">Tamamlanma oranı</canvas></div>
+    <div style="position:relative;height:160px"><canvas id="completionChart"></canvas></div>
   </div>`;
 }
 
@@ -406,10 +528,11 @@ function bindProgress(day){
 }
 
 function renderProgressCharts(day){
+  if(typeof Chart === 'undefined') return;
   const exIdx = selectedExChart;
-  const base = parseFloat(getData(day.id,exIdx,"weight",0))||60;
+  const base = parseFloat(getData(currentTrackingWeek, day.id,exIdx,"weight",0))||60;
   const labels=[]; const vals=[];
-  for(let w=0;w<=12;w++){
+  for(let w=0; w<=12; w++){
     labels.push(`H${w}`);
     vals.push(+(base*Math.pow(1.025,w)).toFixed(1));
   }
@@ -437,7 +560,7 @@ function renderProgressCharts(day){
 
   const compData=DAYS.map((d,di)=>{
     const tot=d.exercises.length;
-    const done=d.exercises.filter((_,i)=>getData(d.id,i,"done")==="1").length;
+    const done=d.exercises.filter((_,i)=>getData(currentTrackingWeek, d.id,i,"done")==="1").length;
     return Math.round(done/tot*100);
   });
   const c2=document.getElementById("completionChart");
@@ -475,7 +598,7 @@ function renderProgression(day){
   </div>`;
 
   const tableRows = day.exercises.map((ex,i)=>{
-    const base=parseFloat(getData(day.id,i,"weight",0))||0;
+    const base=parseFloat(getData(currentTrackingWeek, day.id,i,"weight",0))||0;
     const prev=progressionWeek>0?+(base*Math.pow(1.025,progressionWeek-1)).toFixed(1):null;
     const cur=base?+(base*Math.pow(1.025,progressionWeek)).toFixed(1):null;
     const diff=prev&&cur?+(cur-prev).toFixed(1):null;
@@ -525,7 +648,7 @@ function renderWeeklyOverview(){
     <div class="overview-title">Haftalık Özet</div>
     <div class="overview-grid" id="ovGrid">
       ${DAYS.map((d,i)=>{
-        const done=d.exercises.filter((_,j)=>getData(d.id,j,"done")==="1").length;
+        const done=d.exercises.filter((_,j)=>getData(currentTrackingWeek, d.id,j,"done")==="1").length;
         const pct=Math.round(done/d.exercises.length*100);
         return `<div class="ov-card" id="ov_${i}" style="${activeDay===i?`border-color:${d.color}60`:""}">
           <div class="ov-label" style="color:${activeDay===i?d.color:"#444"}">${d.label}</div>
@@ -535,7 +658,7 @@ function renderWeeklyOverview(){
       }).join("")}
     </div>
   </div>
-  <div style="margin-top:14px;font-size:11px;color:#2a2a3a;text-align:center;padding-bottom:20px">Veriler bu oturumda saklanır</div>`;
+  <div style="margin-top:14px;font-size:11px;color:#2a2a3a;text-align:center;padding-bottom:20px">Veriler yerel depolamada saklanır</div>`;
 }
 
 function bindOverview(){
@@ -545,7 +668,20 @@ function bindOverview(){
   });
 }
 
+/* Ana Sayfa Butonu Fonksiyonu */
+const homeBtn = document.getElementById("homeBtn");
+if(homeBtn) {
+  homeBtn.onclick = function() {
+    currentTrackingWeek = 0; // Hafta 1'e dön
+    activeDay = 0;           // Pazartesi'ye dön
+    activeSection = "workout"; // Antrenman sekmesine al
+    expandedEx = null;       // Açık detay pencerelerini kapat
+    render();
+  };
+}
+
 function render(){
+  renderWeekSelector();
   renderDayTabs();
   renderMain();
 }
