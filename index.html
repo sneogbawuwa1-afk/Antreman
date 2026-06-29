@@ -177,7 +177,7 @@ const PROG_RULES = [
 let activeDay = 0;
 let activeSection = "workout";
 let expandedEx = null;
-let data = {};
+let data = JSON.parse(localStorage.getItem("gym_tracker_data")) || {};
 let progressionWeek = 0;
 let selectedExChart = 0;
 
@@ -338,6 +338,7 @@ function bindWorkout(day){
     }
   });
   document.getElementById("saveBtn").onclick=()=>{
+    localStorage.setItem("gym_tracker_data", JSON.stringify(data));
     const toast=document.getElementById("toast");
     toast.style.background=day.color;
     toast.style.display="block";
