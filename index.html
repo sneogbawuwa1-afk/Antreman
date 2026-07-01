@@ -346,7 +346,7 @@
     <div class="dropzone" id="dropzone">
       <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#5C6577" stroke-width="1.6"><path d="M12 3v12m0-12 4 4m-4-4-4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
       <div class="dz-title">Excel dosyalarını buraya sürükleyin ya da tıklayıp seçin</div>
-      <div class="dz-sub">4 dosyayı aynı anda seçebilirsiniz — sistem her birini <b>otomatik tanır</b> (Kalemler, Sipariş, Tahsilat, Çek/Senet)</div>
+      <div class="dz-sub">5 dosyayı aynı anda seçebilirsiniz — sistem her birini <b>otomatik tanır</b> (Kalemler, Sipariş, Tahsilat, Çek/Senet, Ticari Stok)</div>
     </div>
     <input type="file" id="fileInput" accept=".xlsx,.xls" multiple />
 
@@ -383,6 +383,14 @@
           <div class="check-meta"></div>
         </div>
       </div>
+      <div class="check-item" data-type="ticariStok">
+        <div class="check-icon">5</div>
+        <div>
+          <div class="check-name">Ticari Stok</div>
+          <div class="check-desc">Malzeme Kodu, Depoda Kalan Mk./Lt. kolonlarını içeren nokta bazlı stok dökümü (opsiyonel)</div>
+          <div class="check-meta"></div>
+        </div>
+      </div>
     </div>
 
     <div class="upload-error" id="uploadError"></div>
@@ -405,6 +413,7 @@
     <div class="tabbar no-print" id="tabBar">
       <button class="tab-btn active" data-view="genel" type="button">📊 Genel Rapor</button>
       <button class="tab-btn" data-view="yaslandirma" type="button">⏱️ Yaşlandırma Raporu</button>
+      <button class="tab-btn" data-view="ticariStok" type="button">🛢️ Ticari Stok Raporu</button>
     </div>
 
     <div id="genelView">
@@ -590,6 +599,59 @@
 
     </div><!-- /yaslandirmaView -->
 
+    <div id="ticariStokView" style="display:none;">
+
+      <div class="panel print-section" id="ticariStokPanel">
+        <div class="panel-head">
+          <div><h2>Nokta Bazlı Ticari Stok Raporu</h2><span class="count" id="ticariStokCount"></span></div>
+          <div class="toolbar">
+            <div class="search-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="ticariStokSearchInput" placeholder="Müşteri, ürün veya temsilci ara…" />
+            </div>
+            <select class="filter-select" id="ticariStokTemsilciFilter"><option value="">Tüm temsilciler</option></select>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:0;">
+          <div style="overflow-x:auto;">
+            <table id="ticariStokTable">
+              <thead><tr>
+                <th data-key="temsilci">Satış Temsilcisi<span class="arrow"></span></th>
+                <th data-key="musteriNo">Müşteri No<span class="arrow"></span></th>
+                <th data-key="musteriAdi">Müşteri Adı<span class="arrow"></span></th>
+                <th data-key="urunKodu">Ürün Kodu<span class="arrow"></span></th>
+                <th data-key="urunAdi">Ürün Adı<span class="arrow"></span></th>
+                <th class="num" data-key="depodaKalanMk">Depoda Kalan Mk.<span class="arrow"></span></th>
+                <th class="num" data-key="depodaKalanLt">Depoda Kalan Lt.<span class="arrow"></span></th>
+              </tr></thead>
+              <tbody id="ticariStokTbody"></tbody>
+            </table>
+          </div>
+          <div class="legend no-print" style="padding:0 16px 14px;">
+            <span>Not: Depoda Kalan Lt. değeri 0 olan satırlar rapora dahil edilmemiştir.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel print-section" id="ticariStokOzetPanel">
+        <div class="panel-head"><h2>Özet — ST Bazlı Ticari Stok</h2></div>
+        <div class="panel-body" style="padding:0;">
+          <div style="overflow-x:auto;">
+            <table id="ticariStokOzetTable">
+              <thead><tr>
+                <th>Satış Temsilcisi</th>
+                <th class="num">Depoda Kalan Mk.</th>
+                <th class="num">Depoda Kalan Lt.</th>
+              </tr></thead>
+              <tbody id="ticariStokOzetTbody"></tbody>
+              <tfoot id="ticariStokOzetTfoot"></tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /ticariStokView -->
+
     <footer>Bu rapor yüklenen ham veri dosyalarından tarayıcınızda anlık olarak hesaplanmıştır. Hiçbir veri sunucuya gönderilmez.</footer>
   </div>
 
@@ -598,10 +660,11 @@
 <script>
 /* ============================== STATE ============================== */
 const state = {
-  files: { kalemler:null, siparis:null, tahsilat:null, cekSenet:null },
+  files: { kalemler:null, siparis:null, tahsilat:null, cekSenet:null, ticariStok:null },
   report: null,
   sort: { key:'kalanBorc', dir:-1 },
   ySort: { key:'toplam', dir:-1 },
+  tSort: { key:'depodaKalanLt', dir:-1 },
   expanded: new Set(),
 };
 
@@ -689,8 +752,8 @@ async function loadReportFromCloud(){
 
 /* ============================== SAHA SATIŞ MÜDÜRÜ EŞLEŞTİRME ============================== */
 const SAHA_MUDUR_MAP = {
-  'Sıtkı Berkay Katrancı': 'Uğur Ergon',
-  'Alican Akbaş': 'Uğur Ergon',
+  'Sıtkı Berkay Katrancı': 'Uğur Ergin',
+  'Alican Akbaş': 'Uğur Ergin',
   'Altuğ Aksu': 'Mertcan Çınar',
   'Ali Yüksel': 'Mertcan Çınar',
   'Mehmetcan Yılmaz': 'Mertcan Çınar',
@@ -711,6 +774,8 @@ function getSahaMuduru(temsilci){
 
 const TL = n => (Math.round(n||0)).toLocaleString('tr-TR') + ' ₺';
 const NUM = n => (Math.round(n||0)).toLocaleString('tr-TR');
+const MK = n => NUM(n) + ' Mk.';
+const LT = n => NUM(n) + ' Lt.';
 const fmtDate = d => d instanceof Date && !isNaN(d) ? d.toLocaleDateString('tr-TR') : '—';
 
 /* ============================== FILE DETECTION ============================== */
@@ -725,8 +790,9 @@ const SIGNATURES = {
     ['Belge Tutarı','Çek/Senet Durumu','Müşt. Kodu'],
   ],
   cekSenet: [['Esas Borçlu','Çek/Senet Numarası']],
+  ticariStok: [['Depoda Kalan Mk.','Depoda Kalan Lt.','Malzeme Kodu']],
 };
-const LABELS = { kalemler:'Kalemler (Fatura / Bakiye)', siparis:'Sipariş Dökümü', tahsilat:'Tahsilat Dökümü', cekSenet:'Çek / Senet Riski' };
+const LABELS = { kalemler:'Kalemler (Fatura / Bakiye)', siparis:'Sipariş Dökümü', tahsilat:'Tahsilat Dökümü', cekSenet:'Çek / Senet Riski', ticariStok:'Ticari Stok' };
 
 function detectType(headers){
   const set = new Set(headers.map(h=>String(h||'').trim()));
@@ -833,9 +899,11 @@ function updateChecklist(){
   });
   const allLoaded = Object.values(state.files).every(Boolean);
   const kalemlerLoaded = Boolean(state.files.kalemler);
+  const total = Object.keys(state.files).length;
+  const loadedCount = Object.values(state.files).filter(Boolean).length;
   buildBtn.disabled = !kalemlerLoaded;
   buildBtn.textContent = allLoaded ? 'Raporu Oluştur' : (kalemlerLoaded ? 'Eksik dosyalarla devam et' : 'Raporu Oluştur');
-  statusPill.textContent = allLoaded ? '4/4 dosya hazır' : Object.values(state.files).filter(Boolean).length + '/4 dosya yüklendi';
+  statusPill.textContent = allLoaded ? (total+'/'+total+' dosya hazır') : (loadedCount + '/' + total + ' dosya yüklendi');
   if(allLoaded) statusPill.classList.add('ok');
 }
 
@@ -894,13 +962,13 @@ syncBtn.addEventListener('click', async ()=>{
 });
 
 function resetAll(){
-  state.files = {kalemler:null, siparis:null, tahsilat:null, cekSenet:null};
+  state.files = {kalemler:null, siparis:null, tahsilat:null, cekSenet:null, ticariStok:null};
   state.report = null;
   state.expanded.clear();
   clearStoredReport();
   document.querySelectorAll('.check-item').forEach(el=>{
     el.classList.remove('done');
-    el.querySelector('.check-icon').textContent = el.getAttribute('data-type')==='kalemler'?'1':el.getAttribute('data-type')==='siparis'?'2':el.getAttribute('data-type')==='tahsilat'?'3':'4';
+    el.querySelector('.check-icon').textContent = el.getAttribute('data-type')==='kalemler'?'1':el.getAttribute('data-type')==='siparis'?'2':el.getAttribute('data-type')==='tahsilat'?'3':el.getAttribute('data-type')==='cekSenet'?'4':'5';
     el.querySelector('.check-meta').textContent='';
   });
   buildBtn.disabled = true;
@@ -922,6 +990,7 @@ function resetAll(){
   if(genelTab) genelTab.classList.add('active');
   document.getElementById('genelView').style.display='block';
   document.getElementById('yaslandirmaView').style.display='none';
+  document.getElementById('ticariStokView').style.display='none';
 }
 resetBtn.addEventListener('click', resetAll);
 
@@ -1139,8 +1208,39 @@ function buildReport(files){
     r.musteriSayisi += 1; r.kalanBorc += m.kalanBorc; r.toplamRisk += m.toplamRisk;
   });
 
+  // ---- 5) TİCARİ STOK: nokta bazlı stok satırları (Depoda Kalan Lt. = 0 olanlar hariç) ----
+  const ticariStokRows = [];
+  if(files.ticariStok){
+    files.ticariStok.data.forEach(r=>{
+      const depodaKalanLt = Number(r['Depoda Kalan Lt.'])||0;
+      if(depodaKalanLt === 0) return; // 0 litre olanlar rapora dahil edilmez
+      ticariStokRows.push({
+        temsilci: r['Satış Temsilcisi Adı'] || '—',
+        musteriNo: r['Müşteri No']!=null ? String(r['Müşteri No']) : '—',
+        musteriAdi: r['Müşteri Ad'] || '—',
+        urunKodu: r['Malzeme Kodu']!=null ? String(r['Malzeme Kodu']) : '—',
+        urunAdi: r['Malzeme Açıklaması'] || '—',
+        depodaKalanMk: Number(r['Depoda Kalan Mk.'])||0,
+        depodaKalanLt,
+      });
+    });
+  }
+  const ticariStokOzetMap = new Map();
+  ticariStokRows.forEach(r=>{
+    const key = r.temsilci || '—';
+    if(!ticariStokOzetMap.has(key)) ticariStokOzetMap.set(key, {temsilci:key, kalemSayisi:0, depodaKalanMk:0, depodaKalanLt:0});
+    const o = ticariStokOzetMap.get(key);
+    o.kalemSayisi += 1;
+    o.depodaKalanMk += r.depodaKalanMk;
+    o.depodaKalanLt += r.depodaKalanLt;
+  });
+  const ticariStok = {
+    rows: ticariStokRows,
+    ozet: Array.from(ticariStokOzetMap.values()).sort((a,b)=>b.depodaKalanLt-a.depodaKalanLt),
+  };
+
   return {
-    asOf: today, musteriler, invoices, bakiyesiz, kpi,
+    asOf: today, musteriler, invoices, bakiyesiz, kpi, ticariStok,
     temsilciler: Array.from(repMap.values()).sort((a,b)=>b.kalanBorc-a.kalanBorc),
   };
 }
@@ -1201,6 +1301,7 @@ function renderReport(report){
   renderRepGrid(report.temsilciler);
   renderBakiyesiz(report.bakiyesiz);
   renderYaslandirmaView(report);
+  renderTicariStokView(report);
 }
 
 /* ============================== SEKME GEÇİŞİ ============================== */
@@ -1211,7 +1312,9 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     const view = btn.getAttribute('data-view');
     document.getElementById('genelView').style.display = view==='genel' ? 'block' : 'none';
     document.getElementById('yaslandirmaView').style.display = view==='yaslandirma' ? 'block' : 'none';
+    document.getElementById('ticariStokView').style.display = view==='ticariStok' ? 'block' : 'none';
     if(view==='yaslandirma' && state.report) renderYaslandirmaView(state.report);
+    if(view==='ticariStok' && state.report) renderTicariStokView(state.report);
   });
 });
 
@@ -1402,6 +1505,89 @@ function renderYaslandirmaView(report){
   renderYaslandirmaTable(report);
   renderYaslandirmaOzet(report);
 }
+
+/* ============================== TİCARİ STOK RAPORU ============================== */
+function getFilteredSortedTicariStok(report){
+  const q = document.getElementById('ticariStokSearchInput').value.trim().toLowerCase();
+  const temsilci = document.getElementById('ticariStokTemsilciFilter').value;
+  const rows = (report.ticariStok ? report.ticariStok.rows : []);
+  let filtered = rows.filter(r=>{
+    if(q && !(String(r.musteriAdi).toLowerCase().includes(q) || String(r.musteriNo).toLowerCase().includes(q) ||
+      String(r.urunAdi).toLowerCase().includes(q) || String(r.urunKodu).toLowerCase().includes(q) ||
+      String(r.temsilci).toLowerCase().includes(q))) return false;
+    if(temsilci && r.temsilci !== temsilci) return false;
+    return true;
+  });
+  const {key,dir} = state.tSort;
+  filtered = filtered.slice().sort((a,b)=>{
+    const av=a[key], bv=b[key];
+    if(typeof av==='string') return dir*String(av).localeCompare(String(bv),'tr');
+    return dir*((av||0)-(bv||0));
+  });
+  return filtered;
+}
+
+function renderTicariStokTable(report){
+  const rows = getFilteredSortedTicariStok(report);
+  document.getElementById('ticariStokCount').textContent = rows.length.toLocaleString('tr-TR') + ' kalem';
+  const tbody = document.getElementById('ticariStokTbody');
+  if(!report.ticariStok || !report.ticariStok.rows.length){
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">Ticari Stok dosyası yüklenmedi ya da depoda kalan litre değeri sıfırın üzerinde satır bulunamadı.</div></td></tr>`;
+    return;
+  }
+  if(!rows.length){
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">Filtreyle eşleşen kayıt bulunamadı.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(r=>`<tr>
+    <td><span class="temsilci-tag">${escapeHtml(r.temsilci)}</span></td>
+    <td>${escapeHtml(r.musteriNo)}</td>
+    <td>${escapeHtml(r.musteriAdi)}</td>
+    <td>${escapeHtml(r.urunKodu)}</td>
+    <td>${escapeHtml(r.urunAdi)}</td>
+    <td class="num" style="white-space:nowrap;">${MK(r.depodaKalanMk)}</td>
+    <td class="num" style="white-space:nowrap;"><span class="num-strong">${LT(r.depodaKalanLt)}</span></td>
+  </tr>`).join('');
+}
+
+function renderTicariStokOzet(report){
+  const ozet = report.ticariStok ? report.ticariStok.ozet : [];
+  const tbody = document.getElementById('ticariStokOzetTbody');
+  if(!ozet.length){
+    tbody.innerHTML = `<tr><td colspan="3"><div class="empty-state">Veri bulunamadı.</div></td></tr>`;
+    document.getElementById('ticariStokOzetTfoot').innerHTML = '';
+    return;
+  }
+  tbody.innerHTML = ozet.map(r=>`<tr>
+    <td><span class="temsilci-tag">${escapeHtml(r.temsilci)}</span></td>
+    <td class="num" style="white-space:nowrap;">${MK(r.depodaKalanMk)}</td>
+    <td class="num" style="white-space:nowrap;"><span class="num-strong">${LT(r.depodaKalanLt)}</span></td>
+  </tr>`).join('');
+  const grand = ozet.reduce((a,r)=>({depodaKalanMk:a.depodaKalanMk+r.depodaKalanMk, depodaKalanLt:a.depodaKalanLt+r.depodaKalanLt}), {depodaKalanMk:0,depodaKalanLt:0});
+  document.getElementById('ticariStokOzetTfoot').innerHTML = `<tr class="totals-row">
+    <td>Genel Toplam</td>
+    <td class="num" style="white-space:nowrap;">${MK(grand.depodaKalanMk)}</td>
+    <td class="num" style="white-space:nowrap;"><span class="num-strong">${LT(grand.depodaKalanLt)}</span></td>
+  </tr>`;
+}
+
+function renderTicariStokView(report){
+  populateTemsilciFilter(report.ticariStok ? report.ticariStok.rows : [], 'ticariStokTemsilciFilter');
+  renderTicariStokTable(report);
+  renderTicariStokOzet(report);
+}
+
+document.getElementById('ticariStokSearchInput').addEventListener('input', ()=>renderTicariStokTable(state.report));
+document.getElementById('ticariStokTemsilciFilter').addEventListener('change', ()=>renderTicariStokTable(state.report));
+document.querySelectorAll('#ticariStokTable thead th[data-key]').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const key = th.getAttribute('data-key');
+    if(state.tSort.key===key) state.tSort.dir *= -1; else state.tSort = {key, dir:-1};
+    document.querySelectorAll('#ticariStokTable thead .arrow').forEach(a=>a.textContent='');
+    th.querySelector('.arrow').textContent = state.tSort.dir===1?'▲':'▼';
+    renderTicariStokTable(state.report);
+  });
+});
 
 document.getElementById('yaslandirmaSearchInput').addEventListener('input', ()=>renderYaslandirmaTable(state.report));
 document.getElementById('yaslandirmaTemsilciFilter').addEventListener('change', ()=>renderYaslandirmaTable(state.report));
