@@ -1312,6 +1312,7 @@ function girisEkraniGizle(){
   document.getElementById('authGate').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   document.getElementById('authLogoutBtn').style.display = 'inline-block';
+  uygulamayiBaslat(); // kullanıcı doğrulandıktan SONRA veri çekmeye başla (aksi hâlde bulut istekleri reddedilir)
 }
 
 if(authAktif){
@@ -1899,7 +1900,11 @@ document.addEventListener('visibilitychange', ()=>{
 });
 
 /* ============================== SAYFA AÇILIŞINDA KAYITLI VERİYİ YÜKLE ============================== */
-window.addEventListener('DOMContentLoaded', async ()=>{
+let uygulamaBaslatildiMi = false;
+async function uygulamayiBaslat(){
+  if(uygulamaBaslatildiMi) return; // giriş durumu değişince (ör. token yenileme) tekrar tekrar çalışmasın
+  uygulamaBaslatildiMi = true;
+
   let report = null, source = null;
 
   await musteriMasterYenile(); // buluttan/cihazdan en son yüklenmiş Müşteri Master'ı çek
@@ -1942,6 +1947,15 @@ window.addEventListener('DOMContentLoaded', async ()=>{
   }else if(cloudEnabled()){
     statusPill.textContent = 'Veri bekleniyor';
   }
+}
+// Giriş yapılandırılmamışsa (authAktif=false), veri çekme işlemi doğrudan sayfa açılışında başlar
+// (eski davranış). Giriş aktifse, veri çekme işlemi girisEkraniGizle() üzerinden, yani kullanıcı
+// GERÇEKTEN giriş yaptıktan/oturumu doğrulandıktan SONRA tetiklenir (aşağıya bakın); aksi hâlde
+// veritabanı kuralları (auth != null) isteği reddettiği için sayfa "Veri bekleniyor" durumunda takılı
+// kalırdı — sayfa yenilenince çalışmasının sebebi, o an Firebase'in önceki oturumu ondan önce
+// hatırlamış olmasıydı; bu düzeltmeyle artık ilk girişte de anında çalışır.
+window.addEventListener('DOMContentLoaded', async ()=>{
+  if(!authAktif) await uygulamayiBaslat();
 });
 
 /* ============================== REPORT BUILDING ============================== */
