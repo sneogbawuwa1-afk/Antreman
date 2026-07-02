@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Nokta Cari Takip Paneli</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -400,7 +402,23 @@
 </style>
 </head>
 <body>
-<div id="app">
+<div id="authGate" style="position:fixed;inset:0;background:var(--cream,#F2EEE6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:16px;padding:36px 32px;max-width:380px;width:100%;box-shadow:0 12px 36px rgba(0,0,0,.10);border:1px solid var(--line,#E4DFD3);">
+    <div style="text-align:center;margin-bottom:22px;">
+      <div style="width:44px;height:44px;border-radius:11px;background:var(--navy,#1F2A44);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;margin:0 auto 12px;">NC</div>
+      <h2 style="margin:0;font-size:18px;">Nokta Cari Takip Paneli</h2>
+      <p style="margin:6px 0 0;color:var(--ink-soft,#6B7280);font-size:13px;">Devam etmek için giriş yapın</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <input type="text" id="authKullaniciKodu" placeholder="Kullanıcı Kodu" autocomplete="username" inputmode="numeric" style="padding:11px 13px;border:1px solid var(--line,#E4DFD3);border-radius:9px;font-size:14px;font-family:inherit;" />
+      <input type="password" id="authPassword" placeholder="Şifre" autocomplete="current-password" style="padding:11px 13px;border:1px solid var(--line,#E4DFD3);border-radius:9px;font-size:14px;font-family:inherit;" />
+      <button type="button" id="authLoginBtn" class="btn primary" style="width:100%;justify-content:center;">Giriş Yap</button>
+      <div id="authError" style="display:none;color:var(--danger,#B3432B);font-size:12.5px;text-align:center;"></div>
+      <div id="authStatus" style="display:none;color:var(--ink-soft,#6B7280);font-size:12.5px;text-align:center;"></div>
+    </div>
+  </div>
+</div>
+<div id="app" style="display:none;">
 
   <div class="topbar">
     <div class="brand">
@@ -415,6 +433,7 @@
       <button class="btn" id="syncBtn" style="display:none;">🔄 Diğer Cihazdan Güncelle</button>
       <button class="btn" id="printBtn" style="display:none;">🖨️ PDF Oluştur / Yazdır</button>
       <button class="btn" id="resetBtn" style="display:none;">Yeni veri yükle</button>
+      <button class="btn" id="authLogoutBtn" style="display:none;" title="Oturumu kapat">🔒 Çıkış Yap</button>
     </div>
   </div>
   <div class="no-print" id="storageNote" style="display:none;margin:-16px 0 20px;">
@@ -1237,10 +1256,117 @@ const CLOUD = {
 };
 function cloudEnabled(){ return !!(CLOUD.dbUrl && CLOUD.dbUrl.trim()); }
 
+/* ============================== GİRİŞ (Firebase Authentication) ==============================
+   Siteye erişimi, Firebase projenizdeki Authentication ile korur. Bu bir GERÇEK erişim kontrolüdür
+   (sayfa kaynağında görünen bir şifre değil): Realtime Database kurallarınızı da "yalnızca giriş
+   yapmış kullanıcılar" olarak kısıtlarsanız (aşağıya bakın), veritabanına doğrudan istek atarak da
+   erişim mümkün olmaz.
+   KURULUM (Firebase Console → projeniz):
+   1) Authentication → Sign-in method → "E-posta/Şifre" sağlayıcısını etkinleştirin.
+   2) Authentication → Users → erişmesini istediğiniz her kişi için "Add user" ile hesap oluşturun.
+      Giriş ekranı "e-posta" değil "Kullanıcı Kodu" istediğinden, buradaki "Email" alanına kullanıcı
+      kodunu şu biçimde yazın: KOD@kullanici.noktacari (örn. kullanıcı kodu 80002499 ise
+      "80002499@kullanici.noktacari"), şifre alanına da o kişinin şifresini (örn. Efes123!) girin.
+      Kişi giriş ekranında sadece "80002499" ve şifresini yazacak, uzantıyı kendisi görmeyecek.
+   3) Project settings → General → "Your apps" altında bir Web uygulaması yoksa oluşturun, oradaki
+      "apiKey" değerini aşağıdaki FIREBASE_CONFIG.apiKey alanına yapıştırın.
+   4) (Şiddetle önerilir) Realtime Database → Rules kısmını şuna çevirip yayınlayın:
+      { "rules": { ".read": "auth != null", ".write": "auth != null" } }
+      Bu adım atlanırsa, giriş ekranı sadece arayüzü gizler; veritabanı hâlâ herkese açık kalır. */
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyB3v7dzM9OVf-NfR7Kj5pRHVrnjXaRM75s',
+  authDomain: 'ortalama-vade-gun.firebaseapp.com',
+  databaseURL: CLOUD.dbUrl,
+  projectId: 'ortalama-vade-gun',
+  storageBucket: 'ortalama-vade-gun.firebasestorage.app',
+  messagingSenderId: '498547595660',
+  appId: '1:498547595660:web:16a39ed793aa166beddea9',
+};
+
+let authAktif = false;
+try{
+  if(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== 'BURAYA_FIREBASE_API_KEY_YAPIŞTIRIN'){
+    firebase.initializeApp(FIREBASE_CONFIG);
+    authAktif = true;
+  }
+}catch(err){ console.error('Firebase Authentication başlatılamadı:', err); }
+
+// Realtime Database REST isteklerine kimlik token'ı ekler (giriş aktifse). Adım 4'teki kural
+// değişikliği yapılmadıysa bu token'sız da çalışır, ama kuralları kısıtladıysanız ZORUNLUDUR.
+async function authQuery(){
+  if(!authAktif) return '';
+  try{
+    const user = firebase.auth().currentUser;
+    if(!user) return '';
+    const token = await user.getIdToken();
+    return '?auth=' + token;
+  }catch(err){ return ''; }
+}
+
+function girisEkraniGoster(){
+  document.getElementById('authGate').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('authLogoutBtn').style.display = 'none';
+}
+function girisEkraniGizle(){
+  document.getElementById('authGate').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('authLogoutBtn').style.display = 'inline-block';
+}
+
+if(authAktif){
+  firebase.auth().onAuthStateChanged(user=>{
+    if(user) girisEkraniGizle(); else girisEkraniGoster();
+  });
+}else{
+  // Giriş yapılandırılmamış (apiKey henüz girilmemiş): uygulama kısıtlamasız açılır, konsola not düşülür.
+  console.warn('Firebase Authentication yapılandırılmadı (FIREBASE_CONFIG.apiKey boş) — giriş ekranı devre dışı.');
+  document.getElementById('authGate').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+}
+
+// Firebase'in "E-posta/Şifre" sağlayıcısı teknik olarak bir e-posta formatı ister; kullanıcıya sade bir
+// "Kullanıcı Kodu" alanı gösterebilmek için kod, arka planda sabit bir uzantı eklenerek e-postaya
+// çevrilir (örn. "80002499" -> "80002499@kullanici.noktacari"). Firebase Console'da kullanıcı
+// oluştururken de e-posta alanına AYNI biçimde ("KOD@kullanici.noktacari") yazılmalıdır.
+const KULLANICI_KODU_UZANTISI = '@kullanici.noktacari';
+function kullaniciKoduEmaile(kod){
+  return String(kod||'').trim() + KULLANICI_KODU_UZANTISI;
+}
+
+document.getElementById('authLoginBtn').addEventListener('click', async ()=>{
+  const kod = document.getElementById('authKullaniciKodu').value.trim();
+  const pass = document.getElementById('authPassword').value;
+  const errEl = document.getElementById('authError');
+  const statusEl = document.getElementById('authStatus');
+  errEl.style.display = 'none';
+  if(!kod || !pass){
+    errEl.textContent = 'Kullanıcı kodu ve şifre gerekli.';
+    errEl.style.display = 'block';
+    return;
+  }
+  statusEl.textContent = 'Giriş yapılıyor…';
+  statusEl.style.display = 'block';
+  try{
+    await firebase.auth().signInWithEmailAndPassword(kullaniciKoduEmaile(kod), pass);
+    statusEl.style.display = 'none';
+  }catch(err){
+    statusEl.style.display = 'none';
+    errEl.textContent = 'Giriş başarısız: kullanıcı kodu veya şifre hatalı.';
+    errEl.style.display = 'block';
+  }
+});
+document.getElementById('authPassword').addEventListener('keydown', e=>{
+  if(e.key === 'Enter') document.getElementById('authLoginBtn').click();
+});
+document.getElementById('authLogoutBtn').addEventListener('click', ()=>{
+  if(authAktif) firebase.auth().signOut();
+});
+
 async function saveReportToCloud(report){
   if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${CLOUD.path}.json`, {
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${CLOUD.path}.json${await authQuery()}`, {
       method:'PUT',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify(report),
@@ -1256,7 +1382,7 @@ async function saveReportToCloud(report){
 async function loadReportFromCloud(){
   if(!cloudEnabled()) return null;
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${CLOUD.path}.json`);
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${CLOUD.path}.json${await authQuery()}`);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text = await res.text();
     if(!text || text==='null') return null;
@@ -1302,7 +1428,7 @@ function musteriMasterObjToMap(obj){ return new Map(Object.entries(obj||{})); }
 async function saveMusteriMasterToCloud(obj){
   if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_CLOUD_PATH}.json`, {
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_CLOUD_PATH}.json${await authQuery()}`, {
       method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(obj),
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
@@ -1312,7 +1438,7 @@ async function saveMusteriMasterToCloud(obj){
 async function loadMusteriMasterFromCloud(){
   if(!cloudEnabled()) return null;
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_CLOUD_PATH}.json`);
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_CLOUD_PATH}.json${await authQuery()}`);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text = await res.text();
     if(!text || text==='null') return null;
@@ -1372,7 +1498,7 @@ function bayiHakedisReviver(key, value){
 async function saveBayiHakedisToCloud(rapor){
   if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${BAYI_HAKEDIS_CLOUD_PATH}.json`, {
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${BAYI_HAKEDIS_CLOUD_PATH}.json${await authQuery()}`, {
       method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(rapor),
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
@@ -1382,7 +1508,7 @@ async function saveBayiHakedisToCloud(rapor){
 async function loadBayiHakedisFromCloud(){
   if(!cloudEnabled()) return null;
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${BAYI_HAKEDIS_CLOUD_PATH}.json`);
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${BAYI_HAKEDIS_CLOUD_PATH}.json${await authQuery()}`);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text = await res.text();
     if(!text || text==='null') return null;
@@ -1418,7 +1544,7 @@ const FATURA_ARSIV_CLOUD_PATH = CLOUD.path + '_faturaKontrolArsiv';
 async function saveFaturaKontrolArsivToCloud(arsiv){
   if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${FATURA_ARSIV_CLOUD_PATH}.json`, {
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${FATURA_ARSIV_CLOUD_PATH}.json${await authQuery()}`, {
       method:'PUT',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify(arsiv),
@@ -1434,7 +1560,7 @@ async function saveFaturaKontrolArsivToCloud(arsiv){
 async function loadFaturaKontrolArsivFromCloud(){
   if(!cloudEnabled()) return null;
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${FATURA_ARSIV_CLOUD_PATH}.json`);
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${FATURA_ARSIV_CLOUD_PATH}.json${await authQuery()}`);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text = await res.text();
     if(!text || text==='null') return null;
@@ -3555,7 +3681,7 @@ function renderYuklemeTable(report){
 async function saveYuklemeArsivToCloud(arsiv){
   if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${YUKLEME_ARSIV_CLOUD_PATH}.json`, {
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${YUKLEME_ARSIV_CLOUD_PATH}.json${await authQuery()}`, {
       method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(arsiv),
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
@@ -3565,7 +3691,7 @@ async function saveYuklemeArsivToCloud(arsiv){
 async function loadYuklemeArsivFromCloud(){
   if(!cloudEnabled()) return null;
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${YUKLEME_ARSIV_CLOUD_PATH}.json`);
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${YUKLEME_ARSIV_CLOUD_PATH}.json${await authQuery()}`);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text = await res.text();
     if(!text || text==='null') return null;
