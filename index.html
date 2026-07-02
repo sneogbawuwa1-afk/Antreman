@@ -215,6 +215,7 @@
   .badge.soon{background:var(--accent-soft);color:var(--accent-deep);}
   .badge.ok{background:var(--success-soft);color:var(--success);}
   .badge.info{background:var(--navy-soft);color:var(--navy);}
+  .badge.hakedis{background:#DCEBFC;color:#1D5FB8;}
   .badge.dikkat{
     background:var(--danger-soft);color:var(--danger);display:inline-flex;align-items:center;gap:4px;
     margin-left:7px;padding:2px 8px 2px 6px;vertical-align:middle;
@@ -424,7 +425,7 @@
     <div class="dropzone" id="dropzone">
       <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#5C6577" stroke-width="1.6"><path d="M12 3v12m0-12 4 4m-4-4-4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
       <div class="dz-title">Excel dosyalarını buraya sürükleyin ya da tıklayıp seçin</div>
-      <div class="dz-sub">9 dosyayı aynı anda seçebilirsiniz — sistem her birini <b>otomatik tanır</b> (Kalemler, Sipariş, Tahsilat, Çek/Senet, Ticari Stok, Fatura Dökümü, Bayi Hak Ediş, Yükleme Raporu, Müşteri Master)</div>
+      <div class="dz-sub">11 dosyayı aynı anda seçebilirsiniz — sistem her birini <b>otomatik tanır</b> (Kalemler, Sipariş, Tahsilat, Çek/Senet, Ticari Stok, Fatura Dökümü, Bayi Hak Ediş, Yükleme Raporu, Müşteri Master, Ciro Primi, Dönemsel İskonto)</div>
     </div>
     <input type="file" id="fileInput" accept=".xlsx,.xls" multiple />
 
@@ -501,6 +502,22 @@
           <div class="check-meta"></div>
         </div>
       </div>
+      <div class="check-item" data-type="ciroPrimi">
+        <div class="check-icon">10</div>
+        <div>
+          <div class="check-name">Ciro Primi</div>
+          <div class="check-desc">Müşteri, Nokta Adı, Grup Tanım, Net Tutar kolonlarını içeren ciro primi dökümü — "Bayi Hakediş" raporunu oluşturur (opsiyonel)</div>
+          <div class="check-meta"></div>
+        </div>
+      </div>
+      <div class="check-item" data-type="donemselIskonto">
+        <div class="check-icon">11</div>
+        <div>
+          <div class="check-name">Dönemsel İskonto</div>
+          <div class="check-desc">Nokta Kodu, Nokta Adı, Hakediş Tutar kolonlarını içeren dönemsel iskonto/bayi ödeme dökümü — Ciro Primi ile birleşerek "Bayi Hakediş" raporunu oluşturur (opsiyonel)</div>
+          <div class="check-meta"></div>
+        </div>
+      </div>
     </div>
 
     <div class="upload-error" id="uploadError"></div>
@@ -528,6 +545,7 @@
       <button class="tab-btn" data-view="ticariStok" type="button">🛢️ Ticari Stok Raporu</button>
       <button class="tab-btn" data-view="faturaKontrol" type="button">🧾 Fatura Kontrol</button>
       <button class="tab-btn" data-view="trend" type="button">📈 Trend Analizi</button>
+      <button class="tab-btn" data-view="bayiHakedis" type="button">🏷️ Bayi Hakediş</button>
     </div>
 
     <div id="genelView">
@@ -957,6 +975,49 @@
 
     </div><!-- /trendView -->
 
+    <div id="bayiHakedisView" style="display:none;">
+
+      <div class="panel print-section" id="bayiHakedisPanel" style="display:none;">
+        <div class="panel-head" style="flex-direction:column;align-items:stretch;">
+          <div><h2>Bayi Hakediş</h2><span class="count" id="bayiHakedisCount"></span></div>
+          <div class="toolbar" style="flex-direction:column;align-items:stretch;max-width:360px;">
+            <div class="search-box" style="width:100%;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="bayiHakedisSearchInput" placeholder="Müşteri numarası veya Müşteri adı ara…" style="width:100%;" />
+              <button type="button" id="bayiHakedisSearchClearBtn" class="search-clear-btn" title="Aramayı temizle" style="display:none;">✕</button>
+            </div>
+            <select class="filter-select" id="bayiHakedisTemsilciFilter" style="width:100%;"><option value="">Tüm temsilciler</option></select>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:0;">
+          <div style="overflow-x:auto;">
+            <table id="bayiHakedisTable">
+              <thead><tr>
+                <th data-key="adi">Nokta<span class="arrow"></span></th>
+                <th data-key="temsilci">Satış Temsilcisi<span class="arrow"></span></th>
+                <th class="num" data-key="kayitSayisi">Kayıt<span class="arrow"></span></th>
+                <th class="num" data-key="iskontoKdvli">İskonto<span class="arrow"></span></th>
+                <th class="num" data-key="katkiPayiKdvli">İşletme Katkı Payı<span class="arrow"></span></th>
+                <th class="num" data-key="genelToplamKdvli">Genel Toplam<span class="arrow"></span></th>
+              </tr></thead>
+              <tbody id="bayiHakedisTbody"></tbody>
+              <tfoot id="bayiHakedisTfoot"></tfoot>
+            </table>
+          </div>
+          <div class="legend no-print" style="padding:10px 20px 0;">
+            <span>Tutarlara <b>%20 KDV dahil</b> edilmiştir. <b>İskonto</b>: Ciro Primi dökümünde Grup Tanım'ı "Fatura altı" veya "Ciro Primi" olan satırlar ile Dönemsel İskonto dökümünün tamamı. <b>İşletme Katkı Payı</b>: Ciro Primi dökümündeki diğer tüm satırlar (örn. "Nakit").</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel print-section" id="bayiHakedisBosPanel">
+        <div class="panel-body">
+          <div class="empty-state" id="bayiHakedisBosMesaj">Bayi Hakediş raporu için ana yükleme sayfasında hem "Ciro Primi" hem de "Dönemsel İskonto" dosyalarını yükleyip "Raporu Oluştur"a basmanız gerekir.</div>
+        </div>
+      </div>
+
+    </div><!-- /bayiHakedisView -->
+
     <footer>Bu rapor yüklenen ham veri dosyalarından tarayıcınızda anlık olarak hesaplanmıştır. Hiçbir veri sunucuya gönderilmez.</footer>
   </div>
 
@@ -965,7 +1026,7 @@
 <script>
 /* ============================== STATE ============================== */
 const state = {
-  files: { kalemler:null, siparis:null, tahsilat:null, cekSenet:null, ticariStok:null, fatura:null, bayiHakedis:null, yukleme:null, musteriMaster:null },
+  files: { kalemler:null, siparis:null, tahsilat:null, cekSenet:null, ticariStok:null, fatura:null, bayiHakedis:null, yukleme:null, musteriMaster:null, ciroPrimi:null, donemselIskonto:null },
   report: null,
   sort: { key:'kalanBorc', dir:-1 },
   sevkSort: { key:'toplamRisk', dir:-1 },
@@ -978,6 +1039,9 @@ const state = {
   yuklemeArsivCache: {}, // gün->rapor şeklinde buluttaki ST Tahsilat/Litre arşivinin bellek-içi kopyası
   yuklemeSeciliGun: null, // arşivde görüntülenmekte olan gün (null ise en son oluşturulan/canlı rapor)
   musteriMasterMap: new Map(), // musteri kodu -> temsilci (en son yüklenen Müşteri Master'dan; gün bazlı değil, kalıcı tek kayıt)
+  bayiHakedisReport: null, // en son oluşturulan Bayi Hakediş raporu (Ciro Primi + Dönemsel İskonto birleşimi, bellek içi)
+  bayiHakedisHata: null,
+  bhSort: { key:'genelToplamKdvli', dir:-1 },
 };
 
 /* ============================== KALICI SAKLAMA (localStorage) ============================== */
@@ -1291,6 +1355,64 @@ async function musteriMasterKaydet(rows){
 // tamamen değiştirilmesinden etkilenmemesi için). Gün bazlı olduğundan ve birden fazla cihazdan
 // büyüyebileceğinden, her yazmadan önce buluttaki mevcut arşivle YEREL arşiv BİRLEŞTİRİLİR
 // (üzerine yazılmaz); böylece bir cihazın yazması, başka bir cihazın daha önce eklediği günleri silmez.
+// ============================== BAYİ HAKEDİŞ (kalıcı, gün bazlı DEĞİL, tek kayıt) ==============================
+// Müşteri Master ile aynı desen: yalnızca en son hesaplanan rapor tek bir kayıt olarak buluta/cihaza
+// yazılır. Yeni Ciro Primi/Dönemsel İskonto yüklenip "Raporu Oluştur"a basılana kadar önceki hâli
+// kullanılmaya devam eder; yeniden hesaplanırsa eskisinin üzerine yazılır.
+const BAYI_HAKEDIS_CLOUD_PATH = CLOUD.path + '_bayiHakedis';
+const BAYI_HAKEDIS_LOCAL_KEY = 'noktaCariTakip_bayiHakedis_v1';
+
+function bayiHakedisReviver(key, value){
+  if(key==='tarih' && typeof value === 'string'){
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? value : d;
+  }
+  return value;
+}
+async function saveBayiHakedisToCloud(rapor){
+  if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
+  try{
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${BAYI_HAKEDIS_CLOUD_PATH}.json`, {
+      method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(rapor),
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    return {ok:true};
+  }catch(err){ console.error('Bayi Hakediş buluta kaydedilemedi:', err); return {ok:false, reason:err.message}; }
+}
+async function loadBayiHakedisFromCloud(){
+  if(!cloudEnabled()) return null;
+  try{
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${BAYI_HAKEDIS_CLOUD_PATH}.json`);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const text = await res.text();
+    if(!text || text==='null') return null;
+    return JSON.parse(text, bayiHakedisReviver);
+  }catch(err){ console.error('Bayi Hakediş buluttan okunamadı:', err); return null; }
+}
+function saveBayiHakedisToLocal(rapor){
+  try{ localStorage.setItem(BAYI_HAKEDIS_LOCAL_KEY, JSON.stringify(rapor)); }catch(err){ console.error(err); }
+}
+function loadBayiHakedisFromLocal(){
+  try{
+    const json = localStorage.getItem(BAYI_HAKEDIS_LOCAL_KEY);
+    return json ? JSON.parse(json, bayiHakedisReviver) : null;
+  }catch(err){ console.error(err); return null; }
+}
+// Sayfa açılışında (veya "Diğer Cihazdan Güncelle"de) çağrılır: buluttaki (yoksa cihazdaki) en son
+// hesaplanmış Bayi Hakediş raporunu çeker.
+async function bayiHakedisYenile(){
+  let rapor = null;
+  if(cloudEnabled()) rapor = await loadBayiHakedisFromCloud();
+  if(!rapor) rapor = loadBayiHakedisFromLocal();
+  state.bayiHakedisReport = rapor;
+  return rapor;
+}
+// Yeni hesaplanan raporu buluta ve cihaza (eskisinin üzerine yazarak) kaydeder.
+async function bayiHakedisKaydet(rapor){
+  saveBayiHakedisToLocal(rapor);
+  if(cloudEnabled()) await saveBayiHakedisToCloud(rapor);
+}
+
 const FATURA_ARSIV_CLOUD_PATH = CLOUD.path + '_faturaKontrolArsiv';
 
 async function saveFaturaKontrolArsivToCloud(arsiv){
@@ -1384,8 +1506,10 @@ const SIGNATURES = {
   bayiHakedis: [['Bayi Tutar','Efes Payı %','Müşteri Alacak Dekont No']],
   yukleme: [['Müşteri Numarası','Litre Total','Yükleme Tarihi']],
   musteriMaster: [['Müşteri','Tabela Adı','Kredi limiti']],
+  ciroPrimi: [['Grup Tanım','Efpa Payı Tutar','Net Tutar']],
+  donemselIskonto: [['Nokta Kodu','Hakediş Tutar','Perid']],
 };
-const LABELS = { kalemler:'Kalemler (Fatura / Bakiye)', siparis:'Sipariş Dökümü', tahsilat:'Tahsilat Dökümü', cekSenet:'Çek / Senet Riski', ticariStok:'Ticari Stok', fatura:'Fatura Dökümü', bayiHakedis:'Bayi Hak Ediş', yukleme:'Yükleme Raporu', musteriMaster:'Müşteri Master' };
+const LABELS = { kalemler:'Kalemler (Fatura / Bakiye)', siparis:'Sipariş Dökümü', tahsilat:'Tahsilat Dökümü', cekSenet:'Çek / Senet Riski', ticariStok:'Ticari Stok', fatura:'Fatura Dökümü', bayiHakedis:'Bayi Hak Ediş', yukleme:'Yükleme Raporu', musteriMaster:'Müşteri Master', ciroPrimi:'Ciro Primi', donemselIskonto:'Dönemsel İskonto' };
 
 function detectType(headers){
   const set = new Set(headers.map(h=>String(h||'').trim()));
@@ -1531,6 +1655,7 @@ buildBtn.addEventListener('click', ()=>{
       musteriMasterKaydet(state.files.musteriMaster.data); // buluta/cihaza kalıcı olarak (eskisinin üzerine) kaydet
     }
     state.report = buildReport(state.files, musteriMasterMapKullanilacak);
+    bayiHakedisRaporuOlustur();
     renderReport(state.report);
     document.getElementById('uploadCard').style.display='none';
     document.getElementById('reportSection').style.display='block';
@@ -1572,6 +1697,8 @@ syncBtn.addEventListener('click', async ()=>{
   const cloudReport = await loadReportFromCloud();
   await faturaArsivYenile();
   await musteriMasterYenile();
+  await bayiHakedisYenile();
+  if(document.getElementById('bayiHakedisView') && document.getElementById('bayiHakedisView').style.display !== 'none') renderBayiHakedisView();
   if(document.getElementById('faturaKontrolArsivBilgi')) renderFaturaKontrolArsivBilgi();
   syncBtn.disabled = false;
   syncBtn.textContent = prevText;
@@ -1589,15 +1716,17 @@ syncBtn.addEventListener('click', async ()=>{
 });
 
 function resetAll(){
-  state.files = {kalemler:null, siparis:null, tahsilat:null, cekSenet:null, ticariStok:null, fatura:null, bayiHakedis:null, yukleme:null, musteriMaster:null};
+  state.files = {kalemler:null, siparis:null, tahsilat:null, cekSenet:null, ticariStok:null, fatura:null, bayiHakedis:null, yukleme:null, musteriMaster:null, ciroPrimi:null, donemselIskonto:null};
   state.report = null;
   state.expanded.clear();
   state.yuklemeReport = null;
   state.yuklemeSeciliGun = null;
+  state.bayiHakedisReport = null;
+  state.bayiHakedisHata = null;
   // NOT: state.musteriMasterMap kasıtlı olarak sıfırlanmıyor — Müşteri Master kalıcıdır, "Yeni veri
   // yükle" ile başlatılan yeni bir oturumda da (yeniden yüklenmediği sürece) kullanılmaya devam eder.
   clearStoredReport();
-  const ICON_NUMS = {kalemler:'1', siparis:'2', tahsilat:'3', cekSenet:'4', ticariStok:'5', fatura:'6', bayiHakedis:'7', yukleme:'8', musteriMaster:'9'};
+  const ICON_NUMS = {kalemler:'1', siparis:'2', tahsilat:'3', cekSenet:'4', ticariStok:'5', fatura:'6', bayiHakedis:'7', yukleme:'8', musteriMaster:'9', ciroPrimi:'10', donemselIskonto:'11'};
   document.querySelectorAll('.check-item').forEach(el=>{
     el.classList.remove('done');
     el.querySelector('.check-icon').textContent = ICON_NUMS[el.getAttribute('data-type')] || '';
@@ -1629,6 +1758,7 @@ function resetAll(){
   document.getElementById('ticariStokView').style.display='none';
   document.getElementById('faturaKontrolView').style.display='none';
   document.getElementById('trendView').style.display='none';
+  document.getElementById('bayiHakedisView').style.display='none';
 }
 resetBtn.addEventListener('click', resetAll);
 
@@ -1647,6 +1777,7 @@ window.addEventListener('DOMContentLoaded', async ()=>{
   let report = null, source = null;
 
   await musteriMasterYenile(); // buluttan/cihazdan en son yüklenmiş Müşteri Master'ı çek
+  await bayiHakedisYenile(); // buluttan/cihazdan en son hesaplanmış Bayi Hakediş raporunu çek
 
   if(cloudEnabled()){
     statusPill.textContent = 'Bulut verisi kontrol ediliyor…';
@@ -2138,12 +2269,14 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     document.getElementById('ticariStokView').style.display = view==='ticariStok' ? 'block' : 'none';
     document.getElementById('faturaKontrolView').style.display = view==='faturaKontrol' ? 'block' : 'none';
     document.getElementById('trendView').style.display = view==='trend' ? 'block' : 'none';
+    document.getElementById('bayiHakedisView').style.display = view==='bayiHakedis' ? 'block' : 'none';
     if(view==='sevk' && state.report) renderSevkView(state.report);
     if(view==='yukleme') renderYuklemeView();
     if(view==='yaslandirma' && state.report) renderYaslandirmaView(state.report);
     if(view==='ticariStok' && state.report) renderTicariStokView(state.report);
     if(view==='faturaKontrol' && state.report) renderFaturaKontrolView(state.report);
     if(view==='trend') renderTrendView(state.report);
+    if(view==='bayiHakedis') renderBayiHakedisView();
   });
 });
 
@@ -2520,6 +2653,18 @@ const VADE_RISK_ESIGI = 28;
 function isRiskliMusteri(m){
   return (m.avgVadeGun||0) >= VADE_RISK_ESIGI;
 }
+
+// Bir müşterinin Bayi Hakediş raporunda (Ciro Primi / Dönemsel İskonto'dan) kaydı olup olmadığını
+// hızlıca sorgulamak için müşteri kodu -> nokta eşleşmesinden bir küme çıkarır.
+function bayiHakedisliMusteriKodlari(){
+  const rapor = state.bayiHakedisReport;
+  if(!rapor || !Array.isArray(rapor.noktalar)) return new Set();
+  return new Set(rapor.noktalar.map(n=>n.kod));
+}
+function hakedisRozeti(musteriKod, hakedisKodlari){
+  if(!hakedisKodlari || !hakedisKodlari.has(musteriKod)) return '';
+  return '<span class="badge hakedis" title="Bu müşterinin Bayi Hakediş raporunda (Ciro Primi/Dönemsel İskonto) kaydı var">Hakediş</span>';
+}
 // Uyarı bandı ve modal başlığındaki eşik metni, yukarıdaki sabitten okunur; böylece eşik değeri
 // değiştirildiğinde bu metinlerin elle güncellenmesi unutulup birbirinden farklı kalması engellenir.
 document.getElementById('dikkatEsikBanner').textContent = VADE_RISK_ESIGI;
@@ -2615,10 +2760,11 @@ function renderMusteriTable(report){
     tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">Filtreyle eşleşen müşteri bulunamadı.</div></td></tr>`;
     return;
   }
+  const hakedisKodlari = bayiHakedisliMusteriKodlari();
   tbody.innerHTML = rows.map(m=>{
     const expanded = state.expanded.has(m.musteri);
     let html = `<tr class="data-row ${expanded?'expanded':''}" data-musteri="${escapeHtml(m.musteri)}">
-      <td><div class="musteri-name">${escapeHtml(m.musteriAdi)}${isRiskliMusteri(m)?'<span class="badge dikkat" title="Ortalama vade '+VADE_RISK_ESIGI+' gün ve üzeri">⚠️ Dikkat</span>':''}</div><div class="musteri-code">${escapeHtml(m.musteri)}</div></td>
+      <td><div class="musteri-name">${escapeHtml(m.musteriAdi)}${isRiskliMusteri(m)?'<span class="badge dikkat" title="Ortalama vade '+VADE_RISK_ESIGI+' gün ve üzeri">⚠️ Dikkat</span>':''}${hakedisRozeti(m.musteri, hakedisKodlari)}</div><div class="musteri-code">${escapeHtml(m.musteri)}</div></td>
       <td><span class="temsilci-tag">${escapeHtml(m.temsilci)}</span></td>
       <td class="num"><span class="num-strong">${TL(m.kalanBorc)}</span>${riskComposition(m)}</td>
       <td class="num">${vadeBadge(m.avgVadeGun)}</td>
@@ -2723,12 +2869,13 @@ function renderSevkMusteriTable(report){
     tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">Açık siparişi veya sevki ertelenen ürünü olan müşteri bulunamadı.</div></td></tr>`;
     return;
   }
+  const hakedisKodlari = bayiHakedisliMusteriKodlari();
   tbody.innerHTML = rows.map(m=>{
     const expandKey = 'sevk_'+m.musteri;
     const expanded = state.expanded.has(expandKey);
     const bakiyesizEtiket = m.__bakiyesiz ? '<span class="badge info" title="Bu müşterinin Kalemler dosyasında (açık fatura/kalan borç) kaydı yok, yalnızca sipariş dökümünde görünüyor">Bakiyesiz</span>' : '';
     let html = `<tr class="data-row ${expanded?'expanded':''}" data-musteri="${escapeHtml(m.musteri)}">
-      <td><div class="musteri-name">${escapeHtml(m.musteriAdi)}${isRiskliMusteri(m)?'<span class="badge dikkat" title="Ortalama vade '+VADE_RISK_ESIGI+' gün ve üzeri">⚠️ Dikkat</span>':''}${bakiyesizEtiket}</div><div class="musteri-code">${escapeHtml(m.musteri)}</div></td>
+      <td><div class="musteri-name">${escapeHtml(m.musteriAdi)}${isRiskliMusteri(m)?'<span class="badge dikkat" title="Ortalama vade '+VADE_RISK_ESIGI+' gün ve üzeri">⚠️ Dikkat</span>':''}${bakiyesizEtiket}${hakedisRozeti(m.musteri, hakedisKodlari)}</div><div class="musteri-code">${escapeHtml(m.musteri)}</div></td>
       <td><span class="temsilci-tag">${escapeHtml(m.temsilci)}</span></td>
       <td class="num"><span class="num-strong">${TL(m.kalanBorc)}</span>${riskComposition(m)}</td>
       <td class="num">${vadeBadge(m.avgVadeGun)}</td>
@@ -3578,6 +3725,246 @@ document.getElementById('yuklemeTarihSelect').addEventListener('change', (e)=>{
   if(rapor) renderYuklemeTable(rapor);
 });
 document.getElementById('yuklemeYenileBtn').addEventListener('click', renderYuklemeView);
+
+/* ============================== BAYİ HAKEDİŞ (Ciro Primi + Dönemsel İskonto) ==============================
+   Bu modül, ana "Kalemler/Sipariş" akışından bağımsız 2 dosyayı (Ciro Primi + Dönemsel İskonto)
+   birleştirir. Ciro Primi'deki her satır, Grup Tanım'a göre iki kategoriden birine yazılır:
+   "Fatura altı" / "Ciro Primi" -> İskonto; diğer tüm açıklamalar (ör. "Nakit") -> İşletme Katkı Payı.
+   Dönemsel İskonto'daki TÜM satırlar İskonto kategorisine yazılır. Nokta eşleştirmesi Ciro Primi'nin
+   "Müşteri" alanı ile Dönemsel İskonto'nun "Nokta Kodu" alanı üzerinden yapılır (aynı müşteri/nokta
+   kod sistemi). Temsilci ataması, uygulama genelindeki önceliğe uyar: önce Müşteri Master, sonra
+   dosyanın kendi Satış Temsilcisi/Temsilci Adı kolonu. Tutarlar %20 KDV eklenerek gösterilir. */
+const BAYI_HAKEDIS_KDV_ORANI = 1.20;
+const ISKONTO_GRUP_TANIMLARI = new Set(['Fatura altı', 'Ciro Primi']);
+
+function buildBayiHakedisRaporu(ciroPrimiRows, donemselIskontoRows, musteriMasterMap){
+  if((!ciroPrimiRows || !ciroPrimiRows.length) && (!donemselIskontoRows || !donemselIskontoRows.length)){
+    throw new Error('Ciro Primi ve Dönemsel İskonto dosyalarında satır bulunamadı.');
+  }
+  const noktaMap = new Map(); // kod -> {kod, adi, temsilci, iskonto, katkiPayi, kayitlar:[]}
+  function noktaRow(kod, adi, temsilciAday){
+    if(!noktaMap.has(kod)) noktaMap.set(kod, {kod, adi: adi||kod, temsilci: '—', iskonto:0, katkiPayi:0, kayitlar:[]});
+    const r = noktaMap.get(kod);
+    if(adi && r.adi===r.kod) r.adi = adi;
+    // Temsilci önceliği: Müşteri Master her zaman en yüksek öncelik; o yoksa dosyanın kendi
+    // temsilci kolonundan gelen ilk dolu değer kullanılır.
+    const masterTemsilci = musteriMasterMap && musteriMasterMap.get(kod);
+    if(masterTemsilci) r.temsilci = masterTemsilci;
+    else if(r.temsilci==='—' && temsilciAday) r.temsilci = temsilciAday;
+    return r;
+  }
+
+  // Aynı noktanın birden fazla hakediş kaydı (birden fazla fatura/dönem) olabileceğinden, toplamların
+  // yanında her bir kayıt da ayrı ayrı saklanır (r.kayitlar); rapor ekranında noktaya tıklanınca bu
+  // kayıtların hepsi tek tek (toplanmadan) listelenebilir.
+  (ciroPrimiRows||[]).forEach(row=>{
+    const kod = String(row['Müşteri']||'').trim();
+    if(!kod) return;
+    const grupTanim = String(row['Grup Tanım']||'').trim();
+    const netTutar = Number(row['Net Tutar'])||0;
+    const kategoriIskontoMu = ISKONTO_GRUP_TANIMLARI.has(grupTanim);
+    const r = noktaRow(kod, row['Nokta Adı'], row['Satış Temsilcisi']);
+    if(kategoriIskontoMu) r.iskonto += netTutar;
+    else r.katkiPayi += netTutar;
+    r.kayitlar.push({
+      kaynak: 'Ciro Primi', kategori: kategoriIskontoMu ? 'İskonto' : 'İşletme Katkı Payı',
+      tarih: excelDateToJS(row['Fatura Tarihi']), aciklama: grupTanim || '—', belgeNo: row['Fatura No'],
+      tutarKdvli: netTutar * BAYI_HAKEDIS_KDV_ORANI,
+    });
+  });
+
+  (donemselIskontoRows||[]).forEach(row=>{
+    const kod = String(row['Nokta Kodu']||'').trim();
+    if(!kod) return;
+    const hakedisTutar = Number(row['Hakediş Tutar'])||0;
+    const r = noktaRow(kod, row['Nokta Adı'], row['Temsilci Adı']);
+    r.iskonto += hakedisTutar; // Dönemsel İskonto -> her zaman İskonto kategorisi
+    r.kayitlar.push({
+      kaynak: 'Dönemsel İskonto', kategori: 'İskonto',
+      tarih: excelDateToJS(row['Fatura Tarihi']), aciklama: row['Dönem'] || row['Perid'] || '—', belgeNo: row['SD Belgesi'],
+      tutarKdvli: hakedisTutar * BAYI_HAKEDIS_KDV_ORANI,
+    });
+  });
+
+  const noktalar = Array.from(noktaMap.values()).map(r=>({
+    kod: r.kod, adi: r.adi, temsilci: r.temsilci,
+    iskontoKdvli: r.iskonto * BAYI_HAKEDIS_KDV_ORANI,
+    katkiPayiKdvli: r.katkiPayi * BAYI_HAKEDIS_KDV_ORANI,
+    genelToplamKdvli: (r.iskonto + r.katkiPayi) * BAYI_HAKEDIS_KDV_ORANI,
+    kayitSayisi: r.kayitlar.length,
+    kayitlar: r.kayitlar.slice().sort((a,b)=> (b.tarih||0)-(a.tarih||0)),
+  })).sort((a,b)=> b.genelToplamKdvli - a.genelToplamKdvli);
+
+  const genelToplam = {
+    iskontoKdvli: sum(noktalar,'iskontoKdvli'),
+    katkiPayiKdvli: sum(noktalar,'katkiPayiKdvli'),
+    genelToplamKdvli: sum(noktalar,'genelToplamKdvli'),
+  };
+
+  return { noktalar, genelToplam, olusturulmaZamani: new Date().toISOString() };
+}
+
+// Ana "Raporu Oluştur" akışının bir parçası olarak çağrılır. Her iki dosya da yüklenmişse raporu
+// hesaplar; biri eksikse rapor oluşturulmaz ("veri eksik" mesajı gösterilir). Bu rapor, ST Tahsilat/
+// Litre'nin aksine güne göre arşivlenmez — her "Raporu Oluştur"da o anki dosyalardan taze hesaplanır.
+function bayiHakedisRaporuOlustur(){
+  const ciroPrimiDosya = state.files.ciroPrimi;
+  const donemselIskontoDosya = state.files.donemselIskonto;
+  state.bayiHakedisHata = null;
+  if(!ciroPrimiDosya && !donemselIskontoDosya){
+    // Bu oturumda yeni dosya yüklenmedi; state.bayiHakedisReport, sayfa açılışında buluttan/cihazdan
+    // yüklenmiş olan önceki (kalıcı) rapor ise ona dokunulmaz.
+    return;
+  }
+  try{
+    const rapor = buildBayiHakedisRaporu(
+      ciroPrimiDosya ? ciroPrimiDosya.data : [],
+      donemselIskontoDosya ? donemselIskontoDosya.data : [],
+      state.musteriMasterMap
+    );
+    state.bayiHakedisReport = rapor;
+    bayiHakedisKaydet(rapor); // buluta/cihaza kalıcı olarak (eskisinin üzerine) kaydet
+  }catch(err){
+    console.error('Bayi Hakediş raporu oluşturulamadı:', err);
+    state.bayiHakedisHata = err.message;
+  }
+}
+
+function getBayiHakedisFilteredSorted(){
+  const report = state.bayiHakedisReport;
+  if(!report) return [];
+  const q = document.getElementById('bayiHakedisSearchInput').value.trim().toLowerCase();
+  const temsilci = document.getElementById('bayiHakedisTemsilciFilter').value;
+  let rows = report.noktalar.filter(r=>{
+    if(q && !(String(r.adi).toLowerCase().includes(q) || String(r.kod).toLowerCase().includes(q))) return false;
+    if(temsilci && r.temsilci !== temsilci) return false;
+    return true;
+  });
+  const {key,dir} = state.bhSort;
+  rows = rows.slice().sort((a,b)=>{
+    let av=a[key], bv=b[key];
+    if(typeof av==='string') return dir*String(av).localeCompare(String(bv),'tr');
+    return dir*((av||0)-(bv||0));
+  });
+  return rows;
+}
+
+function populateBayiHakedisTemsilciFilter(){
+  const report = state.bayiHakedisReport;
+  const sel = document.getElementById('bayiHakedisTemsilciFilter');
+  const current = sel.value;
+  const set = report ? Array.from(new Set(report.noktalar.map(r=>r.temsilci).filter(t=>t && t!=='—'))).sort((a,b)=>a.localeCompare(b,'tr')) : [];
+  sel.innerHTML = '<option value="">Tüm temsilciler</option>' + set.map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+  if(current && set.includes(current)) sel.value = current;
+}
+
+function renderMiniBayiHakedisDetay(kayitlar){
+  let html = `<h4>Hakediş Kayıtları (${kayitlar.length})</h4>
+  <table class="mini-table"><thead><tr>
+    <th>Kaynak</th><th>Tarih</th><th>Kategori</th><th class="num">Tutar (KDV'li)</th>
+  </tr></thead><tbody>`;
+  html += kayitlar.map(k=>`<tr>
+    <td>${escapeHtml(k.kaynak)}</td>
+    <td>${fmtDate(k.tarih)}</td>
+    <td>${escapeHtml(k.kategori)}</td>
+    <td class="num">${TL(k.tutarKdvli)}</td>
+  </tr>`).join('');
+  html += `</tbody></table>`;
+  return html;
+}
+
+function renderBayiHakedisTable(){
+  const report = state.bayiHakedisReport;
+  const rows = getBayiHakedisFilteredSorted();
+  document.getElementById('bayiHakedisCount').textContent = rows.length.toLocaleString('tr-TR') + ' nokta';
+  const tbody = document.getElementById('bayiHakedisTbody');
+  const tfoot = document.getElementById('bayiHakedisTfoot');
+  if(!rows.length){
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">Aramanızla/filtrenizle eşleşen nokta bulunamadı.</div></td></tr>`;
+    tfoot.innerHTML = '';
+    return;
+  }
+  tbody.innerHTML = rows.map(r=>{
+    const expandKey = 'bh_'+r.kod;
+    const expanded = state.expanded.has(expandKey);
+    const cokluMu = r.kayitSayisi > 1;
+    let html = `<tr class="${cokluMu?'data-row':''} ${expanded?'expanded':''}" data-kod="${escapeHtml(r.kod)}" style="${cokluMu?'cursor:pointer;':''}">
+    <td><div class="musteri-name">${escapeHtml(r.adi)}${cokluMu ? ' <span title="Bu noktanın birden fazla hakediş kaydı var, satıra tıklayarak tek tek görebilirsiniz">ⓘ</span>' : ''}</div><div class="musteri-code">${escapeHtml(r.kod)}</div></td>
+    <td><span class="temsilci-tag">${escapeHtml(r.temsilci)}</span></td>
+    <td class="num">${r.kayitSayisi}</td>
+    <td class="num">${r.iskontoKdvli ? TL(r.iskontoKdvli) : '<span class="zero">—</span>'}</td>
+    <td class="num">${r.katkiPayiKdvli ? TL(r.katkiPayiKdvli) : '<span class="zero">—</span>'}</td>
+    <td class="num"><b>${TL(r.genelToplamKdvli)}</b></td>
+  </tr>`;
+    if(expanded){
+      html += `<tr class="expand-row"><td colspan="6"><div class="expand-inner">${renderMiniBayiHakedisDetay(r.kayitlar)}</div></td></tr>`;
+    }
+    return html;
+  }).join('');
+
+  tbody.querySelectorAll('tr.data-row').forEach(tr=>{
+    tr.addEventListener('click', ()=>{
+      const kod = tr.getAttribute('data-kod');
+      const expandKey = 'bh_'+kod;
+      if(state.expanded.has(expandKey)) state.expanded.delete(expandKey); else state.expanded.add(expandKey);
+      renderBayiHakedisTable();
+    });
+  });
+
+  const g = report.genelToplam;
+  tfoot.innerHTML = `<tr class="totals-row">
+    <td>Genel Toplam</td><td></td><td></td>
+    <td class="num">${TL(g.iskontoKdvli)}</td>
+    <td class="num">${TL(g.katkiPayiKdvli)}</td>
+    <td class="num">${TL(g.genelToplamKdvli)}</td>
+  </tr>`;
+}
+
+function renderBayiHakedisView(){
+  const panel = document.getElementById('bayiHakedisPanel');
+  const bosPanel = document.getElementById('bayiHakedisBosPanel');
+  const bosMesaj = document.getElementById('bayiHakedisBosMesaj');
+
+  if(!state.bayiHakedisReport){
+    panel.style.display = 'none';
+    bosPanel.style.display = 'block';
+    bosMesaj.textContent = state.bayiHakedisHata
+      ? ('Bayi Hakediş raporu oluşturulamadı: ' + state.bayiHakedisHata)
+      : 'Bayi Hakediş raporu için ana yükleme sayfasında hem "Ciro Primi" hem de "Dönemsel İskonto" dosyalarını yükleyip "Raporu Oluştur"a basmanız gerekir.';
+    return;
+  }
+  bosPanel.style.display = 'none';
+  panel.style.display = 'block';
+  populateBayiHakedisTemsilciFilter();
+  renderBayiHakedisTable();
+}
+
+function updateBayiHakedisSearchClearBtn(){
+  const hasValue = document.getElementById('bayiHakedisSearchInput').value.trim().length > 0;
+  document.getElementById('bayiHakedisSearchClearBtn').style.display = hasValue ? 'flex' : 'none';
+}
+document.getElementById('bayiHakedisSearchInput').addEventListener('input', ()=>{
+  updateBayiHakedisSearchClearBtn();
+  renderBayiHakedisTable();
+});
+document.getElementById('bayiHakedisSearchClearBtn').addEventListener('click', ()=>{
+  const input = document.getElementById('bayiHakedisSearchInput');
+  input.value = '';
+  updateBayiHakedisSearchClearBtn();
+  renderBayiHakedisTable();
+  input.focus();
+});
+document.getElementById('bayiHakedisTemsilciFilter').addEventListener('change', renderBayiHakedisTable);
+document.querySelectorAll('#bayiHakedisTable thead th[data-key]').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const key = th.getAttribute('data-key');
+    if(state.bhSort.key===key) state.bhSort.dir *= -1; else state.bhSort = {key, dir:-1};
+    document.querySelectorAll('#bayiHakedisTable thead .arrow').forEach(a=>a.textContent='');
+    th.querySelector('.arrow').textContent = state.bhSort.dir===1?'▲':'▼';
+    renderBayiHakedisTable();
+  });
+});
+
 </script>
 </body>
 </html>
