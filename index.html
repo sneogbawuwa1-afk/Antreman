@@ -913,6 +913,7 @@
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;">
               <button type="button" class="btn small no-print" id="faturaKontrolArsivYenileBtn" title="Buluttaki arşivi yeniden çeker">🔄 Yenile</button>
+              <button type="button" class="btn small no-print" id="faturaKontrolArsivSikistirBtn" title="Aynı takvim gününe ait daha eski/yinelenen yükleme kayıtlarını (gölge kayıtları) arşivden kalıcı olarak siler; bakiye geçmişine (Trend Analizi) dokunmaz">🧹 Gölge Kayıtları Temizle</button>
               <button type="button" class="btn small no-print" id="faturaKontrolArsivTemizleBtn" title="Fatura Kontrol için biriktirilen tüm günlerin arşivini siler (şifre gerektirir)">🔒 Arşivi Temizle</button>
             </div>
           </div>
@@ -1225,15 +1226,21 @@ async function faturaKontrolArsivineKaydetVeSenkronizeEt(report){
     kayitZamani: new Date().toISOString(),
   };
   if(!cloudEnabled()){
-    state.faturaArsivCache = Object.assign({}, state.faturaArsivCache, {[bugunKey]: bugununKaydi});
+    const guncel = Object.assign({}, state.faturaArsivCache, {[bugunKey]: bugununKaydi});
+    state.faturaArsivCache = faturaKontrolArsivSikistir(guncel).arsiv;
     if(document.getElementById('faturaKontrolArsivBilgi')) await renderFaturaKontrolArsivBilgi();
     return;
   }
   try{
     const bulutArsiv = (await loadFaturaKontrolArsivFromCloud()) || {};
     bulutArsiv[bugunKey] = bugununKaydi;
-    await saveFaturaKontrolArsivToCloud(bulutArsiv);
-    state.faturaArsivCache = bulutArsiv;
+    // Yeni yükleme kaydedilir kaydedilmez, artık "kaybeden" (daha eski bir yüklemeden kalma ve bu
+    // yüklemeyle aynı takvim gününe ait) satırlar arşivden kalıcı olarak temizlenir — böylece
+    // buluttaki arşivde gölge/yinelenen kayıt birikmez.
+    const {arsiv: sikistirilmisArsiv, silinenSatir} = faturaKontrolArsivSikistir(bulutArsiv);
+    await saveFaturaKontrolArsivToCloud(sikistirilmisArsiv);
+    state.faturaArsivCache = sikistirilmisArsiv;
+    if(silinenSatir>0) console.info(`Fatura Kontrol arşivi: ${silinenSatir} gölge satır temizlendi.`);
     if(document.getElementById('faturaKontrolArsivBilgi')) await renderFaturaKontrolArsivBilgi();
   }catch(err){
     console.error('Fatura Kontrol arşivi senkronize edilemedi:', err);
@@ -1294,6 +1301,63 @@ function faturaKontrolArsivBirlestir(arsiv){
     ilkGun: gunler[0] || null,
     sonGun: gunler[gunler.length-1] || null,
   };
+}
+
+/* ============================== ARŞİV SIKIŞTIRMA (GÖLGE KAYIT TEMİZLEME) ==============================
+   faturaKontrolArsivBirlestir() bir takvim gününe ait veriyi birden fazla yükleme günü arşivde
+   tutuyor olsa bile RAPORLARDA yalnızca en son yüklemenin verisini gösterir — ama eski (artık
+   "kaybeden") satırlar buluttaki arşivde fiilen kayıtlı kalmaya devam eder ("gölge kayıt").
+   Bu fonksiyon, her takvim günü için en son yükleme dışındaki TÜM eski satırları (siparişArsiv/
+   tahsilatArsiv/faturaArsiv) kalıcı olarak arşivden çıkarır ve temizlenmiş arşivi döndürür.
+   KASITLI OLARAK DOKUNULMAYANLAR:
+   - musteriSnapshot: Trend Analizi'ndeki "gün gün bakiye" grafiği bu anlık görüntülere dayanır;
+     bir yükleme gününün işlem satırları başka bir günün yüklemesiyle güncellenmiş olsa bile, o günün
+     BAKİYE DURUMU tarihsel bir veridir ve silinmemelidir.
+   - bayiHakedisArsiv: tekillestirBayiHakedis() takvim günü değil kayıt kimliğine (efpaSipNo/içerik)
+     göre eşleştirir; bu farklı mantık burada ayrıca ele alınmaz.
+   Tarihsiz satırlar (tarih alanı boş/okunamayan) güvenli tarafta kalınarak SİLİNMEZ. */
+function faturaKontrolArsivSikistir(arsiv){
+  const gunler = Object.keys(arsiv||{}).sort();
+  function kazananHaritasi(alanAdi, tarihAlani){
+    const sonUploadGunu = new Map();
+    gunler.forEach(uploadGunu=>{
+      ((arsiv[uploadGunu] && arsiv[uploadGunu][alanAdi]) || []).forEach(r=>{
+        if(!r[tarihAlani]) return;
+        const takvimGunu = dateKeyLocal(new Date(r[tarihAlani]));
+        if(!takvimGunu) return;
+        if(!sonUploadGunu.has(takvimGunu) || uploadGunu > sonUploadGunu.get(takvimGunu)){
+          sonUploadGunu.set(takvimGunu, uploadGunu);
+        }
+      });
+    });
+    return sonUploadGunu;
+  }
+  const kazananSiparis = kazananHaritasi('siparisArsiv', 'istenilenTeslimTarihi');
+  const kazananTahsilat = kazananHaritasi('tahsilatArsiv', 'belgeTarihi');
+  const kazananFatura = kazananHaritasi('faturaArsiv', 'faturaTarihi');
+
+  let silinenSatir = 0;
+  const yeniArsiv = {};
+  gunler.forEach(uploadGunu=>{
+    const g = arsiv[uploadGunu] || {};
+    function filtrele(alanAdi, tarihAlani, kazananMap){
+      const orijinal = g[alanAdi] || [];
+      const yeni = orijinal.filter(r=>{
+        if(!r[tarihAlani]) return true; // tarihsiz satır: dokunulmaz
+        const takvimGunu = dateKeyLocal(new Date(r[tarihAlani]));
+        if(!takvimGunu) return true;
+        return kazananMap.get(takvimGunu) === uploadGunu;
+      });
+      silinenSatir += (orijinal.length - yeni.length);
+      return yeni;
+    }
+    yeniArsiv[uploadGunu] = Object.assign({}, g, {
+      siparisArsiv: filtrele('siparisArsiv', 'istenilenTeslimTarihi', kazananSiparis),
+      tahsilatArsiv: filtrele('tahsilatArsiv', 'belgeTarihi', kazananTahsilat),
+      faturaArsiv: filtrele('faturaArsiv', 'faturaTarihi', kazananFatura),
+    });
+  });
+  return {arsiv: yeniArsiv, silinenSatir};
 }
 
 // --- Web Worker: Fatura Kontrol arşiv birleştirme/tekilleştirme ---
@@ -3224,6 +3288,31 @@ document.getElementById('faturaKontrolArsivTemizleBtn').addEventListener('click'
 
 document.getElementById('faturaKontrolArsivYenileBtn').addEventListener('click', async ()=>{
   await renderFaturaKontrolView(state.report || {musteriler:[]});
+});
+
+document.getElementById('faturaKontrolArsivSikistirBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('faturaKontrolArsivSikistirBtn');
+  const arsiv = state.faturaArsivCache || {};
+  if(!Object.keys(arsiv).length){ await renderFaturaKontrolArsivBilgi(); return; }
+  const orijinalMetin = btn.textContent;
+  btn.disabled = true; btn.textContent = '🧹 Temizleniyor…';
+  try{
+    const {arsiv: sikistirilmisArsiv, silinenSatir} = faturaKontrolArsivSikistir(arsiv);
+    if(silinenSatir===0){
+      alert('Arşivde temizlenecek gölge kayıt bulunamadı — zaten güncel.');
+    }else{
+      if(cloudEnabled()) await saveFaturaKontrolArsivToCloud(sikistirilmisArsiv);
+      state.faturaArsivCache = sikistirilmisArsiv;
+      alert(`${silinenSatir.toLocaleString('tr-TR')} gölge kayıt arşivden kalıcı olarak silindi.`);
+    }
+    await renderFaturaKontrolArsivBilgi();
+    if(state.report) await renderFaturaKontrolTable(state.report);
+  }catch(err){
+    console.error('Gölge kayıtlar temizlenemedi:', err);
+    alert('Gölge kayıtlar temizlenirken bir hata oluştu: ' + err.message);
+  }finally{
+    btn.disabled = false; btn.textContent = orijinalMetin;
+  }
 });
 
 function updateFaturaKontrolSearchClearBtn(){
