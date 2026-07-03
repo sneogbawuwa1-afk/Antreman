@@ -2119,14 +2119,16 @@ function buildReport(files, musteriMasterMap){
   if(files.tahsilat){
     const tHeaders = new Set(files.tahsilat.headers);
     const formatA = tHeaders.has('Tutar') && tHeaders.has('Tahsilat Alan');
+    // Format A (Ön Kayıt dökümü) belge tarihini "Tarih" kolonunda taşır; Format B (nihai rapor) ise "Belge Tarihi" kolonunu kullanır.
+    const tarihKolonu = formatA ? 'Tarih' : 'Belge Tarihi';
 
     files.tahsilat.data.forEach(r=>{
-      const gun = dateKeyLocal(excelDateToJSArti1Gun(r['Belge Tarihi']));
+      const gun = dateKeyLocal(excelDateToJSArti1Gun(r[tarihKolonu]));
       if(gun && (!enYeniTahsilatGunu || gun > enYeniTahsilatGunu)) enYeniTahsilatGunu = gun;
     });
 
     files.tahsilat.data.forEach(r=>{
-      const belgeTarihi = excelDateToJSArti1Gun(r['Belge Tarihi']);
+      const belgeTarihi = excelDateToJSArti1Gun(r[tarihKolonu]);
       const musteriArsiv = String((formatA ? r['Müşteri'] : r['Müşt. Kodu'])||'').trim();
       const tutarArsiv = Math.abs(Number(formatA ? r['Tutar'] : r['Belge Tutarı'])||0);
       if(musteriArsiv){
