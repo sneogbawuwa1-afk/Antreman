@@ -262,6 +262,66 @@
   .modal-body{overflow-y:auto;padding:0 0 8px;}
   #dikkatTable tbody tr{cursor:pointer;transition:background .1s ease;}
   #dikkatTable tbody tr:hover{background:var(--danger-soft);}
+
+  /* --- Senet Yazdır modal: dedicated navy theme (overrides the shared danger-red modal look) --- */
+  #senetModal .panel-head{
+    background:linear-gradient(135deg,var(--navy) 0%, #2C3F63 100%);
+    padding:18px 52px 18px 20px;
+  }
+  .senet-modal-head-inner{display:flex;align-items:center;gap:13px;}
+  .senet-modal-head-icon{
+    width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,0.14);
+    display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+  }
+  #senetModal .panel-head h2{color:#fff;font-size:16.5px;margin:0;}
+  .senet-modal-sub{font-size:11.5px;color:rgba(255,255,255,0.78);margin-top:3px;font-weight:500;}
+  #senetModal .modal-close{background:rgba(255,255,255,0.14);color:#fff;box-shadow:none;}
+  #senetModal .modal-close:hover{background:rgba(255,255,255,0.28);color:#fff;}
+  .senet-modal-body{padding:20px 22px 20px;}
+  .senet-adet-row{
+    margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--line-soft);
+  }
+  .senet-adet-label{font-size:12.5px;font-weight:600;color:var(--ink-soft);display:block;margin-bottom:8px;}
+  .senet-adet-controls{display:flex;align-items:center;gap:10px;}
+  .senet-adet-input{
+    width:78px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;
+    font-size:14.5px;font-family:'Space Grotesk';font-weight:700;text-align:center;
+    background:var(--bg);color:var(--ink);
+  }
+  .senet-adet-input:focus{outline:2px solid var(--accent-soft);border-color:var(--accent);}
+  .senet-vade-list{display:flex;flex-direction:column;gap:10px;}
+  .senet-vade-card{
+    display:flex;align-items:center;gap:14px;
+    padding:12px 14px;background:var(--bg);border:1px solid var(--line-soft);border-radius:11px;
+    transition:border-color .15s ease;
+  }
+  .senet-vade-card:focus-within{border-color:var(--accent);}
+  .senet-vade-card-badge{
+    width:29px;height:29px;border-radius:50%;background:var(--navy);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';
+    font-weight:700;font-size:13px;flex-shrink:0;
+  }
+  .senet-vade-card-info{flex:1;min-width:0;}
+  .senet-vade-card-label{font-size:10.5px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+  .senet-vade-card-tutar{font-family:'Space Grotesk';font-weight:700;font-size:15.5px;color:var(--ink);margin-top:2px;}
+  .senet-vade-card-date{display:flex;flex-direction:column;gap:4px;}
+  .senet-vade-card-date label{font-size:10px;color:var(--ink-faint);font-weight:700;text-transform:uppercase;letter-spacing:.03em;}
+  .senet-vade-card-date input{
+    padding:7px 9px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;
+    font-family:inherit;background:var(--surface);color:var(--ink);width:150px;
+  }
+  .senet-vade-card-date input:focus{outline:2px solid var(--accent-soft);border-color:var(--accent);}
+  .senet-hata-mesaji{
+    display:none;color:var(--danger);font-size:12.5px;margin-top:10px;
+    padding:10px 13px;background:var(--danger-soft);border-radius:9px;line-height:1.5;
+  }
+  .senet-modal-footer{margin-top:18px;}
+  .senet-print-btn{width:100%;padding:12px 16px;font-size:13.5px;border-radius:10px;}
+  @media(max-width:480px){
+    .senet-vade-card{flex-wrap:wrap;}
+    .senet-vade-card-date input{width:100%;}
+  }
+
   @media(max-width:680px){
     .alert-banner{flex-wrap:wrap;}
     .modal{max-height:92vh;}
@@ -328,6 +388,9 @@
     thead th{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     table{font-size:11px;}
     .expand-row{display:none !important;}
+    /* Senet yazdırma modu: rapor sayfası tamamen gizlenir, sadece senet(ler) basılır. */
+    body.senet-yazdiriliyor #app{display:none !important;}
+    body.senet-yazdiriliyor #senetYazdirmaAlani{display:block !important;}
     @page{size:A4 landscape;margin:12mm;}
   }
 
@@ -389,6 +452,57 @@
     .kpi-grid{grid-template-columns:repeat(2,1fr) !important;}
     .brand h1{font-size:15px;}
   }
+  #senetYazdirmaAlani{display:none;}
+  .senet-sayfa{
+    width:210mm;height:148mm;box-sizing:border-box;padding:8mm;
+    page-break-after:always;font-family:'Inter',sans-serif;color:#1B2233;
+  }
+  .senet-cerceve{
+    position:relative;height:100%;box-sizing:border-box;
+    border:1.75px solid #1F2E4A;padding:6px;
+  }
+  .senet-cerceve-inner{
+    position:relative;height:100%;box-sizing:border-box;
+    border:0.75px solid #1F2E4A;padding:14px 22px 16px;
+    display:flex;flex-direction:column;
+  }
+  .senet-ust{
+    display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;
+  }
+  .senet-baslik{font-family:'Space Grotesk';font-weight:700;font-size:19px;letter-spacing:.06em;color:#1F2E4A;}
+  .senet-alacakli{text-align:right;}
+  .senet-alacakli-label{font-size:8.5px;font-weight:700;color:#8B93A3;text-transform:uppercase;letter-spacing:.06em;}
+  .senet-alacakli-adi{font-size:11px;font-weight:700;color:#1F2E4A;max-width:260px;line-height:1.3;margin-top:1px;}
+  .senet-ust-tablo{width:100%;border-collapse:collapse;margin-bottom:14px;}
+  .senet-ust-tablo th{
+    border:1px solid #1F2E4A;padding:6px 8px;text-align:center;
+    font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+    background:#1F2E4A;color:#fff;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  .senet-ust-tablo td{
+    border:1px solid #1F2E4A;padding:8px 8px;text-align:center;
+    font-weight:700;font-size:12.5px;font-family:'Space Grotesk';background:#fff;
+  }
+  .senet-ust-tablo td.senet-tutar-hucre{
+    background:#F1E0C4;color:#9C5D14;font-size:14px;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  .senet-metin{font-size:11.5px;line-height:1.6;text-align:justify;margin:0 0 14px;color:#20242c;}
+  .senet-taraflar{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;}
+  .senet-taraf-box{border:1px solid #C7CCD8;border-radius:5px;padding:9px 11px 10px;background:#FBFBFA;}
+  .senet-taraf-baslik{
+    font-family:'Space Grotesk';font-size:9.5px;font-weight:700;text-transform:uppercase;
+    letter-spacing:.05em;color:#1F2E4A;margin:0 0 6px;padding-bottom:5px;border-bottom:1px solid #DADFE8;
+  }
+  .senet-taraf-box p{margin:2.5px 0;font-size:10.5px;line-height:1.4;}
+  .senet-taraf-box p b{color:#5C6577;font-weight:600;}
+  .senet-imza-blok{min-height:1px;}
+  .senet-alt-bilgi{
+    display:flex;justify-content:space-between;font-size:7.5px;color:#B7BCC7;
+    margin-top:8px;letter-spacing:.03em;
+  }
+  @page{size:A5 landscape;margin:0;}
 </style>
 </head>
 <body>
@@ -556,6 +670,35 @@
       <button class="tab-btn" id="tabbtn-trend" data-view="trend" type="button" role="tab" aria-selected="false" aria-controls="trendView">📈 Trend Analizi</button>
       <button class="tab-btn" id="tabbtn-bayiHakedis" data-view="bayiHakedis" type="button" role="tab" aria-selected="false" aria-controls="bayiHakedisView">🏷️ Bayi Hakediş</button>
       <button class="tab-btn" id="tabbtn-tahsilatVerimlilik" data-view="tahsilatVerimlilik" type="button" role="tab" aria-selected="false" aria-controls="tahsilatVerimlilikView">💹 Temsilci Tahsilat Verimliliği</button>
+    </div>
+
+    <div class="modal-overlay no-print" id="senetModalOverlay">
+      <div class="modal senet-modal" id="senetModal" role="dialog" aria-modal="true" aria-labelledby="senetModalTitle" style="max-width:560px;">
+        <div class="panel-head">
+          <div class="senet-modal-head-inner">
+            <div class="senet-modal-head-icon">📄</div>
+            <div>
+              <h2 id="senetModalTitle">Senet Yazdır</h2>
+              <div class="senet-modal-sub" id="senetModalMusteriBilgi"></div>
+            </div>
+          </div>
+          <button class="modal-close" id="senetModalClose" type="button" aria-label="Kapat">✕</button>
+        </div>
+        <div class="modal-body senet-modal-body">
+          <div class="senet-adet-row">
+            <label for="senetAdetInput" class="senet-adet-label">Kaç senet oluşturulacak?</label>
+            <div class="senet-adet-controls">
+              <input type="number" id="senetAdetInput" min="1" max="12" value="1" class="senet-adet-input" />
+              <button type="button" class="btn primary small" id="senetAdetOnaylaBtn">Devam</button>
+            </div>
+          </div>
+          <div id="senetVadeAlanlari" class="senet-vade-list"></div>
+          <div id="senetHataMesaji" class="senet-hata-mesaji"></div>
+          <div class="senet-modal-footer">
+            <button type="button" class="btn primary senet-print-btn" id="senetYazdirBtn" style="display:none;">🖨️ Senetleri Oluştur ve Yazdır</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div id="genelView" role="tabpanel" aria-labelledby="tabbtn-genel">
@@ -1083,6 +1226,8 @@
 
 </div>
 
+<div id="senetYazdirmaAlani"></div>
+
 <script>
 const state = {
   files: { kalemler:null, siparis:null, tahsilat:null, cekSenet:null, ticariStok:null, fatura:null, bayiHakedis:null, yukleme:null, musteriMaster:null, ciroPrimi:null, donemselIskonto:null },
@@ -1098,6 +1243,7 @@ const state = {
   yuklemeArsivCache: {},
   yuklemeSeciliGun: null,
   musteriMasterMap: new Map(),
+  musteriMasterDetay: new Map(), // musteri kodu -> {tabelaAdi, musteriAdi, vergiNo, tcKimlikNo, adres, il, ilce} (senet basımı için)
   bayiHakedisReport: null,
   bayiHakedisHata: null,
   bhSort: { key:'toplamKdvli', dir:-1 },
@@ -1599,6 +1745,10 @@ async function loadReportFromCloud(){
 
 const MUSTERI_MASTER_CLOUD_PATH = CLOUD.path + '_musteriMaster';
 const MUSTERI_MASTER_LOCAL_KEY = 'noktaCariTakip_musteriMaster_v1';
+// Senet basımı için müşteri detayı (Tabela Adı, Vergi No/TC Kimlik No, Adres, İl) — aynı Müşteri
+// Master dosyasından, temsilci haritasıyla birlikte ama AYRI bir kayıt olarak saklanır.
+const MUSTERI_MASTER_DETAY_CLOUD_PATH = CLOUD.path + '_musteriMasterDetay';
+const MUSTERI_MASTER_DETAY_LOCAL_KEY = 'noktaCariTakip_musteriMasterDetay_v1';
 
 function buildMusteriMasterMap(rows){
   const map = new Map();
@@ -1608,6 +1758,25 @@ function buildMusteriMasterMap(rows){
     let temsilci = String(r['Satış Temsilcisi Adı']||'').trim();
     if(!temsilci) temsilci = 'Key Account';
     map.set(musteri, temsilci);
+  });
+  return map;
+}
+// Senet basımında kullanılacak müşteri kimlik/adres bilgileri. Vergi No varsa (tüzel kişi) o, yoksa
+// TC Kimlik No (şahıs) kullanılır. "İl" alanı, senetteki "Keşide Yeri" için de kullanılır.
+function buildMusteriMasterDetay(rows){
+  const map = new Map();
+  (rows||[]).forEach(r=>{
+    const musteri = String(r['Müşteri']||'').trim();
+    if(!musteri) return;
+    map.set(musteri, {
+      tabelaAdi: String(r['Tabela Adı']||'').trim(),
+      musteriAdi: String(r['Müşteri Adı']||'').trim(),
+      vergiNo: String(r['Vergi No']||'').trim(),
+      tcKimlikNo: String(r['TC Kimlik No']||'').trim(),
+      adres: String(r['Sevk Adresi']||'').trim(),
+      il: String(r['İl']||'').trim(),
+      ilce: String(r['İlçe']||'').trim(),
+    });
   });
   return map;
 }
@@ -1645,11 +1814,48 @@ async function loadMusteriMasterFromLocal(){
   }catch(err){ console.error(err); return null; }
 }
 
+async function saveMusteriMasterDetayToCloud(obj){
+  if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
+  try{
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_DETAY_CLOUD_PATH}.json${await authQuery()}`, {
+      method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(obj),
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    return {ok:true};
+  }catch(err){ console.error('Müşteri Master Detay buluta kaydedilemedi:', err); return {ok:false, reason:err.message}; }
+}
+async function loadMusteriMasterDetayFromCloud(){
+  if(!cloudEnabled()) return null;
+  try{
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_DETAY_CLOUD_PATH}.json${await authQuery()}`);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const text = await res.text();
+    if(!text || text==='null') return null;
+    return JSON.parse(text);
+  }catch(err){ console.error('Müşteri Master Detay buluttan okunamadı:', err); return null; }
+}
+async function saveMusteriMasterDetayToLocal(obj){
+  const ok = await idbSet(MUSTERI_MASTER_DETAY_LOCAL_KEY, obj);
+  if(!ok) console.error('Müşteri Master Detay cihaza kaydedilemedi.');
+}
+async function loadMusteriMasterDetayFromLocal(){
+  try{
+    await idbMigrateFromLocalStorageOnce(MUSTERI_MASTER_DETAY_LOCAL_KEY);
+    return await idbGet(MUSTERI_MASTER_DETAY_LOCAL_KEY);
+  }catch(err){ console.error(err); return null; }
+}
+
 async function musteriMasterYenile(){
   let obj = null;
   if(cloudEnabled()) obj = await loadMusteriMasterFromCloud();
   if(!obj) obj = await loadMusteriMasterFromLocal();
   state.musteriMasterMap = musteriMasterObjToMap(obj);
+
+  let detayObj = null;
+  if(cloudEnabled()) detayObj = await loadMusteriMasterDetayFromCloud();
+  if(!detayObj) detayObj = await loadMusteriMasterDetayFromLocal();
+  state.musteriMasterDetay = musteriMasterObjToMap(detayObj);
+
   return state.musteriMasterMap;
 }
 
@@ -1659,6 +1865,13 @@ async function musteriMasterKaydet(rows){
   const obj = musteriMasterMapToObj(map);
   await saveMusteriMasterToLocal(obj);
   if(cloudEnabled()) await saveMusteriMasterToCloud(obj);
+
+  const detayMap = buildMusteriMasterDetay(rows);
+  state.musteriMasterDetay = detayMap;
+  const detayObj = musteriMasterMapToObj(detayMap);
+  await saveMusteriMasterDetayToLocal(detayObj);
+  if(cloudEnabled()) await saveMusteriMasterDetayToCloud(detayObj);
+
   return map;
 }
 
@@ -3017,9 +3230,222 @@ function renderMusteriTable(report){
   });
 }
 
-function renderMusteriDetail(m){
+/* ============================== SENET YAZDIRMA ============================== */
+// Senette sabit kalacak şirket bilgileri (kullanıcı tarafından onaylandı).
+const SENET_SABIT = {
+  aliciUnvan: 'AKGÜN MEŞ.GIDA İNŞ.TUR.VE TİC.LTD.ŞTİ.',
+  yetkiliMahkeme: 'BAKIRKÖY',
+};
+
+const TR_BIRLER = ['', 'Bir', 'İki', 'Üç', 'Dört', 'Beş', 'Altı', 'Yedi', 'Sekiz', 'Dokuz'];
+const TR_ONLAR = ['', 'On', 'Yirmi', 'Otuz', 'Kırk', 'Elli', 'Altmış', 'Yetmiş', 'Seksen', 'Doksan'];
+const TR_BASAMAK = ['', 'Bin', 'Milyon', 'Milyar', 'Trilyon'];
+const TR_AYLAR = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+
+function ucBasamakYaziyla(n){
+  const yuz = Math.floor(n/100);
+  const kalan = n%100;
+  const on = Math.floor(kalan/10);
+  const bir = kalan%10;
+  let s = '';
+  if(yuz>0) s += (yuz===1 ? '' : TR_BIRLER[yuz]) + 'Yüz';
+  s += TR_ONLAR[on];
+  s += TR_BIRLER[bir];
+  return s;
+}
+// Senetlerde geleneksel olarak kelimeler birbirine bitişik yazılır (araya sonradan kelime
+// eklenerek sahtecilik yapılmasını zorlaştırmak için) — örnek taslaktaki "YüzElliBin" biçimiyle aynı.
+function sayiyiYaziyaCevir(n){
+  n = Math.round(n);
+  if(n===0) return 'Sıfır';
+  const gruplar = [];
+  let x = n;
+  while(x>0){ gruplar.push(x%1000); x = Math.floor(x/1000); }
+  let sonuc = '';
+  for(let i=gruplar.length-1;i>=0;i--){
+    const grup = gruplar[i];
+    if(grup===0) continue;
+    let parca = ucBasamakYaziyla(grup);
+    if(i===1 && grup===1) parca = ''; // "Bir Bin" değil sadece "Bin"
+    sonuc += parca + TR_BASAMAK[i];
+  }
+  return sonuc;
+}
+function tutarYaziyla(tutar){
+  const lira = Math.floor(tutar);
+  const kurus = Math.round((tutar-lira)*100);
+  let s = sayiyiYaziyaCevir(lira) + ' Türk Lirası';
+  if(kurus>0) s += ', ' + sayiyiYaziyaCevir(kurus) + ' Kuruş';
+  return s;
+}
+function tarihUzunYazi(d){
+  if(!(d instanceof Date) || isNaN(d)) return '—';
+  return String(d.getDate()).padStart(2,'0') + ' ' + TR_AYLAR[d.getMonth()] + ' ' + d.getFullYear();
+}
+function tutarRakamSenet(n){
+  return '#' + (n||0).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + '#';
+}
+// Açık sipariş tutarını girilen senet adedine böler; ondalık farkları (küsurat) son senede
+// eklenir, böylece senetlerin toplamı her zaman tam olarak açık sipariş tutarına eşit olur.
+function senetTutarlariniBol(toplam, adet){
+  const parcalar = [];
+  let birikenToplam = 0;
+  for(let i=0;i<adet-1;i++){
+    const deger = Math.round((toplam/adet)*100)/100;
+    parcalar.push(deger);
+    birikenToplam += deger;
+  }
+  parcalar.push(Math.round((toplam-birikenToplam)*100)/100);
+  return parcalar;
+}
+
+function buildSenetHTML(opts){
+  const kesideTarihi = turkiyeBugun();
+  return `<div class="senet-sayfa"><div class="senet-cerceve"><div class="senet-cerceve-inner">
+    <div class="senet-ust">
+      <div>
+        <div class="senet-baslik">BONO</div>
+      </div>
+      <div class="senet-alacakli">
+        <div class="senet-alacakli-label">Alacaklı</div>
+        <div class="senet-alacakli-adi">${escapeHtml(SENET_SABIT.aliciUnvan)}</div>
+      </div>
+    </div>
+    <table class="senet-ust-tablo">
+      <tr><th>Keşide Tarihi</th><th>Keşide Yeri</th><th>Ödeme Tarihi</th><th>Türk Lirası</th></tr>
+      <tr><td>${fmtDate(kesideTarihi)}</td><td>${escapeHtml(opts.il || '—')}</td><td>${fmtDate(opts.vadeTarihi)}</td><td class="senet-tutar-hucre">${tutarRakamSenet(opts.tutar)}</td></tr>
+    </table>
+    <p class="senet-metin">İşbu emre yazılı senet mukabilinde <u>${tarihUzunYazi(opts.vadeTarihi)}</u> tarihinde <b><u>${escapeHtml(SENET_SABIT.aliciUnvan)}</u></b> veyahut emrühavalesine yukarıda yazılı <b><u>#${sayiyiYaziyaCevir(Math.floor(opts.tutar))}${Math.round((opts.tutar%1)*100)>0 ? ' Lira '+sayiyiYaziyaCevir(Math.round((opts.tutar%1)*100))+' Kuruş' : ''} Türk Lirası#</u></b> ödeyeceğim. Bedeli <b>MALEN</b> ahzolunmuştur. İşbu bononun gününde ödenmemesi halinde diğer bonoların da muacceliyet kazanacağını, bu durumda icra masraflarını ve avukatlık ücretini ödeyeceğimi, ihtilaf halinde <b><u>${escapeHtml(SENET_SABIT.yetkiliMahkeme)}</u></b> mahkemeleri ve icra dairelerinin yetkili olduğunu şimdiden kabul ediyorum.</p>
+    <div class="senet-taraflar">
+      <div class="senet-taraf-box">
+        <p class="senet-taraf-baslik">Borçlu</p>
+        <p><b>Ad Soyad / Unvan</b> : ${escapeHtml(opts.borcluAdi || '—')}</p>
+        <p><b>T.C./Vergi No.</b> : ${escapeHtml(opts.vergiTcNo || '—')}</p>
+        <p><b>Adres</b> : ${escapeHtml(opts.adres || '—')}</p>
+      </div>
+      <div class="senet-imza-blok"></div>
+    </div>
+  </div></div></div>`;
+}
+
+let senetState = { musteriKod:null, musteriAdi:null, acikSiparisTutari:0 };
+
+function senetModalAc(musteriKod, musteriAdi, acikSiparisTutari){
+  senetState = { musteriKod, musteriAdi, acikSiparisTutari };
+  document.getElementById('senetModalMusteriBilgi').textContent = `${musteriAdi} (${musteriKod}) — Açık Sipariş: ${TL(acikSiparisTutari)}`;
+  document.getElementById('senetAdetInput').value = 1;
+  document.getElementById('senetVadeAlanlari').innerHTML = '';
+  document.getElementById('senetYazdirBtn').style.display = 'none';
+  document.getElementById('senetHataMesaji').style.display = 'none';
+  document.getElementById('senetModalOverlay').classList.add('open');
+}
+function senetModalKapat(){
+  document.getElementById('senetModalOverlay').classList.remove('open');
+}
+document.getElementById('senetModalClose').addEventListener('click', senetModalKapat);
+document.getElementById('senetModalOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'senetModalOverlay') senetModalKapat();
+});
+document.addEventListener('click', (e)=>{
+  const senetBtn = e.target.closest('.senet-yazdir-btn');
+  if(senetBtn){
+    e.stopPropagation(); // satırın kendi genişletme/daraltma tıklamasını tetiklemesin
+    e.preventDefault();
+    try{
+      senetModalAc(senetBtn.dataset.musteri, senetBtn.dataset.musteriAdi, Number(senetBtn.dataset.tutar));
+    }catch(err){
+      console.error('Senet Yazdır penceresi açılamadı:', err);
+      alert('Senet penceresi açılırken bir hata oluştu: ' + err.message + '\n\nLütfen sayfayı yenileyip (sert yenileme) tekrar deneyin.');
+    }
+  }
+});
+
+document.getElementById('senetAdetOnaylaBtn').addEventListener('click', ()=>{
+  const adet = Math.max(1, Math.min(12, Number(document.getElementById('senetAdetInput').value)||1));
+  document.getElementById('senetAdetInput').value = adet;
+  const parcalar = senetTutarlariniBol(senetState.acikSiparisTutari, adet);
+  const alan = document.getElementById('senetVadeAlanlari');
+  alan.innerHTML = parcalar.map((tutar,i)=>`
+    <div class="senet-vade-card">
+      <div class="senet-vade-card-badge">${i+1}</div>
+      <div class="senet-vade-card-info">
+        <div class="senet-vade-card-label">Senet ${i+1}</div>
+        <div class="senet-vade-card-tutar">${TL(tutar)}</div>
+      </div>
+      <div class="senet-vade-card-date">
+        <label for="senetVade${i}">Vade Tarihi</label>
+        <input type="date" id="senetVade${i}" class="senet-vade-input" data-index="${i}" />
+      </div>
+    </div>`).join('');
+  document.getElementById('senetYazdirBtn').style.display = 'inline-flex';
+  document.getElementById('senetHataMesaji').style.display = 'none';
+});
+
+// Senet (bono) üzerindeki "Ad Soyad / Unvan" alanı: Müşteri Master'daki Tabela Adı ile Müşteri Adı
+// birlikte gösterilir (örn. "Ateş Bakkal / Esra Arı"). İkisi aynıysa veya biri boşsa tekrar önlenir;
+// hiçbiri yoksa açık siparişin bağlı olduğu müşteri adına düşülür.
+function senetBorcluAdiOlustur(detay, yedekMusteriAdi){
+  const tabela = String(detay.tabelaAdi||'').trim();
+  const musteriAdi = String(detay.musteriAdi||'').trim();
+  if(tabela && musteriAdi){
+    return tabela.toLocaleUpperCase('tr-TR') === musteriAdi.toLocaleUpperCase('tr-TR') ? tabela : `${tabela} / ${musteriAdi}`;
+  }
+  return tabela || musteriAdi || yedekMusteriAdi || '—';
+}
+
+document.getElementById('senetYazdirBtn').addEventListener('click', ()=>{
+  const vadeInputs = Array.from(document.querySelectorAll('.senet-vade-input'));
+  const hataEl = document.getElementById('senetHataMesaji');
+  if(vadeInputs.some(inp=>!inp.value)){
+    hataEl.textContent = 'Lütfen tüm senetler için vade tarihi girin.';
+    hataEl.style.display = 'block';
+    return;
+  }
+  const adet = vadeInputs.length;
+  const parcalar = senetTutarlariniBol(senetState.acikSiparisTutari, adet);
+  const detay = state.musteriMasterDetay.get(senetState.musteriKod) || {};
+  if(!detay.tabelaAdi && !detay.musteriAdi){
+    hataEl.textContent = '⚠️ Bu müşteri için Müşteri Master bilgisi bulunamadı; borçlu adı/adres/vergi no boş basılacak. Devam etmek için tekrar basın.';
+    hataEl.style.display = 'block';
+    if(!document.getElementById('senetYazdirBtn').dataset.uyariGosterildi){
+      document.getElementById('senetYazdirBtn').dataset.uyariGosterildi = '1';
+      return;
+    }
+  }
+  delete document.getElementById('senetYazdirBtn').dataset.uyariGosterildi;
+  hataEl.style.display = 'none';
+
+  const vergiTcNo = detay.vergiNo || detay.tcKimlikNo || '';
+  const senetlerHTML = vadeInputs.map((inp,i)=> buildSenetHTML({
+    borcluAdi: senetBorcluAdiOlustur(detay, senetState.musteriAdi),
+    vergiTcNo, adres: detay.adres, il: detay.il,
+    vadeTarihi: new Date(inp.value+'T00:00:00'),
+    tutar: parcalar[i],
+    senetNo: i+1, senetAdet: adet,
+  })).join('');
+
+  document.getElementById('senetYazdirmaAlani').innerHTML = senetlerHTML;
+  document.body.classList.add('senet-yazdiriliyor');
+  senetModalKapat();
+  setTimeout(()=>{
+    window.print();
+    setTimeout(()=>{ document.body.classList.remove('senet-yazdiriliyor'); }, 500);
+  }, 100);
+});
+
+function renderMusteriDetail(m, showSenetBtn){
+  let html = '';
+  if(showSenetBtn && m.siparisTutari > 0){
+    html += `<div class="no-print" style="margin-bottom:14px;">
+      <button type="button" class="btn small senet-yazdir-btn" data-musteri="${escapeHtml(m.musteri)}" data-musteri-adi="${escapeHtml(m.musteriAdi)}" data-tutar="${m.siparisTutari}">📄 Senet Yazdır</button>
+    </div>`;
+  }
+  if(m.__bakiyesiz){
+    html += `<div class="empty-state">Bu müşterinin Kalemler dosyasında kaydı olmadığından fatura/çek-senet detayı yok.</div>`;
+    return html;
+  }
   const gorunurFaturalar = m.invoices.filter(inv=> inv.kalanBorc !== 0);
-  let html = `<h4>Açık Faturalar (${gorunurFaturalar.length})</h4>
+  html += `<h4>Açık Faturalar (${gorunurFaturalar.length})</h4>
   <table class="mini-table"><thead><tr>
     <th>Belge No</th><th>Tür</th><th>Fatura Tarihi</th><th class="num">Tutar</th><th class="num">Kalan Borç</th><th class="num">Faturadan Sonr.Gün</th>
   </tr></thead><tbody>`;
@@ -3106,7 +3532,7 @@ function renderSevkMusteriTable(report){
       <td class="num"><span class="num-strong">${TL(m.toplamRisk)}</span></td>
     </tr>`;
     if(expanded){
-      html += `<tr class="expand-row"><td colspan="9"><div class="expand-inner">${m.__bakiyesiz ? '<div class="empty-state">Bu müşterinin Kalemler dosyasında kaydı olmadığından fatura/çek-senet detayı yok.</div>' : renderMusteriDetail(m)}</div></td></tr>`;
+      html += `<tr class="expand-row"><td colspan="9"><div class="expand-inner">${renderMusteriDetail(m, true)}</div></td></tr>`;
     }
     return html;
   }).join('');
@@ -3228,7 +3654,7 @@ async function renderFaturaKontrolTable(report){
       <td class="num"><span class="num-strong">${TL(m.toplamRisk)}</span></td>
     </tr>`;
     if(expanded){
-      html += `<tr class="expand-row"><td colspan="8"><div class="expand-inner">${renderMusteriDetail(m)}</div></td></tr>`;
+      html += `<tr class="expand-row"><td colspan="8"><div class="expand-inner">${renderMusteriDetail(m, true)}</div></td></tr>`;
     }
     return html;
   }).join('');
