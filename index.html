@@ -296,6 +296,12 @@
   .cust-card .risk-bar{width:100%;height:7px;border-radius:5px;margin-top:8px;margin-bottom:13px;}
   .cust-stat-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
   @media(min-width:820px){.cust-stat-strip{grid-template-columns:repeat(5,minmax(0,1fr));}}
+  .cust-stat-strip.cols-3{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .cust-stat-strip.cols-4{grid-template-columns:repeat(2,minmax(0,1fr));}
+  @media(min-width:820px){
+    .cust-stat-strip.cols-3{grid-template-columns:repeat(3,minmax(0,1fr));}
+    .cust-stat-strip.cols-4{grid-template-columns:repeat(4,minmax(0,1fr));}
+  }
   .cust-stat-chip{background:var(--bg);border-radius:9px;padding:7px 6px;text-align:center;}
   .cust-stat-chip .l{font-size:9px;color:var(--ink-faint);font-weight:700;text-transform:uppercase;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .cust-stat-chip .v{font-family:'Space Grotesk';font-size:12px;font-weight:700;margin-top:3px;}
@@ -969,22 +975,26 @@
             <input type="number" id="sevkVadeMaxInput" class="filter-input" placeholder="Vade ≤ (En Çok)" title="Yazılan sayı ve altındaki ortalama vadeleri gösterir" />
           </div>
         </div>
-        <div class="panel-body" style="padding:0;">
-          <div class="table-scroll">
-            <table id="sevkMusteriTable">
-              <thead><tr>
-                <th data-key="musteriAdi">Müşteri<span class="arrow"></span></th>
-                <th data-key="temsilci">Satış Temsilcisi<span class="arrow"></span></th>
-                <th class="num" data-key="kalanBorc">Kalan Borç<span class="arrow"></span></th>
-                <th class="num" data-key="avgVadeGun">Ortalama Vade (gün)<span class="arrow"></span></th>
-                <th class="num" data-key="siparisTutari">Açık Sipariş<span class="arrow"></span></th>
-                <th class="num" data-key="emanetSiparis">Sevki Ertelenen<span class="arrow"></span></th>
-                <th class="num" data-key="cekSenet">Çek/Senet<span class="arrow"></span></th>
-                <th class="num" data-key="alinanTahsilat">Alınan Tahsilat<span class="arrow"></span></th>
-                <th class="num" data-key="toplamRisk">Toplam Risk<span class="arrow"></span></th>
-              </tr></thead>
-              <tbody id="sevkMusteriTbody"></tbody>
-            </table>
+        <div class="panel-body">
+          <div class="sort-bar">
+            <span class="sort-bar-label">Sırala</span>
+            <select class="filter-select" id="sevkMusteriSortSelect">
+              <option value="musteriAdi">Müşteri</option>
+              <option value="temsilci">Satış Temsilcisi</option>
+              <option value="kalanBorc">Kalan Borç</option>
+              <option value="avgVadeGun">Ortalama Vade</option>
+              <option value="siparisTutari">Açık Sipariş</option>
+              <option value="emanetSiparis">Sevki Ertelenen</option>
+              <option value="cekSenet">Çek/Senet</option>
+              <option value="alinanTahsilat">Alınan Tahsilat</option>
+              <option value="toplamRisk">Toplam Risk</option>
+            </select>
+            <button type="button" class="sort-dir-btn" id="sevkMusteriSortDirBtn" title="Sıralama yönünü değiştir" aria-label="Sıralama yönünü değiştir">↓</button>
+          </div>
+          <div class="cust-card-list" id="sevkMusteriTbody"></div>
+          <div class="musteri-daha-fazla-wrap" id="sevkMusteriDahaFazlaWrap" style="display:none;">
+            <button type="button" class="btn" id="sevkMusteriDahaFazlaBtn">Daha fazla göster</button>
+            <span class="musteri-daha-fazla-info" id="sevkMusteriDahaFazlaInfo"></span>
           </div>
         </div>
       </div>
@@ -1173,23 +1183,29 @@
             </div>
           </div>
         </div>
-        <div class="panel-body" style="padding:0;">
-          <div class="as-of" id="faturaKontrolArsivBilgi" style="padding:12px 20px 0;"></div>
+        <div class="panel-body">
+          <div class="as-of" id="faturaKontrolArsivBilgi"></div>
           <div id="faturaKontrolEmptyDate" class="empty-state" style="display:none;">Sonuçları görmek için yukarıdan bir tarih seçin.</div>
-          <div class="table-scroll">
-            <table id="faturaKontrolTable" style="display:none;">
-              <thead><tr>
-                <th data-key="musteriAdi">Müşteri<span class="arrow"></span></th>
-                <th data-key="temsilci">Satış Temsilcisi<span class="arrow"></span></th>
-                <th class="num" data-key="seciliSiparis">Seçili Tarihte Sipariş<span class="arrow"></span></th>
-                <th class="num" data-key="seciliTahsilat">Seçili Tarihte Tahsilat<span class="arrow"></span></th>
-                <th class="num" data-key="kalanBorc">Kalan Borç<span class="arrow"></span></th>
-                <th class="num" data-key="avgVadeGun">Ortalama Vade (gün)<span class="arrow"></span></th>
-                <th class="num" data-key="cekSenet">Çek/Senet<span class="arrow"></span></th>
-                <th class="num" data-key="toplamRisk">Toplam Risk<span class="arrow"></span></th>
-              </tr></thead>
-              <tbody id="faturaKontrolTbody"></tbody>
-            </table>
+          <div id="faturaKontrolSortWrap" style="display:none;">
+            <div class="sort-bar">
+              <span class="sort-bar-label">Sırala</span>
+              <select class="filter-select" id="faturaKontrolSortSelect">
+                <option value="musteriAdi">Müşteri</option>
+                <option value="temsilci">Satış Temsilcisi</option>
+                <option value="seciliSiparis">Seçili Tarihte Sipariş</option>
+                <option value="seciliTahsilat">Seçili Tarihte Tahsilat</option>
+                <option value="kalanBorc">Kalan Borç</option>
+                <option value="avgVadeGun">Ortalama Vade</option>
+                <option value="cekSenet">Çek/Senet</option>
+                <option value="toplamRisk">Toplam Risk</option>
+              </select>
+              <button type="button" class="sort-dir-btn" id="faturaKontrolSortDirBtn" title="Sıralama yönünü değiştir" aria-label="Sıralama yönünü değiştir">↓</button>
+            </div>
+            <div class="cust-card-list" id="faturaKontrolTbody"></div>
+            <div class="musteri-daha-fazla-wrap" id="faturaKontrolDahaFazlaWrap" style="display:none;">
+              <button type="button" class="btn" id="faturaKontrolDahaFazlaBtn">Daha fazla göster</button>
+              <span class="musteri-daha-fazla-info" id="faturaKontrolDahaFazlaInfo"></span>
+            </div>
           </div>
         </div>
       </div>
@@ -1251,19 +1267,24 @@
             <select class="filter-select" id="bayiHakedisTemsilciFilter" style="width:100%;"><option value="">Tüm temsilciler</option></select>
           </div>
         </div>
-        <div class="panel-body" style="padding:0;">
-          <div class="table-scroll">
-            <table id="bayiHakedisTable">
-              <thead><tr>
-                <th data-key="adi">Nokta<span class="arrow"></span></th>
-                <th data-key="temsilci">Satış Temsilcisi<span class="arrow"></span></th>
-                <th class="num" data-key="kayitSayisi">Kayıt<span class="arrow"></span></th>
-                <th class="num" data-key="iskontoSayisi">İskonto<span class="arrow"></span></th>
-                <th class="num" data-key="katkiPayiSayisi">İşletme Katkı Payı<span class="arrow"></span></th>
-              </tr></thead>
-              <tbody id="bayiHakedisTbody"></tbody>
-              <tfoot id="bayiHakedisTfoot"></tfoot>
-            </table>
+        <div class="panel-body">
+          <div class="sort-bar">
+            <span class="sort-bar-label">Sırala</span>
+            <select class="filter-select" id="bayiHakedisSortSelect">
+              <option value="adi">Nokta</option>
+              <option value="temsilci">Satış Temsilcisi</option>
+              <option value="kayitSayisi">Kayıt</option>
+              <option value="iskontoSayisi">İskonto</option>
+              <option value="katkiPayiSayisi">İşletme Katkı Payı</option>
+              <option value="toplamKdvli">Toplam Hakediş</option>
+            </select>
+            <button type="button" class="sort-dir-btn" id="bayiHakedisSortDirBtn" title="Sıralama yönünü değiştir" aria-label="Sıralama yönünü değiştir">↓</button>
+          </div>
+          <div class="as-of" id="bayiHakedisGenelToplam"></div>
+          <div class="cust-card-list" id="bayiHakedisTbody"></div>
+          <div class="musteri-daha-fazla-wrap" id="bayiHakedisDahaFazlaWrap" style="display:none;">
+            <button type="button" class="btn" id="bayiHakedisDahaFazlaBtn">Daha fazla göster</button>
+            <span class="musteri-daha-fazla-info" id="bayiHakedisDahaFazlaInfo"></span>
           </div>
         </div>
       </div>
@@ -1377,6 +1398,9 @@ const state = {
   tvAy: null,
   tvSort: { key:'tahsilatOrani', dir:-1 },
   musteriGosterilen: 30,
+  sevkGosterilen: 30,
+  bhGosterilen: 30,
+  fkGosterilen: 30,
 };
 
 const MUSTERI_SAYFA_BOYUTU = 30;
@@ -3622,10 +3646,10 @@ function renderMusteriTable(report, resetSayfa=true){
       ${riskComposition(m)}
       <div class="cust-stat-strip">
         <div class="cust-stat-chip"><div class="l">Ort. Vade</div><div class="v">${vadeBadge(m.avgVadeGun)}</div></div>
-        <div class="cust-stat-chip"><div class="l">Açık Sipariş</div><div class="v">${m.siparisTutari>0?TL(m.siparisTutari):'<span class="zero">—</span>'}</div></div>
+        <div class="cust-stat-chip"><div class="l">Sipariş</div><div class="v">${m.siparisTutari>0?TL(m.siparisTutari):'<span class="zero">—</span>'}</div></div>
         <div class="cust-stat-chip"><div class="l">Sevk Ertelenen</div><div class="v">${m.emanetSiparis>0?TL(m.emanetSiparis):'<span class="zero">—</span>'}</div></div>
         <div class="cust-stat-chip"><div class="l">Çek/Senet</div><div class="v">${m.cekSenet>0?TL(m.cekSenet):'<span class="zero">—</span>'}</div></div>
-        <div class="cust-stat-chip"><div class="l">Alınan Tahsilat</div><div class="v">${m.alinanTahsilat>0?TL(m.alinanTahsilat):'<span class="zero">—</span>'}</div></div>
+        <div class="cust-stat-chip"><div class="l">Tahsilat</div><div class="v">${m.alinanTahsilat>0?TL(m.alinanTahsilat):'<span class="zero">—</span>'}</div></div>
       </div>`;
     if(expanded){
       html += `<div class="cust-expanded">
@@ -4003,44 +4027,75 @@ function getSevkFilteredSorted(report){
   return rows;
 }
 
-function renderSevkMusteriTable(report){
+function renderSevkDahaFazlaBtn(gosterilenSayi, toplamSayi){
+  const wrap = document.getElementById('sevkMusteriDahaFazlaWrap');
+  const info = document.getElementById('sevkMusteriDahaFazlaInfo');
+  if(!wrap) return;
+  if(toplamSayi > gosterilenSayi){
+    wrap.style.display = 'flex';
+    info.textContent = `${gosterilenSayi.toLocaleString('tr-TR')} / ${toplamSayi.toLocaleString('tr-TR')} müşteri gösteriliyor`;
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function renderSevkMusteriTable(report, resetSayfa=true){
+  if(resetSayfa) state.sevkGosterilen = MUSTERI_SAYFA_BOYUTU;
   const rows = getSevkFilteredSorted(report);
   document.getElementById('sevkMusteriCount').textContent = rows.length.toLocaleString('tr-TR') + ' müşteri';
-  const tbody = document.getElementById('sevkMusteriTbody');
+  const list = document.getElementById('sevkMusteriTbody');
   if(!rows.length){
-    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">Açık siparişi veya sevki ertelenen ürünü olan müşteri bulunamadı.</div></td></tr>`;
+    list.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Açık siparişi veya sevki ertelenen ürünü olan müşteri bulunamadı.</div>`;
+    renderSevkDahaFazlaBtn(0, 0);
     return;
   }
   const hakedisKodlari = bayiHakedisliMusteriKodlari();
-  tbody.innerHTML = rows.map(m=>{
+  const gosterilecekSayi = Math.min(state.sevkGosterilen, rows.length);
+  const gosterilecekRows = rows.slice(0, gosterilecekSayi);
+  list.innerHTML = gosterilecekRows.map(m=>{
     const expandKey = 'sevk_'+m.musteri;
     const expanded = state.expanded.has(expandKey);
     const bakiyesizEtiket = m.__bakiyesiz ? '<span class="badge info" title="Bu müşterinin Kalemler dosyasında (açık fatura/kalan borç) kaydı yok, yalnızca sipariş dökümünde görünüyor">Bakiyesiz</span>' : '';
-    let html = `<tr class="data-row ${expanded?'expanded':''}" data-musteri="${escapeHtml(m.musteri)}">
-      <td><div class="musteri-name">${escapeHtml(m.musteriAdi)}${isRiskliMusteri(m)?'<span class="badge dikkat" title="Ortalama vade '+VADE_RISK_ESIGI+' gün ve üzeri">⚠️ Dikkat</span>':''}${bakiyesizEtiket}${hakedisRozeti(m.musteri, hakedisKodlari)}</div><div class="musteri-code">${escapeHtml(m.musteri)}</div></td>
-      <td><span class="temsilci-tag">${escapeHtml(m.temsilci)}</span></td>
-      <td class="num"><span class="num-strong">${TL(m.kalanBorc)}</span>${riskComposition(m)}</td>
-      <td class="num">${vadeBadge(m.avgVadeGun)}</td>
-      <td class="num">${m.siparisTutari>0?TL(m.siparisTutari):'<span class="zero">—</span>'}</td>
-      <td class="num">${m.emanetSiparis>0?TL(m.emanetSiparis):'<span class="zero">—</span>'}</td>
-      <td class="num">${m.cekSenet>0?TL(m.cekSenet):'<span class="zero">—</span>'}</td>
-      <td class="num">${m.alinanTahsilat>0?TL(m.alinanTahsilat):'<span class="zero">—</span>'}</td>
-      <td class="num"><span class="num-strong">${TL(m.toplamRisk)}</span></td>
-    </tr>`;
+    let html = `<div class="cust-card${expanded?' is-open':''}" data-musteri="${escapeHtml(m.musteri)}">
+      <div class="cust-card-top">
+        <div class="cust-avatar">${escapeHtml(avatarBaslangic(m.musteriAdi))}</div>
+        <div class="cust-info">
+          <div class="musteri-name">${escapeHtml(m.musteriAdi)}${isRiskliMusteri(m)?'<span class="badge dikkat" title="Ortalama vade '+VADE_RISK_ESIGI+' gün ve üzeri">⚠️ Dikkat</span>':''}${bakiyesizEtiket}${hakedisRozeti(m.musteri, hakedisKodlari)}</div>
+          <div class="musteri-code">${escapeHtml(m.musteri)}</div>
+          <span class="temsilci-tag">${escapeHtml(m.temsilci)}</span>
+        </div>
+        <div class="cust-chevron">${expanded?'⌄':'›'}</div>
+      </div>
+      <div class="cust-kalan-row"><span class="cust-kalan-label">Kalan Borç</span><span class="cust-kalan-val">${TL(m.kalanBorc)}</span></div>
+      ${riskComposition(m)}
+      <div class="cust-stat-strip">
+        <div class="cust-stat-chip"><div class="l">Ort. Vade</div><div class="v">${vadeBadge(m.avgVadeGun)}</div></div>
+        <div class="cust-stat-chip"><div class="l">Sipariş</div><div class="v">${m.siparisTutari>0?TL(m.siparisTutari):'<span class="zero">—</span>'}</div></div>
+        <div class="cust-stat-chip"><div class="l">Sevk Ertelenen</div><div class="v">${m.emanetSiparis>0?TL(m.emanetSiparis):'<span class="zero">—</span>'}</div></div>
+        <div class="cust-stat-chip"><div class="l">Çek/Senet</div><div class="v">${m.cekSenet>0?TL(m.cekSenet):'<span class="zero">—</span>'}</div></div>
+        <div class="cust-stat-chip"><div class="l">Tahsilat</div><div class="v">${m.alinanTahsilat>0?TL(m.alinanTahsilat):'<span class="zero">—</span>'}</div></div>
+      </div>`;
     if(expanded){
-      html += `<tr class="expand-row"><td colspan="9"><div class="expand-inner">${renderMusteriDetail(m, true)}</div></td></tr>`;
+      html += `<div class="cust-expanded">
+        <div class="cust-secondary-stats"><span>Toplam Risk: <b>${TL(m.toplamRisk)}</b></span></div>
+        ${renderMusteriDetail(m, true)}
+      </div>`;
     }
+    html += `</div>`;
     return html;
   }).join('');
 
-  tbody.querySelectorAll('tr.data-row').forEach(tr=>{
-    tr.addEventListener('click', ()=>{
-      const musteri = tr.getAttribute('data-musteri');
+  list.querySelectorAll('.cust-card').forEach(card=>{
+    card.addEventListener('click', (e)=>{
+      if(e.target.closest('.cust-expanded')) return;
+      const musteri = card.getAttribute('data-musteri');
       const expandKey = 'sevk_'+musteri;
       if(state.expanded.has(expandKey)) state.expanded.delete(expandKey); else state.expanded.add(expandKey);
-      renderSevkMusteriTable(state.report);
+      renderSevkMusteriTable(state.report, false);
     });
   });
+
+  renderSevkDahaFazlaBtn(gosterilecekSayi, rows.length);
 }
 
 // Bir "arama kutusu + temizle butonu" ikilisinin görünürlüğünü güncelleyen ortak yardımcı. Aynı üç
@@ -4079,7 +4134,24 @@ document.getElementById('sevkTemsilciFilter').addEventListener('change', ()=>{
 document.getElementById('sevkRiskFilter').addEventListener('change', ()=>renderSevkMusteriTable(state.report));
 document.getElementById('sevkVadeMinInput').addEventListener('input', debounce(()=>renderSevkMusteriTable(state.report)));
 document.getElementById('sevkVadeMaxInput').addEventListener('input', debounce(()=>renderSevkMusteriTable(state.report)));
-wireSortableTable('sevkMusteriTable', 'sevkSort', ()=>renderSevkMusteriTable(state.report));
+
+const sevkMusteriSortSelect = document.getElementById('sevkMusteriSortSelect');
+const sevkMusteriSortDirBtn = document.getElementById('sevkMusteriSortDirBtn');
+sevkMusteriSortSelect.value = state.sevkSort.key;
+sevkMusteriSortDirBtn.textContent = state.sevkSort.dir===1 ? '↑' : '↓';
+sevkMusteriSortSelect.addEventListener('change', ()=>{
+  state.sevkSort.key = sevkMusteriSortSelect.value;
+  renderSevkMusteriTable(state.report);
+});
+sevkMusteriSortDirBtn.addEventListener('click', ()=>{
+  state.sevkSort.dir *= -1;
+  sevkMusteriSortDirBtn.textContent = state.sevkSort.dir===1 ? '↑' : '↓';
+  renderSevkMusteriTable(state.report);
+});
+document.getElementById('sevkMusteriDahaFazlaBtn').addEventListener('click', ()=>{
+  state.sevkGosterilen += MUSTERI_SAYFA_BOYUTU;
+  renderSevkMusteriTable(state.report, false);
+});
 
 async function computeFaturaKontrolRows(report, selectedDate, temsilciFilter, aramaMetni){
   if(!selectedDate) return [];
@@ -4118,56 +4190,86 @@ async function computeFaturaKontrolRows(report, selectedDate, temsilciFilter, ar
   return rows;
 }
 
-async function renderFaturaKontrolTable(report){
+function renderFaturaKontrolDahaFazlaBtn(gosterilenSayi, toplamSayi){
+  const wrap = document.getElementById('faturaKontrolDahaFazlaWrap');
+  const info = document.getElementById('faturaKontrolDahaFazlaInfo');
+  if(!wrap) return;
+  if(toplamSayi > gosterilenSayi){
+    wrap.style.display = 'flex';
+    info.textContent = `${gosterilenSayi.toLocaleString('tr-TR')} / ${toplamSayi.toLocaleString('tr-TR')} müşteri gösteriliyor`;
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+async function renderFaturaKontrolTable(report, resetSayfa=true){
+  if(resetSayfa) state.fkGosterilen = MUSTERI_SAYFA_BOYUTU;
   const dateVal = document.getElementById('faturaKontrolDateInput').value;
   const temsilci = document.getElementById('faturaKontrolTemsilciFilter').value;
   const arama = document.getElementById('faturaKontrolSearchInput').value;
-  const table = document.getElementById('faturaKontrolTable');
+  const sortWrap = document.getElementById('faturaKontrolSortWrap');
   const emptyDateMsg = document.getElementById('faturaKontrolEmptyDate');
 
   if(!dateVal){
-    table.style.display = 'none';
+    sortWrap.style.display = 'none';
     emptyDateMsg.style.display = 'block';
     document.getElementById('faturaKontrolCount').textContent = '';
     return;
   }
   emptyDateMsg.style.display = 'none';
-  table.style.display = 'table';
+  sortWrap.style.display = 'block';
 
   const rows = await computeFaturaKontrolRows(report, dateVal, temsilci, arama);
   document.getElementById('faturaKontrolCount').textContent = rows.length.toLocaleString('tr-TR') + ' müşteri';
-  const tbody = document.getElementById('faturaKontrolTbody');
+  const list = document.getElementById('faturaKontrolTbody');
   if(!rows.length){
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">Seçili tarihte istenilen teslim tarihi veya belge tarihi eşleşen kayıt bulunamadı.</div></td></tr>`;
+    list.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Seçili tarihte istenilen teslim tarihi veya belge tarihi eşleşen kayıt bulunamadı.</div>`;
+    renderFaturaKontrolDahaFazlaBtn(0, 0);
     return;
   }
-  tbody.innerHTML = rows.map(m=>{
+  const gosterilecekSayi = Math.min(state.fkGosterilen, rows.length);
+  const gosterilecekRows = rows.slice(0, gosterilecekSayi);
+  list.innerHTML = gosterilecekRows.map(m=>{
     const expandKey = 'fk_'+m.musteri;
     const expanded = state.expanded.has(expandKey);
-    let html = `<tr class="data-row ${expanded?'expanded':''}" data-musteri="${escapeHtml(m.musteri)}">
-      <td><div class="musteri-name">${escapeHtml(m.musteriAdi)}${isRiskliMusteri(m)?'<span class="badge dikkat" title="Ortalama vade '+VADE_RISK_ESIGI+' gün ve üzeri">⚠️ Dikkat</span>':''}</div><div class="musteri-code">${escapeHtml(m.musteri)}</div></td>
-      <td><span class="temsilci-tag">${escapeHtml(m.temsilci)}</span></td>
-      <td class="num">${m.seciliSiparis>0?TL(m.seciliSiparis):'<span class="zero">—</span>'}</td>
-      <td class="num">${m.seciliTahsilat>0?TL(m.seciliTahsilat):'<span class="zero">—</span>'}</td>
-      <td class="num"><span class="num-strong">${TL(m.kalanBorc)}</span></td>
-      <td class="num">${vadeBadge(m.avgVadeGun)}</td>
-      <td class="num">${m.cekSenet>0?TL(m.cekSenet):'<span class="zero">—</span>'}</td>
-      <td class="num"><span class="num-strong">${TL(m.toplamRisk)}</span></td>
-    </tr>`;
+    let html = `<div class="cust-card${expanded?' is-open':''}" data-musteri="${escapeHtml(m.musteri)}">
+      <div class="cust-card-top">
+        <div class="cust-avatar">${escapeHtml(avatarBaslangic(m.musteriAdi))}</div>
+        <div class="cust-info">
+          <div class="musteri-name">${escapeHtml(m.musteriAdi)}${isRiskliMusteri(m)?'<span class="badge dikkat" title="Ortalama vade '+VADE_RISK_ESIGI+' gün ve üzeri">⚠️ Dikkat</span>':''}</div>
+          <div class="musteri-code">${escapeHtml(m.musteri)}</div>
+          <span class="temsilci-tag">${escapeHtml(m.temsilci)}</span>
+        </div>
+        <div class="cust-chevron">${expanded?'⌄':'›'}</div>
+      </div>
+      <div class="cust-kalan-row"><span class="cust-kalan-label">Kalan Borç</span><span class="cust-kalan-val">${TL(m.kalanBorc)}</span></div>
+      <div class="cust-stat-strip cols-4">
+        <div class="cust-stat-chip"><div class="l">Sipariş</div><div class="v">${m.seciliSiparis>0?TL(m.seciliSiparis):'<span class="zero">—</span>'}</div></div>
+        <div class="cust-stat-chip"><div class="l">Tahsilat</div><div class="v">${m.seciliTahsilat>0?TL(m.seciliTahsilat):'<span class="zero">—</span>'}</div></div>
+        <div class="cust-stat-chip"><div class="l">Ort. Vade</div><div class="v">${vadeBadge(m.avgVadeGun)}</div></div>
+        <div class="cust-stat-chip"><div class="l">Çek/Senet</div><div class="v">${m.cekSenet>0?TL(m.cekSenet):'<span class="zero">—</span>'}</div></div>
+      </div>`;
     if(expanded){
-      html += `<tr class="expand-row"><td colspan="8"><div class="expand-inner">${renderMusteriDetail(m, true)}</div></td></tr>`;
+      html += `<div class="cust-expanded">
+        <div class="cust-secondary-stats"><span>Toplam Risk: <b>${TL(m.toplamRisk)}</b></span></div>
+        ${renderMusteriDetail(m, true)}
+      </div>`;
     }
+    html += `</div>`;
     return html;
   }).join('');
 
-  tbody.querySelectorAll('tr.data-row').forEach(tr=>{
-    tr.addEventListener('click', ()=>{
-      const musteri = tr.getAttribute('data-musteri');
+  list.querySelectorAll('.cust-card').forEach(card=>{
+    card.addEventListener('click', (e)=>{
+      if(e.target.closest('.cust-expanded')) return;
+      const musteri = card.getAttribute('data-musteri');
       const expandKey = 'fk_'+musteri;
       if(state.expanded.has(expandKey)) state.expanded.delete(expandKey); else state.expanded.add(expandKey);
-      renderFaturaKontrolTable(state.report);
+      renderFaturaKontrolTable(state.report, false);
     });
   });
+
+  renderFaturaKontrolDahaFazlaBtn(gosterilecekSayi, rows.length);
 }
 
 async function renderFaturaKontrolView(report, zorla){
@@ -4264,7 +4366,24 @@ wireSearchInput('faturaKontrolSearchInput', 'faturaKontrolSearchClearBtn', debou
 wireSearchClear('faturaKontrolSearchInput', 'faturaKontrolSearchClearBtn', ()=>renderFaturaKontrolTable(state.report));
 document.getElementById('faturaKontrolDateInput').addEventListener('change', ()=>renderFaturaKontrolTable(state.report));
 document.getElementById('faturaKontrolTemsilciFilter').addEventListener('change', ()=>renderFaturaKontrolTable(state.report));
-wireSortableTable('faturaKontrolTable', 'fkSort', ()=>renderFaturaKontrolTable(state.report));
+
+const faturaKontrolSortSelect = document.getElementById('faturaKontrolSortSelect');
+const faturaKontrolSortDirBtn = document.getElementById('faturaKontrolSortDirBtn');
+faturaKontrolSortSelect.value = state.fkSort.key;
+faturaKontrolSortDirBtn.textContent = state.fkSort.dir===1 ? '↑' : '↓';
+faturaKontrolSortSelect.addEventListener('change', ()=>{
+  state.fkSort.key = faturaKontrolSortSelect.value;
+  renderFaturaKontrolTable(state.report);
+});
+faturaKontrolSortDirBtn.addEventListener('click', ()=>{
+  state.fkSort.dir *= -1;
+  faturaKontrolSortDirBtn.textContent = state.fkSort.dir===1 ? '↑' : '↓';
+  renderFaturaKontrolTable(state.report);
+});
+document.getElementById('faturaKontrolDahaFazlaBtn').addEventListener('click', ()=>{
+  state.fkGosterilen += MUSTERI_SAYFA_BOYUTU;
+  renderFaturaKontrolTable(state.report, false);
+});
 
 function populateTrendMusteriListesi(report){
   const musteriler = tumBilinenMusteriler(report);
@@ -4980,49 +5099,70 @@ function renderMiniBayiHakedisDetay(kayitlar){
   return html;
 }
 
-function renderBayiHakedisTable(){
+function renderBayiHakedisDahaFazlaBtn(gosterilenSayi, toplamSayi){
+  const wrap = document.getElementById('bayiHakedisDahaFazlaWrap');
+  const info = document.getElementById('bayiHakedisDahaFazlaInfo');
+  if(!wrap) return;
+  if(toplamSayi > gosterilenSayi){
+    wrap.style.display = 'flex';
+    info.textContent = `${gosterilenSayi.toLocaleString('tr-TR')} / ${toplamSayi.toLocaleString('tr-TR')} nokta gösteriliyor`;
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function renderBayiHakedisTable(resetSayfa=true){
+  if(resetSayfa) state.bhGosterilen = MUSTERI_SAYFA_BOYUTU;
   const report = state.bayiHakedisReport;
   const rows = getBayiHakedisFilteredSorted();
   document.getElementById('bayiHakedisCount').textContent = rows.length.toLocaleString('tr-TR') + ' nokta';
-  const tbody = document.getElementById('bayiHakedisTbody');
-  const tfoot = document.getElementById('bayiHakedisTfoot');
+  const list = document.getElementById('bayiHakedisTbody');
+  const g = report.genelToplam;
+  document.getElementById('bayiHakedisGenelToplam').innerHTML =
+    `Genel Toplam — Kayıt: <b>${g.kayitSayisi}</b> · İskonto: <b>${g.iskontoSayisi}</b> · İşletme Katkı Payı: <b>${g.katkiPayiSayisi}</b> · Toplam Hakediş (KDV Dahil): <b>${TL(g.toplamKdvli)}</b>`;
   if(!rows.length){
-    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">Aramanızla/filtrenizle eşleşen nokta bulunamadı.</div></td></tr>`;
-    tfoot.innerHTML = '';
+    list.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Aramanızla/filtrenizle eşleşen nokta bulunamadı.</div>`;
+    renderBayiHakedisDahaFazlaBtn(0, 0);
     return;
   }
-  tbody.innerHTML = rows.map(r=>{
+  const gosterilecekSayi = Math.min(state.bhGosterilen, rows.length);
+  const gosterilecekRows = rows.slice(0, gosterilecekSayi);
+  list.innerHTML = gosterilecekRows.map(r=>{
     const expandKey = 'bh_'+r.kod;
     const expanded = state.expanded.has(expandKey);
-    let html = `<tr class="data-row ${expanded?'expanded':''}" data-kod="${escapeHtml(r.kod)}" style="cursor:pointer;">
-    <td><div class="musteri-name">${escapeHtml(r.adi)} <span title="Hakediş kayıtlarını görmek için satıra tıklayın">ⓘ</span></div><div class="musteri-code">${escapeHtml(r.kod)}</div></td>
-    <td><span class="temsilci-tag">${escapeHtml(r.temsilci)}</span></td>
-    <td class="num">${r.kayitSayisi}</td>
-    <td class="num">${r.iskontoSayisi || '<span class="zero">—</span>'}</td>
-    <td class="num">${r.katkiPayiSayisi || '<span class="zero">—</span>'}</td>
-  </tr>`;
+    let html = `<div class="cust-card${expanded?' is-open':''}" data-kod="${escapeHtml(r.kod)}">
+      <div class="cust-card-top">
+        <div class="cust-avatar">${escapeHtml(avatarBaslangic(r.adi))}</div>
+        <div class="cust-info">
+          <div class="musteri-name">${escapeHtml(r.adi)}</div>
+          <div class="musteri-code">${escapeHtml(r.kod)}</div>
+          <span class="temsilci-tag">${escapeHtml(r.temsilci)}</span>
+        </div>
+        <div class="cust-chevron">${expanded?'⌄':'›'}</div>
+      </div>
+      <div class="cust-stat-strip cols-3">
+        <div class="cust-stat-chip"><div class="l">Kayıt</div><div class="v">${r.kayitSayisi || '<span class="zero">—</span>'}</div></div>
+        <div class="cust-stat-chip"><div class="l">İskonto</div><div class="v">${r.iskontoSayisi || '<span class="zero">—</span>'}</div></div>
+        <div class="cust-stat-chip"><div class="l">İşletme Katkı Payı</div><div class="v">${r.katkiPayiSayisi || '<span class="zero">—</span>'}</div></div>
+      </div>`;
     if(expanded){
-      html += `<tr class="expand-row"><td colspan="5"><div class="expand-inner">${renderMiniBayiHakedisDetay(r.kayitlar)}</div></td></tr>`;
+      html += `<div class="cust-expanded">${renderMiniBayiHakedisDetay(r.kayitlar)}</div>`;
     }
+    html += `</div>`;
     return html;
   }).join('');
 
-  tbody.querySelectorAll('tr.data-row').forEach(tr=>{
-    tr.addEventListener('click', ()=>{
-      const kod = tr.getAttribute('data-kod');
+  list.querySelectorAll('.cust-card').forEach(card=>{
+    card.addEventListener('click', (e)=>{
+      if(e.target.closest('.cust-expanded')) return;
+      const kod = card.getAttribute('data-kod');
       const expandKey = 'bh_'+kod;
       if(state.expanded.has(expandKey)) state.expanded.delete(expandKey); else state.expanded.add(expandKey);
-      renderBayiHakedisTable();
+      renderBayiHakedisTable(false);
     });
   });
 
-  const g = report.genelToplam;
-  tfoot.innerHTML = `<tr class="totals-row">
-    <td>Genel Toplam</td><td></td>
-    <td class="num">${g.kayitSayisi}</td>
-    <td class="num">${g.iskontoSayisi}</td>
-    <td class="num">${g.katkiPayiSayisi}</td>
-  </tr>`;
+  renderBayiHakedisDahaFazlaBtn(gosterilecekSayi, rows.length);
 }
 
 function renderBayiHakedisView(){
@@ -5047,8 +5187,25 @@ function renderBayiHakedisView(){
 const debouncedRenderBayiHakedisTable = debounce(()=>renderBayiHakedisTable());
 wireSearchInput('bayiHakedisSearchInput', 'bayiHakedisSearchClearBtn', debouncedRenderBayiHakedisTable);
 wireSearchClear('bayiHakedisSearchInput', 'bayiHakedisSearchClearBtn', renderBayiHakedisTable);
-document.getElementById('bayiHakedisTemsilciFilter').addEventListener('change', renderBayiHakedisTable);
-wireSortableTable('bayiHakedisTable', 'bhSort', renderBayiHakedisTable);
+document.getElementById('bayiHakedisTemsilciFilter').addEventListener('change', ()=>renderBayiHakedisTable());
+
+const bayiHakedisSortSelect = document.getElementById('bayiHakedisSortSelect');
+const bayiHakedisSortDirBtn = document.getElementById('bayiHakedisSortDirBtn');
+bayiHakedisSortSelect.value = state.bhSort.key;
+bayiHakedisSortDirBtn.textContent = state.bhSort.dir===1 ? '↑' : '↓';
+bayiHakedisSortSelect.addEventListener('change', ()=>{
+  state.bhSort.key = bayiHakedisSortSelect.value;
+  renderBayiHakedisTable();
+});
+bayiHakedisSortDirBtn.addEventListener('click', ()=>{
+  state.bhSort.dir *= -1;
+  bayiHakedisSortDirBtn.textContent = state.bhSort.dir===1 ? '↑' : '↓';
+  renderBayiHakedisTable();
+});
+document.getElementById('bayiHakedisDahaFazlaBtn').addEventListener('click', ()=>{
+  state.bhGosterilen += MUSTERI_SAYFA_BOYUTU;
+  renderBayiHakedisTable(false);
+});
 
 
 const AY_ADLARI_TR = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
