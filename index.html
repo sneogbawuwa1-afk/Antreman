@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="google" content="notranslate" />
-<title>Keşan Bayi Takip Panelİ</title>
+<title>Keşan Bayi Takip Paneli</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
@@ -76,6 +76,19 @@
     color:rgba(255,255,255,.72);font-weight:600;
     font-size:12px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;
   }
+  .scroll-top-btn{
+    position:fixed;right:22px;bottom:26px;z-index:60;
+    width:46px;height:46px;border-radius:50%;
+    background:var(--navy);color:#fff;border:none;
+    box-shadow:0 8px 20px -6px rgba(19,34,63,0.45);
+    font-size:19px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    opacity:0;visibility:hidden;transform:translateY(8px);
+    transition:opacity .2s ease, transform .2s ease, visibility .2s ease, background .15s ease;
+  }
+  .scroll-top-btn.visible{opacity:1;visibility:visible;transform:translateY(0);}
+  .scroll-top-btn:hover{background:var(--accent-deep);}
+  .scroll-top-btn:active{transform:scale(.94);}
+  @media print{.scroll-top-btn{display:none;}}
   .topbar-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
   .pill{
     font-size:11.5px;font-weight:700;padding:7px 14px;border-radius:100px;
@@ -269,6 +282,9 @@
   .cust-card{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:14px 15px;cursor:pointer;transition:box-shadow .15s ease,border-color .15s ease;min-width:0;}
   .cust-card:hover{box-shadow:var(--shadow);border-color:var(--line);}
   .cust-card.is-open{grid-column:1 / -1;background:var(--accent-soft);border-color:var(--accent);}
+  .musteri-daha-fazla-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:16px;}
+  .musteri-daha-fazla-wrap .btn{padding:10px 22px;}
+  .musteri-daha-fazla-info{font-size:12px;color:var(--ink-faint);}
   .cust-card-top{display:flex;align-items:flex-start;gap:11px;margin-bottom:11px;}
   .cust-avatar{width:38px;height:38px;border-radius:10px;background:var(--navy-soft);color:var(--navy);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;font-size:13px;flex-shrink:0;}
   .cust-info{flex:1;min-width:0;}
@@ -886,6 +902,10 @@
           <button type="button" class="sort-dir-btn" id="musteriSortDirBtn" title="Sıralama yönünü değiştir" aria-label="Sıralama yönünü değiştir">↓</button>
         </div>
         <div class="cust-card-list" id="musteriTbody"></div>
+        <div class="musteri-daha-fazla-wrap" id="musteriDahaFazlaWrap" style="display:none;">
+          <button type="button" class="btn" id="musteriDahaFazlaBtn">Daha fazla göster</button>
+          <span class="musteri-daha-fazla-info" id="musteriDahaFazlaInfo"></span>
+        </div>
         <div class="legend">
           <span><i style="background:var(--navy)"></i>Kalan Borç</span>
           <span><i style="background:var(--accent)"></i>Açık Sipariş</span>
@@ -915,25 +935,6 @@
       <div class="panel-head"><div><h2>Satış Temsilcisi Bazlı Dağılım</h2></div></div>
       <div class="panel-body">
         <div class="rep-grid" id="repGrid"></div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-head">
-        <div><h2>Bakiyesi Olmayan Siparişler</h2><span class="count" id="bakiyesizCount"></span></div>
-      </div>
-      <div class="panel-body" style="padding:0;">
-        <div class="table-scroll">
-          <table id="bakiyesizTable">
-            <thead><tr>
-              <th>Müşteri</th>
-              <th>Satış Temsilcisi</th>
-              <th class="num">Açık Sipariş</th>
-              <th class="num">Sevki Ertelenen</th>
-            </tr></thead>
-            <tbody id="bakiyesizTbody"></tbody>
-          </table>
-        </div>
       </div>
     </div>
 
@@ -1375,7 +1376,10 @@ const state = {
   tvReport: null,
   tvAy: null,
   tvSort: { key:'tahsilatOrani', dir:-1 },
+  musteriGosterilen: 30,
 };
+
+const MUSTERI_SAYFA_BOYUTU = 30;
 
 const STORAGE_KEY = 'noktaCariTakip_report_v1';
 const DATE_KEYS = new Set(['faturaTarihi','netVade','vade','belgeTarihi','asOf','istenilenTeslimTarihi','tahsilatTarihi']);
@@ -3059,7 +3063,6 @@ function renderReport(report){
   renderAgingPanel(report);
   renderSevkView(report);
   renderRepGrid(report.temsilciler);
-  renderBakiyesiz(report.bakiyesiz);
   renderYaslandirmaView(report);
   renderTicariStokView(report);
 }
@@ -3578,16 +3581,32 @@ function avatarBaslangic(ad){
   return (h1+h2).toLocaleUpperCase('tr-TR');
 }
 
-function renderMusteriTable(report){
+function renderMusteriDahaFazlaBtn(gosterilenSayi, toplamSayi){
+  const wrap = document.getElementById('musteriDahaFazlaWrap');
+  const info = document.getElementById('musteriDahaFazlaInfo');
+  if(!wrap) return;
+  if(toplamSayi > gosterilenSayi){
+    wrap.style.display = 'flex';
+    info.textContent = `${gosterilenSayi.toLocaleString('tr-TR')} / ${toplamSayi.toLocaleString('tr-TR')} müşteri gösteriliyor`;
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function renderMusteriTable(report, resetSayfa=true){
+  if(resetSayfa) state.musteriGosterilen = MUSTERI_SAYFA_BOYUTU;
   const rows = getFilteredSorted(report);
   document.getElementById('musteriCount').textContent = rows.length.toLocaleString('tr-TR') + ' müşteri';
   const list = document.getElementById('musteriTbody');
   if(!rows.length){
     list.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Filtreyle eşleşen müşteri bulunamadı.</div>`;
+    renderMusteriDahaFazlaBtn(0, 0);
     return;
   }
   const hakedisKodlari = bayiHakedisliMusteriKodlari();
-  list.innerHTML = rows.map(m=>{
+  const gosterilecekSayi = Math.min(state.musteriGosterilen, rows.length);
+  const gosterilecekRows = rows.slice(0, gosterilecekSayi);
+  list.innerHTML = gosterilecekRows.map(m=>{
     const expanded = state.expanded.has(m.musteri);
     let html = `<div class="cust-card${expanded?' is-open':''}" data-musteri="${escapeHtml(m.musteri)}">
       <div class="cust-card-top">
@@ -3623,9 +3642,11 @@ function renderMusteriTable(report){
       if(e.target.closest('.cust-expanded')) return;
       const musteri = card.getAttribute('data-musteri');
       if(state.expanded.has(musteri)) state.expanded.delete(musteri); else state.expanded.add(musteri);
-      renderMusteriTable(state.report);
+      renderMusteriTable(state.report, false);
     });
   });
+
+  renderMusteriDahaFazlaBtn(gosterilecekSayi, rows.length);
 }
 
 /* ============================== SENET YAZDIRMA ============================== */
@@ -4443,6 +4464,11 @@ musteriSortDirBtn.addEventListener('click', ()=>{
   renderMusteriTable(state.report);
 });
 
+document.getElementById('musteriDahaFazlaBtn').addEventListener('click', ()=>{
+  state.musteriGosterilen += MUSTERI_SAYFA_BOYUTU;
+  renderMusteriTable(state.report, false);
+});
+
 function renderAging(agingAmount, agingCount){
   const maxAmt = Math.max(...agingAmount.map(a=>a.value), 1);
   const maxCnt = Math.max(...agingCount.map(a=>a.value), 1);
@@ -4469,22 +4495,6 @@ function renderRepGrid(temsilciler){
       <div class="rstat"><span>Toplam Risk</span><b>${TL(r.toplamRisk)}</b></div>
     </div>`).join('');
 }
-
-function renderBakiyesiz(bakiyesiz){
-  document.getElementById('bakiyesizCount').textContent = bakiyesiz.length.toLocaleString('tr-TR') + ' müşteri';
-  const tbody = document.getElementById('bakiyesizTbody');
-  if(!bakiyesiz.length){
-    tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state">Bakiyesi olmayan açık sipariş bulunamadı.</div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = bakiyesiz.map(b=>`<tr>
-    <td><div class="musteri-name">${escapeHtml(b.musteriAdi)}</div><div class="musteri-code">${escapeHtml(b.musteri)}</div></td>
-    <td><span class="temsilci-tag">${escapeHtml(b.temsilci)}</span></td>
-    <td class="num">${b.siparisTutari>0?TL(b.siparisTutari):'<span class="zero">—</span>'}</td>
-    <td class="num">${b.emanetSiparis>0?TL(b.emanetSiparis):'<span class="zero">—</span>'}</td>
-  </tr>`).join('');
-}
-
 
 const YUKLEME_ARSIV_CLOUD_PATH = CLOUD.path + '_yuklemeRaporuArsiv';
 const YUKLEME_ARSIV_LOCAL_KEY = 'noktaCariTakip_yuklemeArsiv_v1';
@@ -5470,6 +5480,22 @@ document.querySelectorAll('th[data-key]').forEach(th=>{
   });
 });
 
+</script>
+<button type="button" id="scrollTopBtn" class="scroll-top-btn" title="Yukarı çık" aria-label="Sayfanın başına dön">↑</button>
+<script>
+(function(){
+  const btn = document.getElementById('scrollTopBtn');
+  if(!btn) return;
+  const toggle = ()=>{
+    if(window.scrollY > 400) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  };
+  window.addEventListener('scroll', toggle, {passive:true});
+  toggle();
+  btn.addEventListener('click', ()=>{
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+})();
 </script>
 </body>
 </html>
