@@ -4784,6 +4784,11 @@ function yuklemeKartKolonlariniIndirge(kolonlar){
   return sonuc;
 }
 
+// Not: Bu fonksiyon artık yalnızca "en güncel gün"ü değil, Tahsilat Dökümü'ndeki HER takvim
+// gününü ayrı ayrı hesaplar. Dönen sonuç {gunler, gunAnahtarlari, enGuncelGunKey} şeklindedir;
+// gunler[gunKey] içindeki her kayıt, eskiden tek başına dönen rapor ile AYNI şekle sahiptir
+// (tahsilatTarihi, yuklemeTarihi, kolonlar, temsilciler, genelToplamSatiri, kayitZamani), böylece
+// mevcut render/arşiv kodları (renderYuklemeTable vb.) değişiklik gerektirmeden çalışmaya devam eder.
 function buildYuklemeRaporu(tahsilatRows, yuklemeRows){
   if(!tahsilatRows || !tahsilatRows.length) throw new Error('Tahsilat Raporu\'nda satır bulunamadı.');
   if(!yuklemeRows || !yuklemeRows.length) throw new Error('Yükleme Raporu\'nda satır bulunamadı.');
@@ -4792,16 +4797,21 @@ function buildYuklemeRaporu(tahsilatRows, yuklemeRows){
     sst: (r['SST']||'Tanımsız').toString().trim() || 'Tanımsız',
     musteriKodu: yuklemeKod(r['Müşt. Kodu']),
     belgeTarihi: excelDateToJSArti1Gun(r['Belge Tarihi']),
+    belgeNo: yuklemeKod(r['Belge No']),
     odemeTipi: r['Ödeme Tipi'],
     banka: r['Banka'],
     tutar: Math.abs(yuklemeNumber(r['Belge Tutarı'])),
   })).filter(r=> r.belgeTarihi);
   if(!tahsilatParsed.length) throw new Error('Tahsilat Raporu\'nda geçerli bir Belge Tarihi bulunamadı.');
 
-  let enGuncelTahsilatTarihi = tahsilatParsed[0].belgeTarihi;
-  tahsilatParsed.forEach(r=>{ if(r.belgeTarihi.getTime() > enGuncelTahsilatTarihi.getTime()) enGuncelTahsilatTarihi = r.belgeTarihi; });
-  const enGuncelTahsilatGunKey = dateKeyLocal(enGuncelTahsilatTarihi);
-  const tahsilatGununSatirlari = tahsilatParsed.filter(r=> dateKeyLocal(r.belgeTarihi) === enGuncelTahsilatGunKey);
+  // Tahsilat satırlarını takvim gününe göre grupla — dosyadaki HER gün ayrı işlenecek.
+  const tahsilatGunHaritasi = new Map(); // gunKey -> {tarih, satirlar[]}
+  tahsilatParsed.forEach(r=>{
+    const gunKey = dateKeyLocal(r.belgeTarihi);
+    if(!gunKey) return;
+    if(!tahsilatGunHaritasi.has(gunKey)) tahsilatGunHaritasi.set(gunKey, {tarih:r.belgeTarihi, satirlar:[]});
+    tahsilatGunHaritasi.get(gunKey).satirlar.push(r);
+  });
 
   const musteriTemsilciHaritasi = new Map();
   (state.musteriMasterMap||new Map()).forEach((temsilci, kod)=>{
@@ -4825,65 +4835,114 @@ function buildYuklemeRaporu(tahsilatRows, yuklemeRows){
     musteriNo: yuklemeKod(r['Müşteri Numarası']),
     litre: yuklemeNumber(r['Litre Total']),
     yuklemeTarihi: excelDateToJSArti1Gun(r['Yükleme Tarihi']),
+    siparisKodu: yuklemeKod(r['Sipariş Kodu']),
+    teslimStatusu: String(r['Teslim Statüsü']||'').trim(),
   })).filter(r=> r.yuklemeTarihi);
   if(!yuklemeParsed.length) throw new Error('Yükleme Raporu\'nda geçerli bir Yükleme Tarihi bulunamadı.');
 
-  let enGuncelYuklemeTarihi = yuklemeParsed[0].yuklemeTarihi;
-  yuklemeParsed.forEach(r=>{ if(r.yuklemeTarihi.getTime() > enGuncelYuklemeTarihi.getTime()) enGuncelYuklemeTarihi = r.yuklemeTarihi; });
-  const enGuncelYuklemeGunKey = dateKeyLocal(enGuncelYuklemeTarihi);
-  const yuklemeGununSatirlari = yuklemeParsed.filter(r=> dateKeyLocal(r.yuklemeTarihi) === enGuncelYuklemeGunKey);
-
-  const litreByMusteri = new Map();
-  yuklemeGununSatirlari.forEach(r=>{
-    litreByMusteri.set(r.musteriNo, (litreByMusteri.get(r.musteriNo)||0) + r.litre);
+  // Yükleme satırlarını da takvim gününe göre grupla — Yükleme Raporu da (Tahsilat Dökümü gibi)
+  // toplu/çok günlük bir dosya olabilir; her gün, o güne ait tahsilat gününden BAĞIMSIZ olarak
+  // ayrıca gruplanır. Böylece hangi dosya hangi günleri kapsıyorsa yalnızca o günler güncellenir.
+  const yuklemeGunHaritasi = new Map(); // gunKey -> {tarih, satirlar[]} (Teslim Statüsü filtresi UYGULANMADAN — bu ham grup, "bu gün bu yüklemede var mı" bilgisini taşır)
+  yuklemeParsed.forEach(r=>{
+    const gunKey = dateKeyLocal(r.yuklemeTarihi);
+    if(!gunKey) return;
+    if(!yuklemeGunHaritasi.has(gunKey)) yuklemeGunHaritasi.set(gunKey, {tarih:r.yuklemeTarihi, satirlar:[]});
+    yuklemeGunHaritasi.get(gunKey).satirlar.push(r);
   });
 
-  const kolonSet = new Set();
-  const temsilciMap = new Map();
-  function repRow(temsilci){
-    if(!temsilciMap.has(temsilci)) temsilciMap.set(temsilci, {temsilci, kolonlar:{}, genelToplam:0, litre:0});
-    return temsilciMap.get(temsilci);
-  }
-  tahsilatGununSatirlari.forEach(r=>{
-    const etiket = yuklemeOdemeEtiketi(r.odemeTipi, r.banka);
-    kolonSet.add(etiket);
-    const row = repRow(r.sst);
-    row.kolonlar[etiket] = (row.kolonlar[etiket]||0) + r.tutar;
-    row.genelToplam += r.tutar;
-  });
+  // Rapor, dosyalardan HANGİSİ kapsıyorsa o günlerin BİRLEŞİMİ (union) üzerinden üretilir: Tahsilat
+  // Dökümü'nde olup Yükleme Raporu'nda olmayan bir gün de, ya da tam tersi de raporlanabilsin diye.
+  const gunAnahtarlari = Array.from(new Set([...tahsilatGunHaritasi.keys(), ...yuklemeGunHaritasi.keys()])).sort();
+  const gunler = {};
 
-  litreByMusteri.forEach((litre, musteriNo)=>{
-    const temsilci = musteriTemsilciHaritasi.get(musteriNo) || 'Tanımsız';
-    const row = repRow(temsilci);
-    row.litre += litre;
-  });
+  gunAnahtarlari.forEach(gunKey=>{
+    const tGun = tahsilatGunHaritasi.get(gunKey) || null;
+    const yGun = yuklemeGunHaritasi.get(gunKey) || null;
+    const tahsilatGununSatirlari = tGun ? tGun.satirlar : [];
+    // "Teslim Statüsü" değeri "Not Delivered" olan yükleme satırları hiçbir hesaplamaya dahil
+    // edilmez ve dolayısıyla arşive de yazılmaz (teslim edilmemiş sevkiyat litre'ye sayılmaz;
+    // arşivde önceden bu sipariş nedeniyle var olan bir kayıt varsa aşağıdaki tam-gün yeniden
+    // hesaplama sayesinde kendiliğinden düşer).
+    const yuklemeGununSatirlari = yGun ? yGun.satirlar.filter(r=> r.teslimStatusu !== 'Not Delivered') : [];
 
-  const kolonlar = yuklemeKolonSirala(kolonSet);
-  const temsilciler = Array.from(temsilciMap.values())
-    .map(r=>({
-      temsilci: r.temsilci,
-      kolonlar: r.kolonlar,
-      genelToplam: r.genelToplam,
-      litre: r.litre,
-      stTahsilatLitre: r.litre > 0 ? (r.genelToplam / r.litre) : null,
-    }))
-    .sort((a,b)=> a.temsilci.localeCompare(b.temsilci,'tr'));
+    const litreByMusteri = new Map();
+    yuklemeGununSatirlari.forEach(r=>{
+      litreByMusteri.set(r.musteriNo, (litreByMusteri.get(r.musteriNo)||0) + r.litre);
+    });
 
-  const genelToplamSatiri = { kolonlar:{}, genelToplam:0, litre:0 };
-  temsilciler.forEach(r=>{
-    kolonlar.forEach(k=>{ genelToplamSatiri.kolonlar[k] = (genelToplamSatiri.kolonlar[k]||0) + (r.kolonlar[k]||0); });
-    genelToplamSatiri.genelToplam += r.genelToplam;
-    genelToplamSatiri.litre += r.litre;
+    const kolonSet = new Set();
+    const temsilciMap = new Map();
+    function repRow(temsilci){
+      if(!temsilciMap.has(temsilci)) temsilciMap.set(temsilci, {temsilci, kolonlar:{}, genelToplam:0, litre:0});
+      return temsilciMap.get(temsilci);
+    }
+    // Bu günün tahsilat satırlarında geçen tüm Belge No'lar toplanır; arşiv senkronizasyonunda
+    // bu günün arşiv kaydı bu listeyle eşitlenir — yeni Belge No'lar eklenmiş, artık bulunmayanlar
+    // ise silinmiş olur.
+    const belgeNoSeti = new Set();
+    tahsilatGununSatirlari.forEach(r=>{
+      const etiket = yuklemeOdemeEtiketi(r.odemeTipi, r.banka);
+      kolonSet.add(etiket);
+      const row = repRow(r.sst);
+      row.kolonlar[etiket] = (row.kolonlar[etiket]||0) + r.tutar;
+      row.genelToplam += r.tutar;
+      if(r.belgeNo) belgeNoSeti.add(r.belgeNo);
+    });
+
+    litreByMusteri.forEach((litre, musteriNo)=>{
+      const temsilci = musteriTemsilciHaritasi.get(musteriNo) || 'Tanımsız';
+      const row = repRow(temsilci);
+      row.litre += litre;
+    });
+
+    // Bu günün (Not Delivered hariç) yükleme satırlarında geçen tüm Sipariş Kodları toplanır; tıpkı
+    // Belge No'da olduğu gibi, arşiv senkronizasyonunda bu günün litre verisi bu listeyle eşitlenir:
+    // yeni Sipariş Kodu'na sahip veriler eklenir, artık bulunmayanlar (iptal/Not Delivered) düşer,
+    // aynı kalanlara tekrar dokunulmaz.
+    const siparisKoduSeti = new Set();
+    yuklemeGununSatirlari.forEach(r=>{ if(r.siparisKodu) siparisKoduSeti.add(r.siparisKodu); });
+
+    const kolonlar = yuklemeKolonSirala(kolonSet);
+    const temsilciler = Array.from(temsilciMap.values())
+      .map(r=>({
+        temsilci: r.temsilci,
+        kolonlar: r.kolonlar,
+        genelToplam: r.genelToplam,
+        litre: r.litre,
+        stTahsilatLitre: r.litre > 0 ? (r.genelToplam / r.litre) : null,
+      }))
+      .sort((a,b)=> a.temsilci.localeCompare(b.temsilci,'tr'));
+
+    const genelToplamSatiri = { kolonlar:{}, genelToplam:0, litre:0 };
+    temsilciler.forEach(r=>{
+      kolonlar.forEach(k=>{ genelToplamSatiri.kolonlar[k] = (genelToplamSatiri.kolonlar[k]||0) + (r.kolonlar[k]||0); });
+      genelToplamSatiri.genelToplam += r.genelToplam;
+      genelToplamSatiri.litre += r.litre;
+    });
+    genelToplamSatiri.stTahsilatLitre = genelToplamSatiri.litre > 0 ? (genelToplamSatiri.genelToplam / genelToplamSatiri.litre) : null;
+
+    gunler[gunKey] = {
+      tahsilatTarihi: tGun ? tGun.tarih : (yGun ? yGun.tarih : null),
+      yuklemeTarihi: yGun ? yGun.tarih : (tGun ? tGun.tarih : null),
+      kolonlar,
+      temsilciler,
+      genelToplamSatiri,
+      belgeNoListesi: Array.from(belgeNoSeti),
+      siparisKoduListesi: Array.from(siparisKoduSeti),
+      // Bu iki bayrak, arşiv birleştirmede (yuklemeGununuArsivIleBirlestir) hangi tarafın (tahsilat
+      // rakamları mı, sevkiyat/litre verisi mi) bu yüklemede TAZE geldiğini, hangisinin arşivden
+      // olduğu gibi korunması gerektiğini belirler.
+      tahsilatVerisiVarMi: Boolean(tGun),
+      sevkiyatVerisiVarMi: Boolean(yGun),
+      kayitZamani: new Date().toISOString(),
+    };
   });
-  genelToplamSatiri.stTahsilatLitre = genelToplamSatiri.litre > 0 ? (genelToplamSatiri.genelToplam / genelToplamSatiri.litre) : null;
 
   return {
-    tahsilatTarihi: enGuncelTahsilatTarihi,
-    yuklemeTarihi: enGuncelYuklemeTarihi,
-    kolonlar,
-    temsilciler,
-    genelToplamSatiri,
-    kayitZamani: new Date().toISOString(),
+    gunler,
+    gunAnahtarlari,
+    enGuncelGunKey: gunAnahtarlari.length ? gunAnahtarlari[gunAnahtarlari.length-1] : null,
   };
 }
 
@@ -5030,16 +5089,137 @@ async function loadYuklemeArsivFromLocal(){
   }catch(err){ console.error(err); return null; }
 }
 
-async function yuklemeRaporuArsivineKaydet(report){
-  const gunKey = dateKeyLocal(report.yuklemeTarihi);
-  if(!gunKey) return;
+// Tahsilat Dökümü'nde bulunan (yani sonuc.gunler içinde en az bir kaydı olan) HER gün için,
+// o günün arşiv kaydı bu raporla TAMAMEN eşitlenir (Belge No bazında senkronizasyon):
+//  - Yeni raporda olup arşivde olmayan Belge No'lar eklenmiş olur,
+//  - Arşivde olup yeni raporda artık bulunmayan Belge No'lar (o gün için) arşivden düşer,
+//  - Her iki tarafta da aynı kalan Belge No'lar için tekrar bir işlem yapılmaz (sonuç zaten aynı).
+// Yeni yüklenen Tahsilat Dökümü'nde HİÇ satırı bulunmayan günlere (örn. arşivde olup raporun
+// kapsamadığı daha eski günler) KESİNLİKLE dokunulmaz — bu günlerin arşiv kaydı olduğu gibi kalır.
+// Yükleme Raporu (sevkiyat/litre) dosyası genellikle yalnızca EN GÜNCEL günün verisini içerir;
+// geçmiş günler için bu dosyada satır bulunmaz. Bu yüzden bir günün tahsilat rakamları (kolonlar/
+// genelToplam) her yüklemede güncellenirken, o güne ait sevkiyat verisi bu yüklemede YOKSA
+// (yeniGun.sevkiyatVerisiVarMi === false), arşivde önceden kayıtlı litre verisi SIFIRLANMAZ; olduğu
+// gibi korunarak yeni tahsilat rakamlarıyla birleştirilir.
+function yuklemeGunuLitreIleBirlestir(yeniGun, eskiGun){
+  if(!eskiGun || yeniGun.sevkiyatVerisiVarMi) return yeniGun;
+
+  const eskiLitreMap = new Map();
+  (eskiGun.temsilciler||[]).forEach(r=>{ eskiLitreMap.set(r.temsilci, r.litre||0); });
+
+  const gorulenTemsilciler = new Set();
+  const birlesikTemsilciler = (yeniGun.temsilciler||[]).map(r=>{
+    gorulenTemsilciler.add(r.temsilci);
+    const litre = eskiLitreMap.has(r.temsilci) ? eskiLitreMap.get(r.temsilci) : (r.litre||0);
+    return Object.assign({}, r, {
+      litre,
+      stTahsilatLitre: litre > 0 ? (r.genelToplam / litre) : null,
+    });
+  });
+  // Bu günde tahsilatı olmayıp yalnızca eski arşivde litre kaydı bulunan temsilciler de korunur.
+  (eskiGun.temsilciler||[]).forEach(r=>{
+    if(gorulenTemsilciler.has(r.temsilci) || !(r.litre>0)) return;
+    birlesikTemsilciler.push(Object.assign({}, r));
+  });
+  birlesikTemsilciler.sort((a,b)=> a.temsilci.localeCompare(b.temsilci,'tr'));
+
+  const kolonlar = yeniGun.kolonlar || [];
+  const genelToplamSatiri = { kolonlar:{}, genelToplam:0, litre:0 };
+  birlesikTemsilciler.forEach(r=>{
+    kolonlar.forEach(k=>{ genelToplamSatiri.kolonlar[k] = (genelToplamSatiri.kolonlar[k]||0) + (r.kolonlar[k]||0); });
+    genelToplamSatiri.genelToplam += r.genelToplam;
+    genelToplamSatiri.litre += r.litre;
+  });
+  genelToplamSatiri.stTahsilatLitre = genelToplamSatiri.litre > 0 ? (genelToplamSatiri.genelToplam / genelToplamSatiri.litre) : null;
+
+  return Object.assign({}, yeniGun, {
+    temsilciler: birlesikTemsilciler,
+    genelToplamSatiri,
+    yuklemeTarihi: eskiGun.yuklemeTarihi || yeniGun.yuklemeTarihi,
+  });
+}
+
+// yuklemeGunuLitreIleBirlestir'in AYNASI: Tahsilat Dökümü bu yüklemede bu günü kapsamıyorsa
+// (yeniGun.tahsilatVerisiVarMi === false) ama Yükleme Raporu kapsıyorsa, litre/Sipariş Kodu verisi
+// TAZE ve otoritedir (Not Delivered olanlar zaten elenmiş, yeni Sipariş Kodu'ları eklenmiş, artık
+// olmayanlar düşmüştür); tahsilat rakamları (kolonlar/genelToplam) ise bu yüklemede güncellenmediği
+// için arşivdeki önceki haliyle korunur.
+function yuklemeGunuTahsilatIleBirlestir(yeniGun, eskiGun){
+  if(!eskiGun || yeniGun.tahsilatVerisiVarMi) return yeniGun;
+
+  const eskiTahsilatMap = new Map();
+  (eskiGun.temsilciler||[]).forEach(r=>{ eskiTahsilatMap.set(r.temsilci, {kolonlar:r.kolonlar||{}, genelToplam:r.genelToplam||0}); });
+
+  const gorulenTemsilciler = new Set();
+  const birlesikTemsilciler = (yeniGun.temsilciler||[]).map(r=>{
+    gorulenTemsilciler.add(r.temsilci);
+    const eski = eskiTahsilatMap.get(r.temsilci);
+    const kolonlar = eski ? eski.kolonlar : (r.kolonlar||{});
+    const genelToplam = eski ? eski.genelToplam : (r.genelToplam||0);
+    return {
+      temsilci: r.temsilci,
+      kolonlar,
+      genelToplam,
+      litre: r.litre,
+      stTahsilatLitre: r.litre > 0 ? (genelToplam / r.litre) : null,
+    };
+  });
+  // Bu günde (yeni yüklemede) litresi olmayıp yalnızca eski arşivde tahsilatı bulunan temsilciler de
+  // korunur — bu yüklemede sevkiyat verisi bu temsilci için gelmemiş olsa dahi tahsilat rakamları
+  // kaybolmaz.
+  (eskiGun.temsilciler||[]).forEach(r=>{
+    if(gorulenTemsilciler.has(r.temsilci) || !(r.genelToplam>0)) return;
+    birlesikTemsilciler.push({
+      temsilci: r.temsilci,
+      kolonlar: r.kolonlar,
+      genelToplam: r.genelToplam,
+      litre: 0,
+      stTahsilatLitre: null,
+    });
+  });
+  birlesikTemsilciler.sort((a,b)=> a.temsilci.localeCompare(b.temsilci,'tr'));
+
+  const kolonlar = (eskiGun.kolonlar && eskiGun.kolonlar.length) ? eskiGun.kolonlar : (yeniGun.kolonlar||[]);
+  const genelToplamSatiri = { kolonlar:{}, genelToplam:0, litre:0 };
+  birlesikTemsilciler.forEach(r=>{
+    kolonlar.forEach(k=>{ genelToplamSatiri.kolonlar[k] = (genelToplamSatiri.kolonlar[k]||0) + (r.kolonlar[k]||0); });
+    genelToplamSatiri.genelToplam += r.genelToplam;
+    genelToplamSatiri.litre += r.litre;
+  });
+  genelToplamSatiri.stTahsilatLitre = genelToplamSatiri.litre > 0 ? (genelToplamSatiri.genelToplam / genelToplamSatiri.litre) : null;
+
+  return Object.assign({}, yeniGun, {
+    kolonlar,
+    temsilciler: birlesikTemsilciler,
+    genelToplamSatiri,
+    tahsilatTarihi: eskiGun.tahsilatTarihi || yeniGun.tahsilatTarihi,
+    belgeNoListesi: (eskiGun.belgeNoListesi && eskiGun.belgeNoListesi.length) ? eskiGun.belgeNoListesi : yeniGun.belgeNoListesi,
+  });
+}
+
+// Bir günün arşiv kaydını, bu yüklemede TAZE gelen tarafı otorite kabul edip diğer tarafı arşivden
+// koruyarak günceller: her iki taraf da taze ise doğrudan yeniGun kullanılır; yalnızca biri taze ise
+// ilgili "birlestir" yardımcısı devreye girer; arşivde hiç kayıt yoksa doğrudan yeniGun kullanılır.
+function yuklemeGununuArsivIleBirlestir(yeniGun, eskiGun){
+  if(!eskiGun) return yeniGun;
+  if(yeniGun.tahsilatVerisiVarMi && yeniGun.sevkiyatVerisiVarMi) return yeniGun;
+  if(!yeniGun.tahsilatVerisiVarMi && yeniGun.sevkiyatVerisiVarMi) return yuklemeGunuTahsilatIleBirlestir(yeniGun, eskiGun);
+  if(yeniGun.tahsilatVerisiVarMi && !yeniGun.sevkiyatVerisiVarMi) return yuklemeGunuLitreIleBirlestir(yeniGun, eskiGun);
+  return eskiGun; // teorik olarak oluşmaz: gunKey zaten en az bir taraf var olduğu için üretilir.
+}
+
+async function yuklemeRaporlariniArsivineKaydet(sonuc){
+  const gunAnahtarlari = Object.keys((sonuc && sonuc.gunler) || {});
+  if(!gunAnahtarlari.length) return;
   let arsiv = {};
   if(cloudEnabled()){
     arsiv = (await loadYuklemeArsivFromCloud()) || {};
   } else {
     arsiv = (await loadYuklemeArsivFromLocal()) || {};
   }
-  arsiv[gunKey] = report;
+  gunAnahtarlari.forEach(gunKey=>{
+    arsiv[gunKey] = yuklemeGununuArsivIleBirlestir(sonuc.gunler[gunKey], arsiv[gunKey]);
+  });
   state.yuklemeArsivCache = arsiv;
   if(cloudEnabled()){
     await saveYuklemeArsivToCloud(arsiv);
@@ -5096,10 +5276,11 @@ async function yuklemeRaporuOlusturVeArsivle(){
     return;
   }
   try{
-    const report = buildYuklemeRaporu(tahsilatDosya.data, yuklemeDosya.data);
-    state.yuklemeReport = report;
-    state.yuklemeSeciliGun = dateKeyLocal(report.yuklemeTarihi);
-    await yuklemeRaporuArsivineKaydet(report);
+    const sonuc = buildYuklemeRaporu(tahsilatDosya.data, yuklemeDosya.data);
+    const guncelGunKey = sonuc.enGuncelGunKey;
+    await yuklemeRaporlariniArsivineKaydet(sonuc);
+    state.yuklemeReport = guncelGunKey ? (state.yuklemeArsivCache[guncelGunKey] || sonuc.gunler[guncelGunKey]) : null;
+    state.yuklemeSeciliGun = guncelGunKey;
   }catch(err){
     console.error('ST Tahsilat/Litre raporu oluşturulamadı:', err);
     state.yuklemeReport = null;
