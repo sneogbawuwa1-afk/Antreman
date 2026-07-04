@@ -2798,7 +2798,35 @@ function buildReport(files, musteriMasterMap){
   const siparisArsiv = [];
 
   if(files.siparis){
-    files.siparis.data.forEach(r=>{
+    // Fatura No dolu olan satırlarda, AYNI GÜNE (İstenilen Tsl. Trh.) ait tekrar eden Fatura No'lar
+    // mükerrer kayıt sayılır — sadece ilk görülen satır alınır, diğerleri (aynı fatura no + aynı gün)
+    // yok sayılır. Fatura No boşsa bu kural hiç uygulanmaz. Aynı Fatura No farklı bir güne ait ise
+    // (İstenilen Tsl. Trh. farklıysa) mükerrer sayılmaz, ikisi de ayrı ayrı işlenir.
+    const gorulenFaturaNoGun = new Set();
+    const siparisSatirlari = files.siparis.data.filter(r=>{
+      const faturaNo = String(r['Fatura No']||'').trim();
+      if(!faturaNo) return true;
+      const t = excelDateToJSArti1Gun(r['İstenilen Tsl. Trh.']);
+      const gunKey = t ? dateKeyLocal(t) : '';
+      const anahtar = faturaNo + '|' + gunKey;
+      if(gorulenFaturaNoGun.has(anahtar)) return false;
+      gorulenFaturaNoGun.add(anahtar);
+      return true;
+    });
+
+    // Sipariş Dökümü toplu (çok günlük) çekilmiş olabilir (örn. 01-05 arası); ama Sevk Raporu/Genel
+    // Rapor ekranındaki "Açık Sipariş"/"Sevki Ertelenen" KPI'ları yalnızca dosyadaki EN GÜNCEL
+    // İstenilen Tsl. Trh. gününü yansıtmalı — yoksa aynı hâlâ açık siparişler birden fazla günün
+    // anlık görüntüsünde tekrar tekrar sayılıp tutarlar şişer. (siparisArsiv bu filtreye TABİ
+    // DEĞİLDİR; Fatura Kontrol'ün geçmişe dönük görünümü için tüm günler orada saklanmaya devam eder.)
+    let enGuncelSiparisGunu = null;
+    siparisSatirlari.forEach(r=>{
+      const t = excelDateToJSArti1Gun(r['İstenilen Tsl. Trh.']);
+      if(t && (!enGuncelSiparisGunu || t.getTime() > enGuncelSiparisGunu.getTime())) enGuncelSiparisGunu = t;
+    });
+    const enGuncelSiparisGunKey = enGuncelSiparisGunu ? dateKeyLocal(enGuncelSiparisGunu) : null;
+
+    siparisSatirlari.forEach(r=>{
       const musteri = String(r['Müşteri No']||'').trim();
       if(!musteri) return;
       const musteriAdi = r['Müşteri Adı'] || musteri;
@@ -2818,6 +2846,11 @@ function buildReport(files, musteriMasterMap){
 
       if(!siparisMusterileri.has(musteri)) siparisMusterileri.set(musteri, {musteriAdi, temsilci});
       else if(temsilci && !siparisMusterileri.get(musteri).temsilci) siparisMusterileri.get(musteri).temsilci = temsilci;
+
+      // Sevk Raporu KPI'ları (siparisNormalMap/emanetSiparisMap) sadece en güncel günün siparişlerini
+      // toplar; dosyanın eski günlerine ait satırlar bu iki haritaya dahil edilmez.
+      const enGuncelGunMu = !enGuncelSiparisGunKey || dateKeyLocal(istenilenTeslimTarihi) === enGuncelSiparisGunKey;
+      if(!enGuncelGunMu) return;
 
       if(isEmanet){
         emanetSiparisMap.set(musteri, (emanetSiparisMap.get(musteri)||0) + tutar);
