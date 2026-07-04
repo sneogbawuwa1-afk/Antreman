@@ -519,12 +519,70 @@
   .karne-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
   .karne-lbl{font-size:10px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.02em;}
   .karne-val{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;margin-top:2px;}
+  .karne-val .fine{font-family:'Inter',sans-serif;font-size:10.5px;font-weight:600;color:var(--ink-faint);margin-top:3px;}
+  .karne-bar-track{height:6px;background:var(--line-soft);border-radius:4px;overflow:hidden;margin-top:12px;}
+  .karne-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-deep));border-radius:4px;}
+
+  /* --- Sell Out Raporu (Tasarim A) --- */
+  .bar-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+  .bar-row:last-child{margin-bottom:0;}
+  .bar-label{width:170px;font-size:12px;font-weight:600;color:var(--ink);flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .bar-track{flex:1;height:16px;background:var(--line-soft);border-radius:5px;overflow:hidden;}
+  .bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-deep));border-radius:5px 0 0 5px;}
+  .bar-value{width:170px;text-align:right;font-size:12.5px;font-weight:700;font-family:'Space Grotesk',sans-serif;flex-shrink:0;}
+  .bar-value small{font-family:'Inter',sans-serif;font-weight:600;color:var(--ink-faint);margin-left:4px;}
+  .channel-bar{display:flex;height:36px;border-radius:9px;overflow:hidden;margin-bottom:6px;}
+  .channel-bar span{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;}
+  .share-track{width:90px;height:8px;background:var(--line-soft);border-radius:5px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:8px;}
+  .share-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-deep));border-radius:5px;}
+  .fkns-oran{font-family:'Space Grotesk',sans-serif;font-weight:700;}
+  .hedef-edit-row{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:13px;padding-top:12px;border-top:1px dashed var(--line);}
+  .hedef-field{flex:1;min-width:84px;}
+  .hedef-field label{display:block;font-size:9.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.02em;margin-bottom:3px;}
+  .hedef-field input{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:12.5px;box-sizing:border-box;}
+  .hedef-kaydet-btn{padding:7px 11px;border:1px solid var(--navy);background:var(--navy);color:#fff;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .hedef-kaydet-btn:hover{opacity:.9;}
+  .hedef-kaydet-btn:disabled{opacity:.55;cursor:default;}
+  /* Temsilci kartı, genel rapordaki cust-card ile aynı mantıkla tıklanınca tüm satırı kaplayarak
+     (grid-column:1/-1) yana genişler — dar bir açılır kutu yerine ferah bir liste gösterir. */
+  /* .sellout-card artık .cust-card temel sınıfını kullanıyor; tıklanabilirlik ve is-open
+     (tam genişlik açılma) davranışı zaten .cust-card / .cust-card.is-open kurallarından gelir. */
+  .karne-expand-toggle{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:11px;padding-top:11px;border-top:1px dashed var(--line);font-size:12px;font-weight:700;color:var(--accent-deep);}
+  .karne-expanded{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);cursor:default;}
+  .karne-nokta-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;}
+  .karne-nokta-item{background:var(--surface);border:1px solid var(--line-soft);border-radius:9px;padding:9px 11px;font-size:12.5px;min-width:0;}
+  .karne-nokta-item .adi{font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .karne-nokta-item .kod{font-size:10.5px;color:var(--ink-faint);margin-top:2px;}
+  .fkns-empty{font-size:12px;color:var(--ink-faint);padding:4px 0;}
+  /* --- SSM Karneleri görsel dili (Tasarım 1) — hem SSM kartlarında hem temsilci kartında kullanılır --- */
+  .ssm-karne-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;}
+  .ssm-karne-top{display:flex;align-items:center;gap:11px;margin-bottom:14px;}
+  .ssm-karne-name{font-weight:700;font-size:14.5px;}
+  .ssm-karne-sub{font-size:11px;color:var(--ink-soft);margin-top:1px;}
+  .ssm-fkns-ring-wrap{margin-left:auto;text-align:center;flex-shrink:0;}
+  .ssm-fkns-ring{width:52px;height:52px;display:block;}
+  .ssm-fkns-ring-label{font-size:9px;color:var(--ink-faint);font-weight:700;text-transform:uppercase;letter-spacing:.02em;margin-top:2px;}
+  .ssm-kanal-row{margin-bottom:11px;}
+  .ssm-kanal-row:last-of-type{margin-bottom:0;}
+  .ssm-kanal-top{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;margin-bottom:5px;}
+  .ssm-kanal-top .lbl{font-weight:700;color:var(--ink-soft);text-transform:uppercase;font-size:10px;letter-spacing:.02em;white-space:nowrap;}
+  .ssm-kanal-top .val{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--ink);text-align:right;}
+  .ssm-kanal-top .val small{font-family:'Inter',sans-serif;font-weight:600;color:var(--ink-faint);}
+  .ssm-kanal-track{height:8px;background:var(--line-soft);border-radius:5px;overflow:hidden;}
+  .ssm-kanal-fill{height:100%;border-radius:5px;}
+  .ssm-kanal-kalan{font-size:10px;color:var(--ink-faint);font-weight:600;text-align:right;margin-top:4px;}
+  .ssm-karne-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);}
+  .ssm-karne-foot .g-lbl{font-size:10px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.02em;}
+  .ssm-karne-foot .g-val{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;}
+  /* Sell Out temsilci kartındaki stat-chip etiketleri kısa da olsa 5 dar kutuya sığmayabiliyor —
+     bu kartlarda satır kaydırmaya izin verip kesilmeyi (…) önlüyoruz. */
+  .cust-stat-chip.wrap-label .l{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.2;}
 
   .rate-table input[type=number]{width:64px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;font-family:inherit;font-size:12.5px;text-align:right;}
 
   .week-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line-soft);}
   .week-row:last-child{border-bottom:none;}
-  .week-label{width:96px;flex-shrink:0;font-size:12px;font-weight:600;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .week-label{width:96px;flex-shrink:0;font-size:12px;font-weight:600;color:var(--ink-soft);}
   .week-track{flex:1;height:16px;background:var(--line-soft);border-radius:5px;overflow:hidden;position:relative;}
   .week-fill{height:100%;border-radius:5px 0 0 5px;background:linear-gradient(90deg,var(--accent),var(--accent-deep));}
   .week-val{width:118px;text-align:right;flex-shrink:0;font-size:12.5px;font-weight:700;font-family:'Space Grotesk',sans-serif;}
@@ -561,8 +619,6 @@
   .tab-dropdown-menu{
     position:fixed;top:0;left:0;display:none;flex-direction:column;gap:2px;
     background:#fff;border-radius:14px;padding:6px;min-width:238px;
-    max-width:calc(100vw - 16px);max-height:min(70vh,420px);overflow-y:auto;
-    -webkit-overflow-scrolling:touch;
     box-shadow:0 14px 34px -10px rgba(19,34,63,.38),0 0 0 1px rgba(19,34,63,.06);
     z-index:200;
   }
@@ -650,10 +706,6 @@
     .aging-label{width:78px;font-size:11px;}
     .aging-value{width:88px;font-size:11.5px;}
 
-    .week-label{width:74px;font-size:11px;}
-    .week-val{width:92px;font-size:11px;}
-    .week-row{gap:8px;}
-
     .rep-grid{grid-template-columns:1fr 1fr;gap:8px;}
     .rep-card{padding:10px 12px;}
     .rep-card .rname{font-size:12.5px;}
@@ -725,7 +777,7 @@
 <div id="authGate" style="position:fixed;inset:0;background:var(--bg,#EEF1F6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;">
   <div style="background:#fff;border-radius:16px;padding:36px 32px;max-width:380px;width:100%;box-shadow:0 12px 36px rgba(0,0,0,.10);border:1px solid var(--line,#DBE2EC);">
     <div style="text-align:center;margin-bottom:22px;">
-      <div style="width:44px;height:44px;border-radius:11px;background:var(--navy,#13233F);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;margin:0 auto 12px;" translate="no">V2</div>
+      <div style="width:44px;height:44px;border-radius:11px;background:var(--navy,#13233F);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;margin:0 auto 12px;" translate="no">V1</div>
       <h2 style="margin:0;font-size:18px;" translate="no">Keşan Bayi Takip Paneli</h2>
       <p style="margin:6px 0 0;color:var(--ink-soft,#54617A);font-size:13px;">Devam etmek için giriş yapın</p>
     </div>
@@ -742,7 +794,7 @@
 
   <div class="topbar">
     <div class="brand">
-      <div class="brand-mark" translate="no">V2</div>
+      <div class="brand-mark" translate="no">V1</div>
       <div>
         <h1 translate="no">Keşan Bayi Takip Paneli</h1>
         <p class="brand-tag" translate="no">Akgün Meşrubat Gıda · Berat Çağlar CAN</p>
@@ -836,7 +888,15 @@
         <div class="check-icon"></div>
         <div>
           <div class="check-name">Müşteri Master <span class="check-tag opt">Opsiyonel</span></div>
-          <div class="check-desc">Müşteri, Tabela Adı, Satış Temsilcisi Adı, Kredi limiti kolonlarını içeren müşteri ana veri dökümü — tüm raporlardaki müşteri→temsilci eşleşmesini bu dosya belirler (Satış Temsilcisi Adı boşsa otomatik "Key Account" yazılır). Opsiyonel ve her gün yüklenmesi gerekmez; en son yüklenen dosya buluta kaydedilip yeni biri yüklenene kadar kullanılmaya devam eder</div>
+          <div class="check-desc">Müşteri, Tabela Adı, Satış Temsilcisi Adı, Kredi limiti kolonlarını içeren müşteri ana veri dökümü — tüm raporlardaki müşteri→temsilci eşleşmesini bu dosya belirler (Satış Temsilcisi Adı boşsa otomatik "Key Account" yazılır). Bir "Durum" kolonu varsa (Aktif/Pasif), Sell Out Raporu'ndaki FKNS hesabı için de kullanılır. Opsiyonel ve her gün yüklenmesi gerekmez; en son yüklenen dosya buluta kaydedilip yeni biri yüklenene kadar kullanılmaya devam eder</div>
+          <div class="check-meta"></div>
+        </div>
+      </div>
+      <div class="check-item" data-type="sellOut">
+        <div class="check-icon"></div>
+        <div>
+          <div class="check-name">Sell Out Raporu <span class="check-tag opt">Opsiyonel</span></div>
+          <div class="check-desc">Müşteri Kanalı Tnm., Açık/Otel Tnm., Hacim Segmenti Tnm. kolonlarını içeren SAPUI5 satış kalemi dışa aktarımı — "Sell Out Raporu" sekmesini oluşturur (opsiyonel, buluta arşivlenmez — her seferinde güncel dosyayla yüklenir)</div>
           <div class="check-meta"></div>
         </div>
       </div>
@@ -871,6 +931,7 @@
       <button class="tab-btn tab-dropdown-btn active" id="tabbtn-cariDetay" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="cariDetayDropdownMenu">📇 Cari Detay <span class="dd-arrow">▾</span></button>
       <button class="tab-btn tab-dropdown-btn" id="tabbtn-dagitim" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="dagitimDropdownMenu">🚚 Dağıtım <span class="dd-arrow">▾</span></button>
       <button class="tab-btn" id="tabbtn-bayiHakedis" data-view="bayiHakedis" type="button" role="tab" aria-selected="false" aria-controls="bayiHakedisView">🏷️ Bayi Hakediş</button>
+      <button class="tab-btn" id="tabbtn-sellOut" data-view="sellOut" type="button" role="tab" aria-selected="false" aria-controls="sellOutView">📈 Sell Out Raporu</button>
       <button class="tab-btn tab-dropdown-btn" id="tabbtn-finansalAnaliz" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="finansalDropdownMenu">📊 Finansal Analiz <span class="dd-arrow">▾</span></button>
     </div>
 
@@ -1426,6 +1487,79 @@
 
     </div>
 
+    <!-- SELL OUT RAPORU -->
+    <div id="sellOutView" style="display:none;" role="tabpanel" aria-labelledby="tabbtn-sellOut">
+      <details class="info-box">
+        <summary>ℹ️ Nasıl Yorumlanır?</summary>
+        <div class="info-box-body">
+          <h4>📌 Bu Rapor Ne İşe Yarar?</h4>
+          <p>SAPUI5 satış kalemi dışa aktarımından, temsilci ve saha satış müdürü (SSM) bazlı <b>Açık/Kapalı Kanal litre satışını</b> ve <b>FKNS (Fatura Kesilen Nokta Sayısı) oranını</b> gösterir.</p>
+          <h4>📊 Nasıl Yorumlanmalı?</h4>
+          <ul>
+            <li><b>FKNS Oranı:</b> Müşteri Master'daki Aktif noktalardan kaçına bu dönemde fatura kesildiğini gösterir (örn. 100 aktif noktadan 90'ına kesilmişse %90).</li>
+            <li><b>A./K. Kanal Kalan:</b> hedefe ulaşmak için kalan litre miktarıdır (Hedef − Satış).</li>
+            <li><b>Hedef Gerçekleşme:</b> temsilcinin/SSM'nin toplam litre hedefinin yüzde kaçını gerçekleştirdiğini gösterir.</li>
+          </ul>
+          <p><b>Aksiyon:</b> FKNS oranı düşük temsilcilerde, kartı açarak faturası kesilmeyen aktif noktaları görüp takibe alın. Litre hedefleri elle girilip 🔒 şifre ile kaydedilir; tüm cihazlarda görünür.</p>
+        </div>
+      </details>
+
+      <div class="panel" id="sellOutFiltrePanel">
+        <div class="panel-body" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+          <div class="as-of" id="sellOutAsOf" style="margin:0;">Veri kaynağı: Sell Out Raporu (SAPUI5 dışa aktarımı)</div>
+          <button type="button" class="btn small" id="sellOutYenileBtn" title="Buluttaki hedef litre verisini yeniden çeker">🔄 Yenile</button>
+        </div>
+      </div>
+
+      <div id="sellOutBosPanel" class="panel" style="display:none;">
+        <div class="panel-body">
+          <div class="empty-state">Sell Out Raporu için ana yükleme sayfasında "Sell Out Raporu" dosyasını yükleyip "Raporu Oluştur"a basmanız gerekir.</div>
+        </div>
+      </div>
+
+      <div id="sellOutIcerik" style="display:none;">
+        <div id="sellOutAlertBanner"></div>
+        <div id="sellOutKpiGrid"></div>
+
+        <div class="panel">
+          <div class="panel-head"><div><h2>SSM Bazlı Performans</h2><span class="count" id="sellOutSsmCount"></span></div></div>
+          <div class="panel-body">
+            <div class="ssm-karne-grid" id="sellOutSsmGrid"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head" style="padding:16px 20px 0;border:none;"><div><h2>Satış Temsilcisi Karnesi</h2><span class="count" id="sellOutKarneCount">Toplam satış litresine göre sıralı</span></div></div>
+          <div class="panel-body">
+            <div class="cust-card-list" id="sellOutKarneGrid"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><div><h2>Marka Bazlı Dağılım</h2><span class="count">Litre satışına göre</span></div></div>
+          <div class="panel-body" id="sellOutMarkaBar"></div>
+        </div>
+
+        <div class="grid2">
+          <div class="panel" style="margin-bottom:0;">
+            <div class="panel-head"><h2>Satış Kanalı Dağılımı</h2></div>
+            <div class="panel-body" id="sellOutKanalBar"></div>
+          </div>
+          <div class="panel" style="margin-bottom:0;">
+            <div class="panel-head"><h2>Hacim Segmenti</h2></div>
+            <div class="panel-body" id="sellOutHacimBar"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h2 id="sellOutTrendBaslik">Günlük Trend</h2></div>
+          <div class="panel-body">
+            <div class="trend-grid" id="sellOutTrendGrid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="tahsilatVerimlilikView" style="display:none;" role="tabpanel" aria-labelledby="tabbtn-tahsilatVerimlilik">
 
       <details class="info-box">
@@ -1612,7 +1746,7 @@
       </details>
       <div class="as-of">Veri kaynağı: Kalemler (yaşlandırma) — karşılık oranları elle düzenlenebilir</div>
       <div id="supheliAlacakKpiGrid"></div>
-      <div class="grid2">
+      <div class="grid2" style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;">
         <div class="panel">
           <div class="panel-head"><div><h2>Yaşlandırma Bazlı Karşılık Matrisi</h2><span class="count">oranlar otomatik hesaplanır — dilimin gerçek ortalama gecikme gününe göre</span></div></div>
           <div class="panel-body" style="padding:0;">
@@ -1705,7 +1839,7 @@
         </div>
       </div>
       <div id="yoKpiGrid"></div>
-      <div class="grid2">
+      <div class="grid2" style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;">
         <div class="panel">
           <div class="panel-head"><div><h2>Bakiye ve Tahsilat Trendi</h2><span class="count" id="yoChartSub"></span></div></div>
           <div class="panel-body"><div class="trend-chart-card"><div id="yoChart"></div></div></div>
@@ -1763,7 +1897,7 @@
         DSO'dan farkı: CEI, o dönem tahsil edilebilecek (vadesi gelmiş — Faturadan Sonr. Gün ≥ 23) alacağın ne kadarının fiilen tahsil edildiğini ölçer.
       </div>
       <div id="ceiKpiGrid"></div>
-      <div class="grid2">
+      <div class="grid2" style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;">
         <div class="panel">
           <div class="panel-head"><div><h2>Aylık CEI Trendi</h2><span class="count" id="ceiChartSub"></span></div></div>
           <div class="panel-body"><div class="trend-chart-card"><div id="ceiChart"></div></div></div>
@@ -1802,7 +1936,7 @@
 
 <script>
 const state = {
-  files: { kalemler:null, siparis:null, tahsilat:null, cekSenet:null, ticariStok:null, fatura:null, bayiHakedis:null, yukleme:null, musteriMaster:null, ciroPrimi:null, donemselIskonto:null },
+  files: { kalemler:null, siparis:null, tahsilat:null, cekSenet:null, ticariStok:null, fatura:null, bayiHakedis:null, yukleme:null, musteriMaster:null, ciroPrimi:null, donemselIskonto:null, sellOut:null },
   report: null,
   sort: { key:'kalanBorc', dir:-1 },
   sevkSort: { key:'toplamRisk', dir:-1 },
@@ -1818,6 +1952,10 @@ const state = {
   yuklemeSeciliGun: null,
   musteriMasterMap: new Map(),
   musteriMasterDetay: new Map(), // musteri kodu -> {tabelaAdi, musteriAdi, vergiNo, tcKimlikNo, adres, il, ilce} (senet basımı için)
+  musteriMasterDurum: new Map(), // musteri kodu -> 'Aktif' | ham durum metni (Sell Out Raporu FKNS hesaplaması için)
+  sellOutHedef: {}, // { [temsilciAdi]: {acik:Number, kapali:Number} } — buluta kayıtlı, şifreyle değiştirilebilir
+  sellOutNoktaSort: new Map(), // temsilciKey -> {key:'adi'|'kod', dir:1|-1} — Fatura Kesilmeyen Aktif Noktalar listesi sıralaması
+  sellOutReport: null,
   bayiHakedisReport: null,
   bayiHakedisHata: null,
   bhSort: { key:'toplamKdvli', dir:-1 },
@@ -2463,6 +2601,10 @@ const MUSTERI_MASTER_LOCAL_KEY = 'noktaCariTakip_musteriMaster_v1';
 // Master dosyasından, temsilci haritasıyla birlikte ama AYRI bir kayıt olarak saklanır.
 const MUSTERI_MASTER_DETAY_CLOUD_PATH = CLOUD.path + '_musteriMasterDetay';
 const MUSTERI_MASTER_DETAY_LOCAL_KEY = 'noktaCariTakip_musteriMasterDetay_v1';
+// Sell Out Raporu'nda FKNS (Fatura Kesilen Nokta Sayısı) hesaplaması için, Müşteri Master
+// dosyasındaki nokta durumu (Aktif/Pasif) — temsilci haritasıyla birlikte ama AYRI kaydedilir.
+const MUSTERI_MASTER_DURUM_CLOUD_PATH = CLOUD.path + '_musteriMasterDurum';
+const MUSTERI_MASTER_DURUM_LOCAL_KEY = 'noktaCariTakip_musteriMasterDurum_v1';
 
 function buildMusteriMasterMap(rows){
   const map = new Map();
@@ -2511,6 +2653,39 @@ function buildMusteriMasterDetay(rows){
 }
 function musteriMasterMapToObj(map){ const o={}; map.forEach((v,k)=>{ o[k]=v; }); return o; }
 function musteriMasterObjToMap(obj){ return new Map(Object.entries(obj||{})); }
+
+// Müşteri Master dosyasında nokta durumunu (Aktif/Pasif) taşıyan kolonun adı dosyadan dosyaya
+// değişebilir — bu yüzden bilinen aday kolon adları sırayla denenir, ilk bulunan kullanılır.
+// Gerçek dosyanızdaki kolon adı bu listede yoksa, buraya eklemeniz yeterlidir.
+const DURUM_KOLON_ADAYLARI = ['Durum','Statü','Müşteri Statüsü','Müşteri Durumu','Hesap Durumu','Nokta Durumu','Aktiflik Durumu','Status','Cari Durum'];
+function musteriDurumKolonunuBul(headers){
+  const set = new Set((headers||[]).map(h=>String(h||'').trim()));
+  return DURUM_KOLON_ADAYLARI.find(k=>set.has(k)) || null;
+}
+function buildMusteriMasterDurumMap(rows, headers){
+  const map = new Map();
+  const kolon = musteriDurumKolonunuBul(headers || (rows && rows[0] ? Object.keys(rows[0]) : []));
+  if(!kolon) return map; // Durum kolonu bulunamadı — harita boş döner, FKNS hesaplamasında tüm noktalar aktif varsayılır.
+  (rows||[]).forEach(r=>{
+    const musteri = String(r['Müşteri']||'').trim();
+    if(!musteri) return;
+    const ham = String(r[kolon]||'').trim();
+    const normalize = ham.toLocaleUpperCase('tr-TR');
+    map.set(musteri, normalize === 'AKTİF' || normalize === 'AKTIF' ? 'Aktif' : (ham || 'Pasif'));
+  });
+  return map;
+}
+// Nokta statüsü "Pasif" veya "İptal" (yazım/boşluk farklarına toleranslı) ise true döner — Sell Out
+// Raporu'nda bu noktalar hem "Fatura kesilmeyen aktif noktalar" listesinden hem de FKNS
+// hesaplamasından (payda/pay) tamamen çıkarılır. Durum metninde geçen başka ifadeler (örn. "Beklemede",
+// "Yeni Nokta" gibi Aktif dışı ama Pasif/İptal de olmayan statüler) burada elenmez — sadece açıkça
+// Pasif veya İptal olanlar hesap dışına alınır.
+function noktaPasifVeyaIptalMi(durum){
+  if(!durum) return false;
+  const n = String(durum).trim().toLocaleUpperCase('tr-TR');
+  if(!n) return false;
+  return n.includes('PASİF') || n.includes('PASIF') || n.includes('İPTAL') || n.includes('IPTAL');
+}
 
 async function saveMusteriMasterToCloud(obj){
   if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
@@ -2574,6 +2749,37 @@ async function loadMusteriMasterDetayFromLocal(){
   }catch(err){ console.error(err); return null; }
 }
 
+async function saveMusteriMasterDurumToCloud(obj){
+  if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
+  try{
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_DURUM_CLOUD_PATH}.json${await authQuery()}`, {
+      method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(obj),
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    return {ok:true};
+  }catch(err){ console.error('Müşteri Master Durum buluta kaydedilemedi:', err); return {ok:false, reason:err.message}; }
+}
+async function loadMusteriMasterDurumFromCloud(){
+  if(!cloudEnabled()) return null;
+  try{
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_DURUM_CLOUD_PATH}.json${await authQuery()}`);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const text = await res.text();
+    if(!text || text==='null') return null;
+    return JSON.parse(text);
+  }catch(err){ console.error('Müşteri Master Durum buluttan okunamadı:', err); return null; }
+}
+async function saveMusteriMasterDurumToLocal(obj){
+  const ok = await idbSet(MUSTERI_MASTER_DURUM_LOCAL_KEY, obj);
+  if(!ok) console.error('Müşteri Master Durum cihaza kaydedilemedi.');
+}
+async function loadMusteriMasterDurumFromLocal(){
+  try{
+    await idbMigrateFromLocalStorageOnce(MUSTERI_MASTER_DURUM_LOCAL_KEY);
+    return await idbGet(MUSTERI_MASTER_DURUM_LOCAL_KEY);
+  }catch(err){ console.error(err); return null; }
+}
+
 async function musteriMasterYenile(){
   let obj = null;
   if(cloudEnabled()) obj = await loadMusteriMasterFromCloud();
@@ -2585,10 +2791,15 @@ async function musteriMasterYenile(){
   if(!detayObj) detayObj = await loadMusteriMasterDetayFromLocal();
   state.musteriMasterDetay = musteriMasterObjToMap(detayObj);
 
+  let durumObj = null;
+  if(cloudEnabled()) durumObj = await loadMusteriMasterDurumFromCloud();
+  if(!durumObj) durumObj = await loadMusteriMasterDurumFromLocal();
+  state.musteriMasterDurum = musteriMasterObjToMap(durumObj);
+
   return state.musteriMasterMap;
 }
 
-async function musteriMasterKaydet(rows){
+async function musteriMasterKaydet(rows, headers){
   const map = buildMusteriMasterMap(rows);
   state.musteriMasterMap = map;
   const obj = musteriMasterMapToObj(map);
@@ -2600,6 +2811,12 @@ async function musteriMasterKaydet(rows){
   const detayObj = musteriMasterMapToObj(detayMap);
   await saveMusteriMasterDetayToLocal(detayObj);
   if(cloudEnabled()) await saveMusteriMasterDetayToCloud(detayObj);
+
+  const durumMap = buildMusteriMasterDurumMap(rows, headers);
+  state.musteriMasterDurum = durumMap;
+  const durumObj = musteriMasterMapToObj(durumMap);
+  await saveMusteriMasterDurumToLocal(durumObj);
+  if(cloudEnabled()) await saveMusteriMasterDurumToCloud(durumObj);
 
   return map;
 }
@@ -2848,8 +3065,9 @@ const SIGNATURES = {
   musteriMaster: [['Müşteri','Tabela Adı','Kredi limiti']],
   ciroPrimi: [['Grup Tanım','Efpa Payı Tutar','Net Tutar']],
   donemselIskonto: [['Nokta Kodu','Hakediş Tutar','Perid']],
+  sellOut: [['Müşteri Kanalı Tnm.','Açık/Otel Tnm.','Hacim Segmenti Tnm.']],
 };
-const LABELS = { kalemler:'Kalemler (Fatura / Bakiye)', siparis:'Sipariş Dökümü', tahsilat:'Tahsilat Dökümü', cekSenet:'Çek / Senet Riski', ticariStok:'Ticari Stok', fatura:'Fatura Dökümü', bayiHakedis:'Bayi Hak Ediş', yukleme:'Yükleme Raporu', musteriMaster:'Müşteri Master', ciroPrimi:'Ciro Primi', donemselIskonto:'Dönemsel İskonto' };
+const LABELS = { kalemler:'Kalemler (Fatura / Bakiye)', siparis:'Sipariş Dökümü', tahsilat:'Tahsilat Dökümü', cekSenet:'Çek / Senet Riski', ticariStok:'Ticari Stok', fatura:'Fatura Dökümü', bayiHakedis:'Bayi Hak Ediş', yukleme:'Yükleme Raporu', musteriMaster:'Müşteri Master', ciroPrimi:'Ciro Primi', donemselIskonto:'Dönemsel İskonto', sellOut:'Sell Out Raporu' };
 
 function detectType(headers){
   const set = new Set(headers.map(h=>String(h||'').trim()));
@@ -2980,10 +3198,11 @@ buildBtn.addEventListener('click', async ()=>{
     if(state.files.musteriMaster){
       musteriMasterMapKullanilacak = buildMusteriMasterMap(state.files.musteriMaster.data);
       state.musteriMasterMap = musteriMasterMapKullanilacak;
-      await musteriMasterKaydet(state.files.musteriMaster.data);
+      await musteriMasterKaydet(state.files.musteriMaster.data, state.files.musteriMaster.headers);
     }
     state.report = buildReport(state.files, musteriMasterMapKullanilacak);
     await bayiHakedisRaporuOlustur();
+    await sellOutRaporuOlustur();
     renderReport(state.report);
     document.getElementById('uploadCard').style.display='none';
     document.getElementById('reportSection').style.display='block';
@@ -3025,7 +3244,10 @@ syncBtn.addEventListener('click', async ()=>{
   await faturaArsivYenile(true);
   await musteriMasterYenile();
   await bayiHakedisYenile();
+  await sellOutHedefYenile();
+  await sellOutYenile();
   if(document.getElementById('bayiHakedisView') && document.getElementById('bayiHakedisView').style.display !== 'none') renderBayiHakedisView();
+  if(document.getElementById('sellOutView') && document.getElementById('sellOutView').style.display !== 'none') renderSellOutView();
   if(document.getElementById('faturaKontrolArsivBilgi')) await renderFaturaKontrolArsivBilgi();
   syncBtn.disabled = false;
   syncBtn.textContent = prevText;
@@ -3043,15 +3265,16 @@ syncBtn.addEventListener('click', async ()=>{
 });
 
 async function resetAll(){
-  state.files = {kalemler:null, siparis:null, tahsilat:null, cekSenet:null, ticariStok:null, fatura:null, bayiHakedis:null, yukleme:null, musteriMaster:null, ciroPrimi:null, donemselIskonto:null};
+  state.files = {kalemler:null, siparis:null, tahsilat:null, cekSenet:null, ticariStok:null, fatura:null, bayiHakedis:null, yukleme:null, musteriMaster:null, ciroPrimi:null, donemselIskonto:null, sellOut:null};
   state.report = null;
   state.expanded.clear();
   state.yuklemeReport = null;
   state.yuklemeSeciliGun = null;
   state.bayiHakedisReport = null;
   state.bayiHakedisHata = null;
+  state.sellOutReport = null;
   await clearStoredReport();
-  const ICON_NUMS = {kalemler:'', siparis:'', tahsilat:'', cekSenet:'', ticariStok:'', fatura:'', bayiHakedis:'', yukleme:'', musteriMaster:'', ciroPrimi:'', donemselIskonto:''};
+  const ICON_NUMS = {kalemler:'', siparis:'', tahsilat:'', cekSenet:'', ticariStok:'', fatura:'', bayiHakedis:'', yukleme:'', musteriMaster:'', ciroPrimi:'', donemselIskonto:'', sellOut:''};
   document.querySelectorAll('.check-item').forEach(el=>{
     el.classList.remove('done');
     el.querySelector('.check-icon').textContent = ICON_NUMS[el.getAttribute('data-type')] || '';
@@ -3084,6 +3307,7 @@ async function resetAll(){
   document.getElementById('faturaKontrolView').style.display='none';
   document.getElementById('trendView').style.display='none';
   document.getElementById('bayiHakedisView').style.display='none';
+  document.getElementById('sellOutView').style.display='none';
   document.getElementById('tahsilatVerimlilikView').style.display='none';
   document.getElementById('dsoTrendView').style.display='none';
   document.getElementById('nakitAkisView').style.display='none';
@@ -3111,6 +3335,8 @@ async function uygulamayiBaslat(){
 
   await musteriMasterYenile();
   await bayiHakedisYenile();
+  await sellOutHedefYenile();
+  await sellOutYenile();
 
   if(cloudEnabled()){
     statusPill.textContent = 'Bulut verisi kontrol ediliyor…';
@@ -3584,7 +3810,6 @@ const TAB_DROPDOWNS = [
 ];
 function closeDropdown(d){
   d.menu.classList.remove('open');
-  d.menu.style.visibility = '';
   d.btn.setAttribute('aria-expanded','false');
   d.menu.setAttribute('aria-hidden','true');
 }
@@ -3594,26 +3819,13 @@ function closeAllDropdowns(except){
 function openDropdown(d){
   closeAllDropdowns(d);
   const r = d.btn.getBoundingClientRect();
-  // Menü display:none haldeyken offsetWidth/offsetHeight her zaman 0 döner,
-  // bu yüzden gerçek boyut yerine sabit bir varsayıma (238px) güveniliyordu.
-  // En uzun etiketli menüde (Finansal Analiz → "Temsilci Tahsilat
-  // Verimliliği") gerçek genişlik bunu aştığında menü dar telefon
-  // ekranlarında sağdan taşıyordu. Şimdi menüyü önce görünmez (visibility)
-  // ama ölçülebilir yapıp gerçek boyutunu alıyor, sonra hem yatayda hem
-  // dikeyde ekran sınırlarına göre konumlandırıyoruz.
-  d.menu.style.visibility = 'hidden';
-  d.menu.classList.add('open');
   const menuWidth = d.menu.offsetWidth || 238;
-  const menuHeight = d.menu.offsetHeight || 0;
   let left = r.left;
   const maxLeft = window.innerWidth - menuWidth - 8;
   if(left > maxLeft) left = Math.max(8, maxLeft);
-  let top = r.bottom + 6;
-  const maxTop = window.innerHeight - menuHeight - 8;
-  if(top > maxTop) top = Math.max(8, maxTop);
-  d.menu.style.top = top + 'px';
+  d.menu.style.top = (r.bottom + 6) + 'px';
   d.menu.style.left = left + 'px';
-  d.menu.style.visibility = 'visible';
+  d.menu.classList.add('open');
   d.btn.setAttribute('aria-expanded','true');
   d.menu.setAttribute('aria-hidden','false');
 }
@@ -3633,25 +3845,6 @@ document.addEventListener('click', (e)=>{
 window.addEventListener('resize', ()=>{ TAB_DROPDOWNS.forEach(d=>{ if(d.menu.classList.contains('open')) openDropdown(d); }); });
 document.querySelector('.tabbar')?.addEventListener('scroll', ()=>closeAllDropdowns());
 
-// Topbar yüksekliği mobilde (marka + aksiyon butonları alt alta düşünce) veya
-// masaüstünde (uzun bayi adı/etiketiyle) değişebiliyor. Sekme çubuğunun sticky
-// "top" değeri sabit bir sayıya kilitliyse, topbar ondan uzun olduğunda sekme
-// çubuğunun üst kısmı topbar'ın arkasında kalıp görünmez/tıklanmaz hale
-// geliyordu. Bunun yerine gerçek topbar yüksekliğini ölçüp sekme çubuğunu
-// her zaman tam altına sabitliyoruz.
-(function syncTabbarOffset(){
-  const topbarEl = document.querySelector('.topbar');
-  const tabbarEl = document.getElementById('tabBar');
-  if(!topbarEl || !tabbarEl) return;
-  const apply = ()=>{ tabbarEl.style.top = Math.ceil(topbarEl.getBoundingClientRect().height) + 'px'; };
-  if('ResizeObserver' in window){
-    new ResizeObserver(apply).observe(topbarEl);
-  } else {
-    window.addEventListener('resize', apply);
-  }
-  apply();
-})();
-
 document.querySelectorAll('.tab-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     if(TAB_DROPDOWNS.some(d=>d.btn===btn)) return;
@@ -3669,6 +3862,7 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     document.getElementById('faturaKontrolView').style.display = view==='faturaKontrol' ? 'block' : 'none';
     document.getElementById('trendView').style.display = view==='trend' ? 'block' : 'none';
     document.getElementById('bayiHakedisView').style.display = view==='bayiHakedis' ? 'block' : 'none';
+    document.getElementById('sellOutView').style.display = view==='sellOut' ? 'block' : 'none';
     document.getElementById('tahsilatVerimlilikView').style.display = view==='tahsilatVerimlilik' ? 'block' : 'none';
     document.getElementById('dsoTrendView').style.display = view==='dsoTrend' ? 'block' : 'none';
     document.getElementById('nakitAkisView').style.display = view==='nakitAkis' ? 'block' : 'none';
@@ -3683,6 +3877,7 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     if(view==='faturaKontrol' && state.report) renderFaturaKontrolView(state.report);
     if(view==='trend') renderTrendView(state.report);
     if(view==='bayiHakedis') renderBayiHakedisView();
+    if(view==='sellOut') renderSellOutView();
     if(view==='tahsilatVerimlilik' && state.report) renderTahsilatVerimlilikView(state.report);
     if(view==='dsoTrend' && state.report) renderDsoTrendView(state.report);
     if(view==='nakitAkis' && state.report) renderNakitAkisView(state.report);
@@ -5118,21 +5313,13 @@ function trendTextWidth(text, font){
   return _trendMeasureCtx.measureText(text).width;
 }
 
-const __trendChartCache = {};
 function renderTrendChart(containerId, seri, key, renk, birim){
-  __trendChartCache[containerId] = {seri, key, renk, birim};
   const el = document.getElementById(containerId);
   if(!seri.length){
     el.innerHTML = '<div class="empty-state" style="padding:24px 10px;">Veri yok</div>';
     return;
   }
-  // Grafik genişliği, SVG viewBox'ı sabit 520 varsayıp gerçek konteyner mobilde
-  // çok daha darsa (örn. 300px), eksen yazılarının/etiketlerin orantısız
-  // küçülüp okunamaz hale gelmesine yol açıyordu. Bunun yerine viewBox'ı
-  // konteynerin GERÇEK piksel genişliğine eşitliyoruz; böylece font-size gibi
-  // mutlak birimler her ekran boyutunda aynı görünür büyüklükte kalır.
-  const containerWidth = el.clientWidth || (el.parentElement && el.parentElement.clientWidth) || 520;
-  const W = Math.max(240, Math.round(containerWidth)), H = 192, padR = 16, padT = 18, padB = 28;
+  const W = 520, H = 192, padR = 16, padT = 18, padB = 28;
   const values = seri.map(s=>s[key]);
   let minV = Math.min(...values), maxV = Math.max(...values);
   if(minV === maxV){ minV -= Math.max(1, Math.abs(minV)*0.1); maxV += Math.max(1, Math.abs(maxV)*0.1); }
@@ -5178,19 +5365,6 @@ function renderTrendChart(containerId, seri, key, renk, birim){
     ${xLabels}
   </svg>`;
 }
-
-// Ekran döndürme veya pencere boyutu değişince, o an görünür olan trend
-// grafiklerini önbelleğe alınan seri verisiyle yeniden çizer (yeniden bulut
-// çağrısı yapmadan) — böylece grafik yeni genişliğe göre okunaklı kalır.
-window.addEventListener('resize', debounce(()=>{
-  Object.keys(__trendChartCache).forEach(id=>{
-    const el = document.getElementById(id);
-    if(el && el.offsetParent!==null){
-      const c = __trendChartCache[id];
-      renderTrendChart(id, c.seri, c.key, c.renk, c.birim);
-    }
-  });
-}, 200));
 
 document.getElementById('trendMusteriInput').addEventListener('input', ()=>{
   const val = document.getElementById('trendMusteriInput').value.trim();
@@ -7254,6 +7428,615 @@ async function recomputeAndRenderCei(report, zorla){
     return `<tr><td>${escapeHtml(r.temsilci)}</td><td class="num">${TL(r.toplamTahsilat+r.toplamKalanBorc)}</td><td class="num num-strong">${TL(r.toplamTahsilat)}</td><td class="num num-strong">${fmtYuzde(r.tahsilatOrani)}</td><td><span class="pill ${durum.cls}">${durum.label}</span></td></tr>`;
   }).join('') || '<tr><td colspan="5" class="empty-state">Kayıt yok</td></tr>';
 }
+
+// ============================================================================
+// 6) SELL OUT RAPORU (Tasarım A)
+// ============================================================================
+const SELLOUT_HEDEF_CLOUD_PATH = CLOUD.path + '_sellOutHedef';
+const SELLOUT_HEDEF_LOCAL_KEY = 'noktaCariTakip_sellOutHedef_v1';
+const SELLOUT_REPORT_CLOUD_PATH = CLOUD.path + '_sellOutReport';
+const SELLOUT_REPORT_LOCAL_KEY = 'noktaCariTakip_sellOutReport_v1';
+
+// Müşteri Kanalı Tnm. -> Açık Kanal / Kapalı Kanal eşlemesi. Ekomini -> Kapalı Kanal;
+// Otel ve Horeca -> Açık Kanal; Standart Açık/Standart Kapalı zaten adından bellidir.
+const KAPALI_KANAL_DEGERLERI = new Set(['Standart Kapalı','Ekomini']);
+const ACIK_KANAL_DEGERLERI = new Set(['Standart Açık','Otel','Horeca']);
+function sellOutKanalSinifla(musteriKanaliRaw, acikOtelRaw){
+  const v = String(musteriKanaliRaw||'').trim();
+  if(KAPALI_KANAL_DEGERLERI.has(v)) return 'Kapalı Kanal';
+  if(ACIK_KANAL_DEGERLERI.has(v)) return 'Açık Kanal';
+  return String(acikOtelRaw||'').trim() ? 'Açık Kanal' : 'Kapalı Kanal';
+}
+
+// Ham satış kalemlerinden; hedef-bağımsız olmayan (litre, FKNS, marka, kanal, trend) her şeyi
+// hesaplar. Açık/Kapalı Kanal LİTRE HEDEFLERİ elle girildiği ve her an değişebildiği için burada
+// HESAPLANMAZ — bunlar render anında applySellOutHedef() ile ayrıca uygulanır; böylece bir hedef
+// kaydedildiğinde ham Sell Out dosyasını yeniden yüklemeye gerek kalmaz.
+function buildSellOutReport(rows, musteriMasterMap, musteriMasterDurumMap, musteriMasterDetayMap){
+  musteriMasterMap = musteriMasterMap || new Map();
+  musteriMasterDurumMap = musteriMasterDurumMap || new Map();
+  musteriMasterDetayMap = musteriMasterDetayMap || new Map();
+
+  const temsilciAgg = new Map();
+  const temsilciToSSM = new Map();
+  const markaAgg = new Map();
+  const hacimSegAgg = new Map();
+  const gunlukTrend = new Map();
+  let toplamNet=0, toplamLitre=0, acikNetToplam=0, kapaliNetToplam=0;
+  let blokajTutar=0, blokajAdet=0;
+  const belgeSetGenel = new Set();
+  const invoicedNoktaSetGenel = new Set();
+
+  (rows||[]).forEach(r=>{
+    const musteri = String(r['Müşteri No']||'').trim();
+    const temsilciHam = String(r['Satış Temsilcisi Adı']||'').trim();
+    const ssmHam = String(r['Satış Müdürü Adı']||'').trim();
+    const net = Number(r['Net'])||0;
+    const litre = Number(r['Litre'])||0;
+    const kanal = sellOutKanalSinifla(r['Müşteri Kanalı Tnm.'], r['Açık/Otel Tnm.']);
+    const marka = String(r['Mal Grubu Tnm.']||'').trim() || 'Diğer';
+    const hacimSeg = String(r['Hacim Segmenti Tnm.']||'').trim() || 'Tanımsız';
+    const belgeNo = r['Satış Belgesi'];
+    const muhasebeDurum = String(r['Muhasebeleşme Durumu Tanımı']||'').trim();
+    const trendTarihi = excelDateToJS(r['Girilen Faturalama Tarihi']);
+
+    toplamNet += net; toplamLitre += litre;
+    if(kanal==='Açık Kanal') acikNetToplam += net; else kapaliNetToplam += net;
+    if(belgeNo!=null && belgeNo!=='') belgeSetGenel.add(String(belgeNo));
+    if(musteri) invoicedNoktaSetGenel.add(musteri);
+    if(muhasebeDurum === 'Faturalama Blokajlı'){ blokajTutar += net; blokajAdet += 1; }
+
+    markaAgg.set(marka, (markaAgg.get(marka)||0)+litre);
+    hacimSegAgg.set(hacimSeg, (hacimSegAgg.get(hacimSeg)||0)+net);
+
+    if(trendTarihi){
+      const gk = dateKeyLocal(trendTarihi);
+      if(gk){
+        if(!gunlukTrend.has(gk)) gunlukTrend.set(gk, {net:0, litre:0});
+        const g = gunlukTrend.get(gk);
+        g.net += net; g.litre += litre;
+      }
+    }
+
+    if(!temsilciHam) return;
+    const key = normalizeAdSoyad(temsilciHam);
+    if(ssmHam && !temsilciToSSM.has(key)) temsilciToSSM.set(key, ssmHam);
+    if(!temsilciAgg.has(key)){
+      temsilciAgg.set(key, {key, ad:temsilciHam, ssm: ssmHam||null, netCiro:0, acikLitre:0, kapaliLitre:0, belgeSet:new Set(), invoicedNoktaSet:new Set(), aktifNoktalar:[]});
+    }
+    const t = temsilciAgg.get(key);
+    if(ssmHam && !t.ssm) t.ssm = ssmHam;
+    t.netCiro += net;
+    if(kanal==='Açık Kanal') t.acikLitre += litre; else t.kapaliLitre += litre;
+    if(belgeNo!=null && belgeNo!=='') t.belgeSet.add(String(belgeNo));
+    if(musteri) t.invoicedNoktaSet.add(musteri);
+  });
+
+  // Müşteri Master'daki noktaları temsilcilerine dağıt (bu dönem satışı olmasa da FKNS hesabına
+  // dahil olmaları gerekir). Durum kolonu bulunamadıysa tüm noktalar aktif kabul edilir. Durum
+  // kolonu varsa, yalnızca statüsü açıkça "Pasif" veya "İptal" olan noktalar hem bu listeden hem de
+  // FKNS (Fatura Kesilen Nokta Sayısı) hesaplamasından tamamen çıkarılır; diğer statüler (Aktif ya da
+  // tanınmayan başka bir statü metni) hesaba dahil edilmeye devam eder.
+  const durumVarMi = musteriMasterDurumMap.size > 0;
+  musteriMasterMap.forEach((temsilciAd, musteriKod)=>{
+    if(durumVarMi && noktaPasifVeyaIptalMi(musteriMasterDurumMap.get(musteriKod))) return;
+    const key = normalizeAdSoyad(temsilciAd);
+    if(!temsilciAgg.has(key)){
+      temsilciAgg.set(key, {key, ad:temsilciAd, ssm: temsilciToSSM.get(key)||null, netCiro:0, acikLitre:0, kapaliLitre:0, belgeSet:new Set(), invoicedNoktaSet:new Set(), aktifNoktalar:[]});
+    }
+    temsilciAgg.get(key).aktifNoktalar.push(musteriKod);
+  });
+
+  const temsilciler = Array.from(temsilciAgg.values()).map(t=>{
+    const toplamAktif = t.aktifNoktalar.length;
+    const faturaKesilmeyenKodlar = t.aktifNoktalar.filter(k=>!t.invoicedNoktaSet.has(k));
+    const faturaKesilen = toplamAktif - faturaKesilmeyenKodlar.length;
+    const fknsOrani = toplamAktif>0 ? (faturaKesilen/toplamAktif*100) : null;
+    const ssm = t.ssm || getSahaMuduru(t.ad) || 'Tanımsız';
+    return {
+      key:t.key, temsilci:t.ad, ssm, netCiro:t.netCiro,
+      acikLitre:t.acikLitre, kapaliLitre:t.kapaliLitre, toplamLitre:t.acikLitre+t.kapaliLitre,
+      belgeSayisi:t.belgeSet.size,
+      toplamAktifNokta:toplamAktif, faturaKesilenNokta:faturaKesilen, faturaKesilmeyenNokta:faturaKesilmeyenKodlar.length,
+      fknsOrani,
+      faturaKesilmeyenListe: faturaKesilmeyenKodlar.map(kod=>({kod, adi:(musteriMasterDetayMap.get(kod)||{}).musteriAdi || kod})),
+    };
+  }).sort((a,b)=> b.toplamLitre - a.toplamLitre);
+
+  const aktifNoktaSayisi = durumVarMi
+    ? Array.from(musteriMasterDurumMap.values()).filter(v=>v==='Aktif').length
+    : invoicedNoktaSetGenel.size;
+
+  const gunlukTrendDizi = Array.from(gunlukTrend.entries())
+    .map(([gunKey,v])=>({gunKey, net:v.net, litre:v.litre}))
+    .sort((a,b)=>a.gunKey.localeCompare(b.gunKey));
+
+  return {
+    toplamNet, toplamLitre, belgeSayisi: belgeSetGenel.size, aktifNoktaSayisi, durumVarMi,
+    ssmSayisi: new Set(temsilciler.map(t=>t.ssm||'Tanımsız').filter(s=>s!=='Tanımsız')).size,
+    temsilciSayisi: temsilciler.length,
+    blokajTutar, blokajAdet,
+    temsilciler,
+    markalar: Array.from(markaAgg.entries()).map(([ad,litre])=>({ad,litre})).sort((a,b)=>b.litre-a.litre),
+    hacimSegmentleri: Array.from(hacimSegAgg.entries()).map(([ad,net])=>({ad,net})).sort((a,b)=>b.net-a.net),
+    kanalNet: {acik:acikNetToplam, kapali:kapaliNetToplam},
+    gunlukTrend: gunlukTrendDizi,
+  };
+}
+
+// baseReport (hedef içermeyen, kalıcı olarak saklanan rapor) üzerine güncel litre hedeflerini
+// uygular ve temsilci + SSM satırlarını yeniden hesaplayıp döndürür. Saf bir fonksiyondur —
+// hedef kaydedildiğinde ham dosya yeniden yüklenmeden sadece bu fonksiyon tekrar çağrılır.
+function applySellOutHedef(baseReport, hedefMap){
+  hedefMap = hedefMap || {};
+  const temsilciler = baseReport.temsilciler.map(t=>{
+    const hedef = hedefMap[t.key] || {};
+    const acikHedef = Number(hedef.acik)||0;
+    const kapaliHedef = Number(hedef.kapali)||0;
+    const acikKalan = Math.max(0, acikHedef - t.acikLitre);
+    const kapaliKalan = Math.max(0, kapaliHedef - t.kapaliLitre);
+    const toplamHedef = acikHedef+kapaliHedef;
+    const hedefGerceklesme = toplamHedef>0 ? (t.toplamLitre/toplamHedef*100) : null;
+    return Object.assign({}, t, {acikHedef, kapaliHedef, acikKalan, kapaliKalan, hedefGerceklesme});
+  })
+  // SSM'i tespit edilemeyen (Tanımsız) temsilciler — genelde bu dönem hiç satışı olmayan, hardcoded
+  // SSM eşlemesinde de bulunmayan "yetim" kayıtlardır — hem raporda hem SSM tablosunda gösterilmez.
+  .filter(t=> t.ssm && t.ssm !== 'Tanımsız')
+  .sort((a,b)=> b.toplamLitre - a.toplamLitre);
+
+  const ssmAgg = new Map();
+  temsilciler.forEach(r=>{
+    const key = r.ssm;
+    if(!ssmAgg.has(key)) ssmAgg.set(key, {ssm:key, acikHedef:0, acikLitre:0, kapaliHedef:0, kapaliLitre:0, toplamAktifNokta:0, faturaKesilenNokta:0, temsilciSayisi:0});
+    const s = ssmAgg.get(key);
+    s.acikHedef += r.acikHedef; s.acikLitre += r.acikLitre;
+    s.kapaliHedef += r.kapaliHedef; s.kapaliLitre += r.kapaliLitre;
+    s.toplamAktifNokta += r.toplamAktifNokta; s.faturaKesilenNokta += r.faturaKesilenNokta;
+    s.temsilciSayisi += 1;
+  });
+  const ssmler = Array.from(ssmAgg.values()).map(s=>{
+    const toplamHedef = s.acikHedef+s.kapaliHedef;
+    const toplamSatis = s.acikLitre+s.kapaliLitre;
+    return Object.assign({}, s, {
+      hedefGerceklesme: toplamHedef>0 ? (toplamSatis/toplamHedef*100) : null,
+      genelFkns: s.toplamAktifNokta>0 ? (s.faturaKesilenNokta/s.toplamAktifNokta*100) : null,
+    });
+  }).sort((a,b)=> (b.acikLitre+b.kapaliLitre)-(a.acikLitre+a.kapaliLitre));
+
+  return Object.assign({}, baseReport, {
+    temsilciler, ssmler,
+    temsilciSayisi: temsilciler.length,
+    ssmSayisi: ssmler.length,
+  });
+}
+
+async function saveSellOutHedefToCloud(obj){
+  if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
+  try{
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${SELLOUT_HEDEF_CLOUD_PATH}.json${await authQuery()}`, {
+      method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(obj),
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    return {ok:true};
+  }catch(err){ console.error('Sell Out hedef buluta kaydedilemedi:', err); return {ok:false, reason:err.message}; }
+}
+async function loadSellOutHedefFromCloud(){
+  if(!cloudEnabled()) return null;
+  try{
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${SELLOUT_HEDEF_CLOUD_PATH}.json${await authQuery()}`);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const text = await res.text();
+    if(!text || text==='null') return null;
+    return JSON.parse(text);
+  }catch(err){ console.error('Sell Out hedef buluttan okunamadı:', err); return null; }
+}
+async function saveSellOutHedefToLocal(obj){
+  const ok = await idbSet(SELLOUT_HEDEF_LOCAL_KEY, obj);
+  if(!ok) console.error('Sell Out hedef cihaza kaydedilemedi.');
+}
+async function loadSellOutHedefFromLocal(){
+  try{ return await idbGet(SELLOUT_HEDEF_LOCAL_KEY); }catch(err){ console.error(err); return null; }
+}
+async function sellOutHedefYenile(){
+  let obj = null;
+  if(cloudEnabled()) obj = await loadSellOutHedefFromCloud();
+  if(!obj) obj = await loadSellOutHedefFromLocal();
+  state.sellOutHedef = obj || {};
+  return state.sellOutHedef;
+}
+async function sellOutHedefKaydet(obj){
+  state.sellOutHedef = obj;
+  await saveSellOutHedefToLocal(obj);
+  if(cloudEnabled()) await saveSellOutHedefToCloud(obj);
+}
+
+async function saveSellOutReportToCloud(rapor){
+  if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
+  try{
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${SELLOUT_REPORT_CLOUD_PATH}.json${await authQuery()}`, {
+      method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(rapor),
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    return {ok:true};
+  }catch(err){ console.error('Sell Out raporu buluta kaydedilemedi:', err); return {ok:false, reason:err.message}; }
+}
+async function loadSellOutReportFromCloud(){
+  if(!cloudEnabled()) return null;
+  try{
+    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${SELLOUT_REPORT_CLOUD_PATH}.json${await authQuery()}`);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const text = await res.text();
+    if(!text || text==='null') return null;
+    return JSON.parse(text);
+  }catch(err){ console.error('Sell Out raporu buluttan okunamadı:', err); return null; }
+}
+async function saveSellOutReportToLocal(rapor){
+  const ok = await idbSet(SELLOUT_REPORT_LOCAL_KEY, rapor);
+  if(!ok) console.error('Sell Out raporu cihaza kaydedilemedi.');
+}
+async function loadSellOutReportFromLocal(){
+  try{ return await idbGet(SELLOUT_REPORT_LOCAL_KEY); }catch(err){ console.error(err); return null; }
+}
+async function sellOutYenile(){
+  let rapor = null;
+  if(cloudEnabled()) rapor = await loadSellOutReportFromCloud();
+  if(!rapor) rapor = await loadSellOutReportFromLocal();
+  state.sellOutReport = rapor;
+  return rapor;
+}
+async function sellOutKaydet(rapor){
+  state.sellOutReport = rapor;
+  await saveSellOutReportToLocal(rapor);
+  if(cloudEnabled()) await saveSellOutReportToCloud(rapor);
+}
+
+async function sellOutRaporuOlustur(){
+  const dosya = state.files.sellOut;
+  if(!dosya) return; // yeni dosya yüklenmediyse önceden kaydedilmiş rapor korunur
+  try{
+    const baseRapor = buildSellOutReport(dosya.data, state.musteriMasterMap, state.musteriMasterDurum, state.musteriMasterDetay);
+    await sellOutKaydet(baseRapor);
+  }catch(err){
+    console.error('Sell Out raporu oluşturulamadı:', err);
+  }
+}
+
+function sellOutRenk(oran){
+  if(oran==null) return 'var(--ink-faint)';
+  if(oran>=90) return 'var(--success)';
+  if(oran>=75) return 'var(--warn)';
+  return 'var(--danger)';
+}
+
+// FKNS (ya da Genel FKNS) oranını gösteren dairesel gösterge (donut) — SSM Karneleri ve Temsilci
+// Karnesi kartlarında birebir aynı görselle kullanılır. Çevre uzunluğu r=16 için ~100 birim olduğundan
+// stroke-dasharray doğrudan yüzde değeriyle eşleşir.
+function fknsRingSvg(oran){
+  const renk = sellOutRenk(oran);
+  const deger = oran==null ? 0 : Math.max(0, Math.min(100, oran));
+  const metin = oran==null ? '—' : '%'+Math.round(oran);
+  return `<svg class="ssm-fkns-ring" viewBox="0 0 36 36">
+    <path d="M18 2a16 16 0 0 1 0 32 16 16 0 0 1 0-32" fill="none" stroke="#EEF2F7" stroke-width="4"/>
+    <path d="M18 2a16 16 0 0 1 0 32 16 16 0 0 1 0-32" fill="none" style="stroke:${renk}" stroke-width="4" stroke-dasharray="${deger} 100" stroke-linecap="round"/>
+    <text x="18" y="21" font-size="9" font-weight="700" fill="#152238" text-anchor="middle" font-family="Space Grotesk">${escapeHtml(metin)}</text>
+  </svg>`;
+}
+
+// Açık/Kapalı Kanal ilerleme satırı — hedef girilmemişse (0) sadece satış litresi gösterilir.
+// Hedef girilmişse, çubuğun altında kalan (hedef-satış, negatifse 0) litre bilgisi de gösterilir.
+function ssmKanalRowHtml(label, satis, hedef){
+  const hedefVarMi = hedef>0;
+  const pct = hedefVarMi ? Math.min(100, satis/hedef*100) : 0;
+  const renk = hedefVarMi ? sellOutRenk(pct) : 'var(--ink-faint)';
+  const valTxt = hedefVarMi ? `${NUM(satis)} / ${NUM(hedef)} Lt.` : `${LT(satis)} <small>· hedef yok</small>`;
+  const kalanTxt = hedefVarMi ? `<div class="ssm-kanal-kalan">Kalan ${LT(Math.max(0, hedef-satis))}</div>` : '';
+  return `<div class="ssm-kanal-row">
+    <div class="ssm-kanal-top"><span class="lbl">${escapeHtml(label)}</span><span class="val">${valTxt}</span></div>
+    <div class="ssm-kanal-track"><div class="ssm-kanal-fill" style="width:${pct.toFixed(1)}%;background:${renk};"></div></div>
+    ${kalanTxt}
+  </div>`;
+}
+
+function renderSellOutBarRows(items, key, fmt){
+  key = key || 'net'; fmt = fmt || TL;
+  if(!items || !items.length) return '<div class="empty-state">Kayıt yok</div>';
+  const maks = Math.max(...items.map(i=>i[key]), 1);
+  return items.map(i=>{
+    const pct = Math.max(2, i[key]/maks*100);
+    return `<div class="bar-row"><div class="bar-label" title="${escapeHtml(i.ad)}">${escapeHtml(i.ad)}</div><div class="bar-track"><div class="bar-fill" style="width:${pct.toFixed(1)}%"></div></div><div class="bar-value">${fmt(i[key])}</div></div>`;
+  }).join('');
+}
+
+function gunKeyGoster(gunKey){
+  if(!gunKey) return '—';
+  const parts = String(gunKey).split('-');
+  return parts.length===3 ? (parts[2]+'.'+parts[1]) : gunKey;
+}
+function gunKeyGosterUzun(gunKey){
+  if(!gunKey) return '—';
+  const parts = String(gunKey).split('-');
+  return parts.length===3 ? (parts[2]+'.'+parts[1]+'.'+parts[0]) : gunKey;
+}
+
+function sellOutMiniChart(gunlukTrend, key, renk, koyuRenk, fmt){
+  const w=300, h=124, padX=22, padTop=26, padBottom=28;
+  const vals = gunlukTrend.map(g=>g[key]);
+  const maks = Math.max(...vals, 1);
+  const mins = Math.min(...vals, 0);
+  const span = (maks-mins)||1;
+  const n = gunlukTrend.length;
+  const stepX = n>1 ? (w-2*padX)/(n-1) : 0;
+  const pts = gunlukTrend.map((g,i)=>{
+    const x = padX + i*stepX;
+    const y = padTop + (1-((g[key]-mins)/span))*(h-padTop-padBottom);
+    return {x,y,g,i};
+  });
+  const polyline = pts.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ');
+  const circles = pts.map(p=>`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="${koyuRenk}"><title>${escapeHtml(gunKeyGosterUzun(p.g.gunKey))}: ${escapeHtml(fmt(p.g[key]))}</title></circle>`).join('');
+
+  // Gün etiketleri: çok fazla nokta varsa çakışmayı önlemek için bir atlayarak gösterilir.
+  const gunAtlama = n>8 ? 2 : 1;
+  const labels = pts.filter(p=> p.i%gunAtlama===0 || p.i===n-1).map(p=>`<text x="${p.x.toFixed(1)}" y="${h-10}" font-size="10" fill="#71809A" text-anchor="middle">${escapeHtml(gunKeyGoster(p.g.gunKey))}</text>`).join('');
+
+  // Değer etiketleri: HER noktaya basmak dar aralıkta çakışmaya yol açtığından, yalnızca ilk, son,
+  // en yüksek ve en düşük değerli noktalar (birbirine çok yakın değillerse) etiketlenir; tüm
+  // noktaların tam değeri zaten daireye gelindiğinde (hover/tooltip) görünür.
+  const gercekMaks = Math.max(...vals);
+  const gercekMins = Math.min(...vals);
+  let adaylar = Array.from(new Set([0, n-1, vals.indexOf(gercekMaks), vals.indexOf(gercekMins)])).sort((a,b)=>a-b);
+  const minPikselAralik = 42;
+  const secilenler = [];
+  adaylar.forEach(idx=>{
+    const p = pts[idx];
+    if(secilenler.length===0 || Math.abs(p.x - secilenler[secilenler.length-1].x) >= minPikselAralik){
+      secilenler.push(p);
+    }
+  });
+  const vlabels = secilenler.map(p=>`<text x="${p.x.toFixed(1)}" y="${(p.y-9).toFixed(1)}" font-size="9.5" fill="#152238" text-anchor="middle" font-weight="700">${escapeHtml(fmt(p.g[key]))}</text>`).join('');
+
+  return `<svg viewBox="0 0 ${w} ${h}"><polyline points="${polyline}" fill="none" stroke="${renk}" stroke-width="2.5"/>${circles}${labels}${vlabels}</svg>`;
+}
+
+function renderSellOutTrendCharts(gunlukTrendTam){
+  const gunlukTrend = (gunlukTrendTam||[]).slice(-14);
+  if(gunlukTrend.length < 2) return '<div class="empty-state">Trend için yeterli gün verisi yok</div>';
+  const netVals = gunlukTrend.map(g=>g.net);
+  const litreVals = gunlukTrend.map(g=>g.litre);
+  const ortNet = netVals.reduce((a,b)=>a+b,0)/netVals.length;
+  const ortLitre = litreVals.reduce((a,b)=>a+b,0)/litreVals.length;
+  return `
+    <div class="trend-chart-card">
+      <div class="trend-chart-title">Net Ciro (₺)</div>
+      ${sellOutMiniChart(gunlukTrend,'net','#1B5FAE','#123E73', TL)}
+      <div class="trend-chart-ortalama">Günlük ortalama: ${TL(ortNet)}</div>
+    </div>
+    <div class="trend-chart-card">
+      <div class="trend-chart-title">Hacim (L)</div>
+      ${sellOutMiniChart(gunlukTrend,'litre','#B8862E','#8a6620', LT)}
+      <div class="trend-chart-ortalama">Günlük ortalama: ${LT(ortLitre)}</div>
+    </div>`;
+}
+
+async function renderSellOutView(){
+  const bosPanel = document.getElementById('sellOutBosPanel');
+  const icerik = document.getElementById('sellOutIcerik');
+  const baseRapor = state.sellOutReport;
+  if(!baseRapor){
+    bosPanel.style.display='block';
+    icerik.style.display='none';
+    document.getElementById('sellOutAsOf').textContent = 'Veri kaynağı: Sell Out Raporu (SAPUI5 dışa aktarımı) — henüz yüklenmedi';
+    return;
+  }
+  bosPanel.style.display='none';
+  icerik.style.display='block';
+  const report = applySellOutHedef(baseRapor, state.sellOutHedef);
+
+  const durumNotu = report.durumVarMi ? '' : " · Müşteri Master'da Durum kolonu bulunamadı, tüm noktalar aktif kabul edildi";
+  document.getElementById('sellOutAsOf').textContent = 'Veri kaynağı: SAPUI5 dışa aktarımı · '+report.belgeSayisi.toLocaleString('tr-TR')+' satış belgesi · '+fmtDate(new Date())+' itibarıyla'+durumNotu;
+
+  const alertEl = document.getElementById('sellOutAlertBanner');
+  if(report.blokajAdet>0){
+    const oran = report.toplamNet>0 ? (report.blokajTutar/report.toplamNet*100) : 0;
+    alertEl.innerHTML = `<div class="alert-banner">
+      <div class="alert-banner-icon">⚠️</div>
+      <div class="alert-banner-text"><strong>${report.blokajAdet.toLocaleString('tr-TR')} kalem faturalama blokajlı</strong>— ${TL(report.blokajTutar)} tutarında muhasebeleşmeyi bekliyor, toplam cironun %${oran.toFixed(1).replace('.',',')}'i.</div>
+    </div>`;
+  }else{
+    alertEl.innerHTML = '';
+  }
+
+  const toplamAcikLitreGenel = report.temsilciler.reduce((a,t)=>a+t.acikLitre,0);
+  const toplamKapaliLitreGenel = report.temsilciler.reduce((a,t)=>a+t.kapaliLitre,0);
+  const toplamAcikHedefGenel = report.temsilciler.reduce((a,t)=>a+t.acikHedef,0);
+  const toplamKapaliHedefGenel = report.temsilciler.reduce((a,t)=>a+t.kapaliHedef,0);
+  const acikKalanGenel = Math.max(0, toplamAcikHedefGenel - toplamAcikLitreGenel);
+  const kapaliKalanGenel = Math.max(0, toplamKapaliHedefGenel - toplamKapaliLitreGenel);
+  const toplamHedefGenelHero = toplamAcikHedefGenel + toplamKapaliHedefGenel;
+  const genelGerceklesmeOraniHero = toplamHedefGenelHero>0 ? ((toplamAcikLitreGenel+toplamKapaliLitreGenel)/toplamHedefGenelHero*100) : null;
+
+  const items = [
+    {label:'Gerçekleşme Oranı', icon:'🎯', value:null, display: genelGerceklesmeOraniHero!=null?fmtYuzde(genelGerceklesmeOraniHero):'—', sub: `<span style="display:flex;flex-direction:column;align-items:flex-end;gap:1px;"><span style="font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;opacity:.8;">Toplam Litre</span><span style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:800;line-height:1.15;">${Math.round(report.toplamLitre).toLocaleString('tr-TR')} L</span></span>`},
+    {label:'Toplam Açık Kanal LT', icon:'🛢️', value:null, display: LT(toplamAcikLitreGenel)},
+    {label:'Toplam Kapalı Kanal LT', icon:'📦', value:null, display: LT(toplamKapaliLitreGenel)},
+    {label:'Açık Kanal Kalan Litre', icon:'🏪', value:null, display: LT(acikKalanGenel)},
+    {label:'Kapalı Kanal Kalan Litre', icon:'👥', value:null, display: LT(kapaliKalanGenel)},
+  ];
+  renderKpiHeroRow(items, 'sellOutKpiGrid');
+
+
+  document.getElementById('sellOutSsmCount').textContent = report.ssmSayisi+' Saha Satış Müdürü';
+  const ssmCardsHtml = report.ssmler.map(s=>`
+    <div class="ssm-karne-card">
+      <div class="ssm-karne-top">
+        <div class="cust-avatar">${escapeHtml(avatarBaslangic(s.ssm))}</div>
+        <div>
+          <div class="ssm-karne-name">${escapeHtml(s.ssm)}</div>
+          <div class="ssm-karne-sub">${s.temsilciSayisi.toLocaleString('tr-TR')} temsilci</div>
+        </div>
+        <div class="ssm-fkns-ring-wrap">
+          ${fknsRingSvg(s.genelFkns)}
+          <div class="ssm-fkns-ring-label">FKNS</div>
+        </div>
+      </div>
+      ${ssmKanalRowHtml('Açık Kanal', s.acikLitre, s.acikHedef)}
+      ${ssmKanalRowHtml('Kapalı Kanal', s.kapaliLitre, s.kapaliHedef)}
+      <div class="ssm-karne-foot">
+        <span class="g-lbl">Hedef Gerçekleşme</span>
+        <span class="g-val" style="color:${sellOutRenk(s.hedefGerceklesme)};">${s.hedefGerceklesme!=null?fmtYuzde(s.hedefGerceklesme):'—'}</span>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('sellOutSsmGrid').innerHTML = report.ssmler.length ? ssmCardsHtml : '<div class="empty-state" style="grid-column:1/-1;">Kayıt yok</div>';
+
+  document.getElementById('sellOutKarneGrid').innerHTML = report.temsilciler.map((r,i)=>{
+    const gercRenk = sellOutRenk(r.hedefGerceklesme);
+    const expandKey = 'sellout_'+r.key;
+    const expanded = state.expanded.has(expandKey);
+    const noktaSort = state.sellOutNoktaSort.get(r.key) || {key:'adi', dir:1};
+    const siraliListe = r.faturaKesilmeyenListe.slice().sort((a,b)=>{
+      const av = String(a[noktaSort.key]||''), bv = String(b[noktaSort.key]||'');
+      return noktaSort.dir * av.localeCompare(bv, 'tr');
+    });
+    const listeHtml = siraliListe.length
+      ? `<div class="sort-bar" style="margin-bottom:10px;">
+          <span class="sort-bar-label">Sırala</span>
+          <select class="filter-select karne-nokta-sort-select" data-temsilci-key="${escapeHtml(r.key)}">
+            <option value="adi"${noktaSort.key==='adi'?' selected':''}>Müşteri Adı</option>
+            <option value="kod"${noktaSort.key==='kod'?' selected':''}>Müşteri Numarası</option>
+          </select>
+          <button type="button" class="sort-dir-btn karne-nokta-sort-dir-btn" data-temsilci-key="${escapeHtml(r.key)}" title="Sıralama yönünü değiştir">${noktaSort.dir===1?'↓':'↑'}</button>
+        </div>
+        <div class="karne-nokta-list">`+siraliListe.map(n=>`<div class="karne-nokta-item"><div class="adi" title="${escapeHtml(n.adi)}">${escapeHtml(n.adi)}</div><div class="kod">${escapeHtml(n.kod)}</div></div>`).join('')+'</div>'
+      : '<div class="fkns-empty">Tüm aktif noktalara fatura kesilmiş 🎉</div>';
+    return `
+    <div class="cust-card sellout-card${expanded?' is-open':''}" data-temsilci-key="${escapeHtml(r.key)}">
+      <div class="ssm-karne-top">
+        <div class="cust-avatar">${escapeHtml(avatarBaslangic(r.temsilci))}</div>
+        <div class="cust-info">
+          <div class="musteri-name">${escapeHtml(r.temsilci)} <span class="badge info">#${i+1}</span></div>
+          <span class="temsilci-tag" style="margin-top:5px;display:inline-block;">${escapeHtml(r.ssm)}</span>
+        </div>
+        <div class="ssm-fkns-ring-wrap">
+          ${fknsRingSvg(r.fknsOrani)}
+          <div class="ssm-fkns-ring-label">FKNS</div>
+        </div>
+      </div>
+      ${ssmKanalRowHtml('Açık Kanal', r.acikLitre, r.acikHedef)}
+      ${ssmKanalRowHtml('Kapalı Kanal', r.kapaliLitre, r.kapaliHedef)}
+      <div class="ssm-karne-foot">
+        <span class="g-lbl">Hedef Gerçekleşme</span>
+        <span class="g-val" style="color:${gercRenk};">${r.hedefGerceklesme!=null?fmtYuzde(r.hedefGerceklesme):'—'}</span>
+      </div>
+
+      <div class="hedef-edit-row">
+        <div class="hedef-field"><label>Açık Hedef (L)</label><input type="number" min="0" step="100" class="sellout-hedef-input" data-temsilci-key="${escapeHtml(r.key)}" data-kanal="acik" value="${r.acikHedef||0}"></div>
+        <div class="hedef-field"><label>Kapalı Hedef (L)</label><input type="number" min="0" step="100" class="sellout-hedef-input" data-temsilci-key="${escapeHtml(r.key)}" data-kanal="kapali" value="${r.kapaliHedef||0}"></div>
+        <button type="button" class="hedef-kaydet-btn" data-temsilci-key="${escapeHtml(r.key)}" data-temsilci-ad="${escapeHtml(r.temsilci)}">🔒 Kaydet</button>
+      </div>
+
+      <div class="karne-expand-toggle"><span>Fatura kesilmeyen aktif noktalar (${r.faturaKesilmeyenNokta})</span><span class="cust-chevron" style="margin:0;">${expanded?'⌄':'›'}</span></div>
+      ${expanded ? `<div class="karne-expanded">${listeHtml}</div>` : ''}
+    </div>`;
+  }).join('') || '<div class="empty-state" style="grid-column:1/-1;">Kayıt yok</div>';
+
+  document.querySelectorAll('#sellOutKarneGrid .sellout-card').forEach(card=>{
+    card.addEventListener('click', (e)=>{
+      if(e.target.closest('.hedef-edit-row')) return;
+      if(e.target.closest('.karne-expanded')) return;
+      const key = 'sellout_'+card.getAttribute('data-temsilci-key');
+      if(state.expanded.has(key)) state.expanded.delete(key); else state.expanded.add(key);
+      renderSellOutView();
+    });
+  });
+  document.querySelectorAll('.karne-nokta-sort-select').forEach(sel=>{
+    sel.addEventListener('click', e=>e.stopPropagation());
+    sel.addEventListener('change', e=>{
+      e.stopPropagation();
+      const key = sel.getAttribute('data-temsilci-key');
+      const mevcut = state.sellOutNoktaSort.get(key) || {key:'adi', dir:1};
+      state.sellOutNoktaSort.set(key, {key: sel.value, dir: mevcut.dir});
+      renderSellOutView();
+    });
+  });
+  document.querySelectorAll('.karne-nokta-sort-dir-btn').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      e.stopPropagation();
+      const key = btn.getAttribute('data-temsilci-key');
+      const mevcut = state.sellOutNoktaSort.get(key) || {key:'adi', dir:1};
+      state.sellOutNoktaSort.set(key, {key: mevcut.key, dir: mevcut.dir*-1});
+      renderSellOutView();
+    });
+  });
+
+  document.getElementById('sellOutMarkaBar').innerHTML = renderSellOutBarRows(report.markalar, 'litre', LT);
+  document.getElementById('sellOutHacimBar').innerHTML = renderSellOutBarRows(report.hacimSegmentleri, 'net', TL);
+
+  const acikNet = report.kanalNet.acik, kapaliNet = report.kanalNet.kapali;
+  const toplamKanalNet = (acikNet+kapaliNet) || 1;
+  const acikPct = acikNet/toplamKanalNet*100, kapaliPct = kapaliNet/toplamKanalNet*100;
+  document.getElementById('sellOutKanalBar').innerHTML = `
+    <div class="channel-bar">
+      <span style="width:${kapaliPct.toFixed(1)}%;background:var(--accent-deep);">${kapaliPct>=8?('Kapalı Kanal %'+kapaliPct.toFixed(1).replace('.',',')):''}</span>
+      <span style="width:${acikPct.toFixed(1)}%;background:var(--accent);">${acikPct>=8?('Açık Kanal %'+acikPct.toFixed(1).replace('.',',')):''}</span>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--accent-deep)"></i>Kapalı Kanal — ${TL(kapaliNet)}</span>
+      <span><i style="background:var(--accent)"></i>Açık Kanal — ${TL(acikNet)}</span>
+    </div>`;
+
+  const gt = report.gunlukTrend||[];
+  document.getElementById('sellOutTrendBaslik').textContent = 'Günlük Trend'+(gt.length ? (' — '+gunKeyGosterUzun(gt[Math.max(0,gt.length-14)].gunKey)+' – '+gunKeyGosterUzun(gt[gt.length-1].gunKey)) : '');
+  document.getElementById('sellOutTrendGrid').innerHTML = renderSellOutTrendCharts(gt);
+
+  document.querySelectorAll('.hedef-kaydet-btn').forEach(btn=>{
+    btn.addEventListener('click', sellOutHedefKaydetHandler);
+  });
+}
+
+async function sellOutHedefKaydetHandler(e){
+  const btn = e.currentTarget;
+  const key = btn.getAttribute('data-temsilci-key');
+  const ad = btn.getAttribute('data-temsilci-ad');
+  const card = btn.closest('.cust-card');
+  const acikInput = card.querySelector('.sellout-hedef-input[data-kanal="acik"]');
+  const kapaliInput = card.querySelector('.sellout-hedef-input[data-kanal="kapali"]');
+  const acik = Number(acikInput.value)||0;
+  const kapali = Number(kapaliInput.value)||0;
+
+  const girilenSifre = prompt('Litre hedefini değiştirmek için şifreyi girin:');
+  if(girilenSifre===null) return;
+  if(girilenSifre !== FATURA_ARSIV_TEMIZLEME_SIFRESI){
+    alert('Şifre hatalı — hedef kaydedilmedi.');
+    return;
+  }
+  btn.disabled = true;
+  const eskiText = btn.textContent;
+  btn.textContent = '⏳ Kaydediliyor…';
+  try{
+    const yeni = Object.assign({}, state.sellOutHedef);
+    yeni[key] = {ad, acik, kapali};
+    await sellOutHedefKaydet(yeni);
+    await renderSellOutView();
+  }catch(err){
+    console.error('Hedef kaydedilemedi:', err);
+    alert('Hedef kaydedilirken bir hata oluştu: '+err.message);
+    btn.textContent = eskiText;
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('sellOutYenileBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('sellOutYenileBtn');
+  btn.disabled = true;
+  const prevText = btn.textContent;
+  btn.textContent = '🔄 Yenileniyor…';
+  await sellOutHedefYenile();
+  await musteriMasterYenile();
+  await sellOutYenile();
+  await renderSellOutView();
+  btn.disabled = false;
+  btn.textContent = prevText;
+});
 
 // --- Olay bağlamaları ---
 document.getElementById('dsoTrendYenileBtn').addEventListener('click', ()=> renderDsoTrendView(state.report || {musteriler:[]}, true));
