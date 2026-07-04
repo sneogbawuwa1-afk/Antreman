@@ -524,7 +524,7 @@
 
   .week-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line-soft);}
   .week-row:last-child{border-bottom:none;}
-  .week-label{width:96px;flex-shrink:0;font-size:12px;font-weight:600;color:var(--ink-soft);}
+  .week-label{width:96px;flex-shrink:0;font-size:12px;font-weight:600;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .week-track{flex:1;height:16px;background:var(--line-soft);border-radius:5px;overflow:hidden;position:relative;}
   .week-fill{height:100%;border-radius:5px 0 0 5px;background:linear-gradient(90deg,var(--accent),var(--accent-deep));}
   .week-val{width:118px;text-align:right;flex-shrink:0;font-size:12.5px;font-weight:700;font-family:'Space Grotesk',sans-serif;}
@@ -561,6 +561,8 @@
   .tab-dropdown-menu{
     position:fixed;top:0;left:0;display:none;flex-direction:column;gap:2px;
     background:#fff;border-radius:14px;padding:6px;min-width:238px;
+    max-width:calc(100vw - 16px);max-height:min(70vh,420px);overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
     box-shadow:0 14px 34px -10px rgba(19,34,63,.38),0 0 0 1px rgba(19,34,63,.06);
     z-index:200;
   }
@@ -648,6 +650,10 @@
     .aging-label{width:78px;font-size:11px;}
     .aging-value{width:88px;font-size:11.5px;}
 
+    .week-label{width:74px;font-size:11px;}
+    .week-val{width:92px;font-size:11px;}
+    .week-row{gap:8px;}
+
     .rep-grid{grid-template-columns:1fr 1fr;gap:8px;}
     .rep-card{padding:10px 12px;}
     .rep-card .rname{font-size:12.5px;}
@@ -719,7 +725,7 @@
 <div id="authGate" style="position:fixed;inset:0;background:var(--bg,#EEF1F6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;">
   <div style="background:#fff;border-radius:16px;padding:36px 32px;max-width:380px;width:100%;box-shadow:0 12px 36px rgba(0,0,0,.10);border:1px solid var(--line,#DBE2EC);">
     <div style="text-align:center;margin-bottom:22px;">
-      <div style="width:44px;height:44px;border-radius:11px;background:var(--navy,#13233F);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;margin:0 auto 12px;" translate="no">V1</div>
+      <div style="width:44px;height:44px;border-radius:11px;background:var(--navy,#13233F);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;margin:0 auto 12px;" translate="no">V2</div>
       <h2 style="margin:0;font-size:18px;" translate="no">Keşan Bayi Takip Paneli</h2>
       <p style="margin:6px 0 0;color:var(--ink-soft,#54617A);font-size:13px;">Devam etmek için giriş yapın</p>
     </div>
@@ -736,7 +742,7 @@
 
   <div class="topbar">
     <div class="brand">
-      <div class="brand-mark" translate="no">V1</div>
+      <div class="brand-mark" translate="no">V2</div>
       <div>
         <h1 translate="no">Keşan Bayi Takip Paneli</h1>
         <p class="brand-tag" translate="no">Akgün Meşrubat Gıda · Berat Çağlar CAN</p>
@@ -1606,7 +1612,7 @@
       </details>
       <div class="as-of">Veri kaynağı: Kalemler (yaşlandırma) — karşılık oranları elle düzenlenebilir</div>
       <div id="supheliAlacakKpiGrid"></div>
-      <div class="grid2" style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;">
+      <div class="grid2">
         <div class="panel">
           <div class="panel-head"><div><h2>Yaşlandırma Bazlı Karşılık Matrisi</h2><span class="count">oranlar otomatik hesaplanır — dilimin gerçek ortalama gecikme gününe göre</span></div></div>
           <div class="panel-body" style="padding:0;">
@@ -1699,7 +1705,7 @@
         </div>
       </div>
       <div id="yoKpiGrid"></div>
-      <div class="grid2" style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;">
+      <div class="grid2">
         <div class="panel">
           <div class="panel-head"><div><h2>Bakiye ve Tahsilat Trendi</h2><span class="count" id="yoChartSub"></span></div></div>
           <div class="panel-body"><div class="trend-chart-card"><div id="yoChart"></div></div></div>
@@ -1757,7 +1763,7 @@
         DSO'dan farkı: CEI, o dönem tahsil edilebilecek (vadesi gelmiş — Faturadan Sonr. Gün ≥ 23) alacağın ne kadarının fiilen tahsil edildiğini ölçer.
       </div>
       <div id="ceiKpiGrid"></div>
-      <div class="grid2" style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;">
+      <div class="grid2">
         <div class="panel">
           <div class="panel-head"><div><h2>Aylık CEI Trendi</h2><span class="count" id="ceiChartSub"></span></div></div>
           <div class="panel-body"><div class="trend-chart-card"><div id="ceiChart"></div></div></div>
@@ -3578,6 +3584,7 @@ const TAB_DROPDOWNS = [
 ];
 function closeDropdown(d){
   d.menu.classList.remove('open');
+  d.menu.style.visibility = '';
   d.btn.setAttribute('aria-expanded','false');
   d.menu.setAttribute('aria-hidden','true');
 }
@@ -3587,13 +3594,26 @@ function closeAllDropdowns(except){
 function openDropdown(d){
   closeAllDropdowns(d);
   const r = d.btn.getBoundingClientRect();
+  // Menü display:none haldeyken offsetWidth/offsetHeight her zaman 0 döner,
+  // bu yüzden gerçek boyut yerine sabit bir varsayıma (238px) güveniliyordu.
+  // En uzun etiketli menüde (Finansal Analiz → "Temsilci Tahsilat
+  // Verimliliği") gerçek genişlik bunu aştığında menü dar telefon
+  // ekranlarında sağdan taşıyordu. Şimdi menüyü önce görünmez (visibility)
+  // ama ölçülebilir yapıp gerçek boyutunu alıyor, sonra hem yatayda hem
+  // dikeyde ekran sınırlarına göre konumlandırıyoruz.
+  d.menu.style.visibility = 'hidden';
+  d.menu.classList.add('open');
   const menuWidth = d.menu.offsetWidth || 238;
+  const menuHeight = d.menu.offsetHeight || 0;
   let left = r.left;
   const maxLeft = window.innerWidth - menuWidth - 8;
   if(left > maxLeft) left = Math.max(8, maxLeft);
-  d.menu.style.top = (r.bottom + 6) + 'px';
+  let top = r.bottom + 6;
+  const maxTop = window.innerHeight - menuHeight - 8;
+  if(top > maxTop) top = Math.max(8, maxTop);
+  d.menu.style.top = top + 'px';
   d.menu.style.left = left + 'px';
-  d.menu.classList.add('open');
+  d.menu.style.visibility = 'visible';
   d.btn.setAttribute('aria-expanded','true');
   d.menu.setAttribute('aria-hidden','false');
 }
@@ -3612,6 +3632,25 @@ document.addEventListener('click', (e)=>{
 });
 window.addEventListener('resize', ()=>{ TAB_DROPDOWNS.forEach(d=>{ if(d.menu.classList.contains('open')) openDropdown(d); }); });
 document.querySelector('.tabbar')?.addEventListener('scroll', ()=>closeAllDropdowns());
+
+// Topbar yüksekliği mobilde (marka + aksiyon butonları alt alta düşünce) veya
+// masaüstünde (uzun bayi adı/etiketiyle) değişebiliyor. Sekme çubuğunun sticky
+// "top" değeri sabit bir sayıya kilitliyse, topbar ondan uzun olduğunda sekme
+// çubuğunun üst kısmı topbar'ın arkasında kalıp görünmez/tıklanmaz hale
+// geliyordu. Bunun yerine gerçek topbar yüksekliğini ölçüp sekme çubuğunu
+// her zaman tam altına sabitliyoruz.
+(function syncTabbarOffset(){
+  const topbarEl = document.querySelector('.topbar');
+  const tabbarEl = document.getElementById('tabBar');
+  if(!topbarEl || !tabbarEl) return;
+  const apply = ()=>{ tabbarEl.style.top = Math.ceil(topbarEl.getBoundingClientRect().height) + 'px'; };
+  if('ResizeObserver' in window){
+    new ResizeObserver(apply).observe(topbarEl);
+  } else {
+    window.addEventListener('resize', apply);
+  }
+  apply();
+})();
 
 document.querySelectorAll('.tab-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -5079,13 +5118,21 @@ function trendTextWidth(text, font){
   return _trendMeasureCtx.measureText(text).width;
 }
 
+const __trendChartCache = {};
 function renderTrendChart(containerId, seri, key, renk, birim){
+  __trendChartCache[containerId] = {seri, key, renk, birim};
   const el = document.getElementById(containerId);
   if(!seri.length){
     el.innerHTML = '<div class="empty-state" style="padding:24px 10px;">Veri yok</div>';
     return;
   }
-  const W = 520, H = 192, padR = 16, padT = 18, padB = 28;
+  // Grafik genişliği, SVG viewBox'ı sabit 520 varsayıp gerçek konteyner mobilde
+  // çok daha darsa (örn. 300px), eksen yazılarının/etiketlerin orantısız
+  // küçülüp okunamaz hale gelmesine yol açıyordu. Bunun yerine viewBox'ı
+  // konteynerin GERÇEK piksel genişliğine eşitliyoruz; böylece font-size gibi
+  // mutlak birimler her ekran boyutunda aynı görünür büyüklükte kalır.
+  const containerWidth = el.clientWidth || (el.parentElement && el.parentElement.clientWidth) || 520;
+  const W = Math.max(240, Math.round(containerWidth)), H = 192, padR = 16, padT = 18, padB = 28;
   const values = seri.map(s=>s[key]);
   let minV = Math.min(...values), maxV = Math.max(...values);
   if(minV === maxV){ minV -= Math.max(1, Math.abs(minV)*0.1); maxV += Math.max(1, Math.abs(maxV)*0.1); }
@@ -5131,6 +5178,19 @@ function renderTrendChart(containerId, seri, key, renk, birim){
     ${xLabels}
   </svg>`;
 }
+
+// Ekran döndürme veya pencere boyutu değişince, o an görünür olan trend
+// grafiklerini önbelleğe alınan seri verisiyle yeniden çizer (yeniden bulut
+// çağrısı yapmadan) — böylece grafik yeni genişliğe göre okunaklı kalır.
+window.addEventListener('resize', debounce(()=>{
+  Object.keys(__trendChartCache).forEach(id=>{
+    const el = document.getElementById(id);
+    if(el && el.offsetParent!==null){
+      const c = __trendChartCache[id];
+      renderTrendChart(id, c.seri, c.key, c.renk, c.birim);
+    }
+  });
+}, 200));
 
 document.getElementById('trendMusteriInput').addEventListener('input', ()=>{
   const val = document.getElementById('trendMusteriInput').value.trim();
