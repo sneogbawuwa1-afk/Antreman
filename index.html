@@ -266,6 +266,14 @@
 
   .risk-bar{display:flex;height:6px;border-radius:4px;overflow:hidden;width:100px;background:var(--line-soft);margin-top:4px;}
   .risk-bar span{height:100%;}
+  .aging-table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .aging-table th:first-child, .aging-table td:first-child{position:sticky;left:0;z-index:2;}
+  .aging-table thead th:first-child{background:var(--surface);}
+  .aging-table tbody td:first-child{background:var(--surface);}
+  .aging-table tbody tr.data-row:nth-child(even) td:first-child{background:#FBFBFC;}
+  .aging-table tbody tr.data-row:hover td:first-child{background:var(--bg);}
+  .aging-table tbody td.num{font-weight:600;}
+  .aging-table tbody td.zero{font-weight:400;}
 
   /* --- Müşteri kart listesi (Tasarım 2) --- */
   .sort-bar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
@@ -313,9 +321,11 @@
   @media(min-width:820px){.cust-stat-strip{grid-template-columns:repeat(5,minmax(0,1fr));}}
   .cust-stat-strip.cols-3{grid-template-columns:repeat(3,minmax(0,1fr));}
   .cust-stat-strip.cols-4{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .cust-stat-strip.cols-6{grid-template-columns:repeat(3,minmax(0,1fr));}
   @media(min-width:820px){
     .cust-stat-strip.cols-3{grid-template-columns:repeat(3,minmax(0,1fr));}
     .cust-stat-strip.cols-4{grid-template-columns:repeat(4,minmax(0,1fr));}
+    .cust-stat-strip.cols-6{grid-template-columns:repeat(6,minmax(0,1fr));}
   }
   .cust-stat-chip{background:var(--bg);border-radius:9px;padding:7px 6px;text-align:center;}
   .cust-stat-chip .l{font-size:9px;color:var(--ink-faint);font-weight:700;text-transform:uppercase;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -1072,8 +1082,8 @@
           </div>
         </div>
         <div class="panel-body" style="padding:0;">
-          <div class="table-scroll">
-            <table id="yaslandirmaTable">
+          <div class="table-scroll aging-table-scroll">
+            <table id="yaslandirmaTable" class="aging-table">
               <thead><tr>
                 <th data-key="musteriAdi">Nokta<span class="arrow"></span></th>
                 <th data-key="temsilci">Satış Temsilcisi<span class="arrow"></span></th>
@@ -1088,14 +1098,18 @@
               <tbody id="yaslandirmaTbody"></tbody>
             </table>
           </div>
+          <div class="musteri-daha-fazla-wrap" id="yaslandirmaDahaFazlaWrap" style="display:none;padding:16px 20px 4px;">
+            <button type="button" class="btn" id="yaslandirmaDahaFazlaBtn">Daha fazla göster</button>
+            <span class="musteri-daha-fazla-info" id="yaslandirmaDahaFazlaInfo"></span>
+          </div>
         </div>
       </div>
 
       <div class="panel" id="yaslandirmaOzetPanel">
         <div class="panel-head"><h2>Özet — Temsilci Bazlı Yaşlandırma</h2></div>
         <div class="panel-body" style="padding:0;">
-          <div class="table-scroll">
-            <table id="yaslandirmaOzetTable">
+          <div class="table-scroll aging-table-scroll">
+            <table id="yaslandirmaOzetTable" class="aging-table">
               <thead><tr>
                 <th>Satış Temsilcisi</th>
                 <th>Saha Satış Müdürü</th>
@@ -1117,8 +1131,8 @@
       <div class="panel" id="yaslandirmaOzetMuduruPanel">
         <div class="panel-head"><h2>Özet — Saha Satış Müdürü Bazlı Yaşlandırma</h2></div>
         <div class="panel-body" style="padding:0;">
-          <div class="table-scroll">
-            <table id="yaslandirmaOzetMuduruTable">
+          <div class="table-scroll aging-table-scroll">
+            <table id="yaslandirmaOzetMuduruTable" class="aging-table">
               <thead><tr>
                 <th>Saha Satış Müdürü</th>
                 <th class="num">0-6 Gün</th>
@@ -1428,6 +1442,7 @@ const state = {
   sevkGosterilen: 30,
   bhGosterilen: 30,
   fkGosterilen: 30,
+  yaslandirmaGosterilen: 30,
 };
 
 const MUSTERI_SAYFA_BOYUTU = 30;
@@ -3152,6 +3167,24 @@ const AGING_DAY_BUCKETS = [
   {key:'g28_34',label:'28-34 Gün', test:g=> g>=28 && g<=34},
   {key:'g35p',  label:'+35 Gün',   test:g=> g>=35},
 ];
+// Taze (yeşil) -> riskli (kırmızı) renk skalası; AGING_DAY_BUCKETS ile aynı sırada (ısı haritası hücreleri için).
+const AGING_RENK_HEX = ['#3C7A56','#1B5FAE','#D9A030','#D97757','#C1503A','#B23A2C'];
+function yaslandirmaHexToRgb(hex){
+  const h = hex.replace('#','');
+  const n = parseInt(h,16);
+  return [(n>>16)&255, (n>>8)&255, n&255];
+}
+const AGING_RENK_RGB = AGING_RENK_HEX.map(yaslandirmaHexToRgb);
+
+// Bir yaşlandırma hücresinin ısı haritası arka planı: değer, o kolonun (tüm satırlardaki) en
+// büyük değerine oranlandığında ne kadar "sıcak" görüneceğini belirler.
+function yaslandirmaIsiStili(value, maks, bucketIndex){
+  if(!value || !maks) return '';
+  const oran = Math.min(1, value/maks);
+  const alpha = (0.07 + oran*0.5).toFixed(3);
+  const [r,g,b] = AGING_RENK_RGB[bucketIndex];
+  return ` style="background:rgba(${r},${g},${b},${alpha})"`;
+}
 
 function emptyBuckets(){
   const b = {};
@@ -3218,33 +3251,55 @@ function getFilteredSortedYaslandirma(report){
   return rows;
 }
 
-function renderYaslandirmaTable(report){
+function yaslandirmaBucketMaksList(rows){
+  return AGING_DAY_BUCKETS.map(b => rows.reduce((m,r)=> Math.max(m, r.buckets[b.key]||0), 0));
+}
+
+function renderYaslandirmaDahaFazlaBtn(gosterilenSayi, toplamSayi){
+  const wrap = document.getElementById('yaslandirmaDahaFazlaWrap');
+  const info = document.getElementById('yaslandirmaDahaFazlaInfo');
+  if(!wrap) return;
+  if(toplamSayi > gosterilenSayi){
+    wrap.style.display = 'flex';
+    info.textContent = `${gosterilenSayi.toLocaleString('tr-TR')} / ${toplamSayi.toLocaleString('tr-TR')} nokta gösteriliyor`;
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function renderYaslandirmaTable(report, resetSayfa=true){
+  if(resetSayfa) state.yaslandirmaGosterilen = MUSTERI_SAYFA_BOYUTU;
   const rows = getFilteredSortedYaslandirma(report);
   document.getElementById('yaslandirmaCount').textContent = rows.length.toLocaleString('tr-TR') + ' nokta';
   const tbody = document.getElementById('yaslandirmaTbody');
   if(!rows.length){
     tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">Filtreyle eşleşen nokta bulunamadı.</div></td></tr>`;
+    renderYaslandirmaDahaFazlaBtn(0, 0);
     return;
   }
-  const cell = v => v>0 ? TL(v) : '<span class="zero">—</span>';
-  tbody.innerHTML = rows.map(r=>`<tr>
+  const maksList = yaslandirmaBucketMaksList(rows);
+  const gosterilecekSayi = Math.min(state.yaslandirmaGosterilen, rows.length);
+  const gosterilecekRows = rows.slice(0, gosterilecekSayi);
+  const cell = (v,i) => `<td class="num${v>0?'':' zero'}"${yaslandirmaIsiStili(v, maksList[i], i)}>${v>0?TL(v):'—'}</td>`;
+  tbody.innerHTML = gosterilecekRows.map(r=>`<tr class="data-row">
     <td><div class="musteri-name">${escapeHtml(r.musteriAdi)}</div><div class="musteri-code">${escapeHtml(r.musteri)}</div></td>
     <td><span class="temsilci-tag">${escapeHtml(r.temsilci)}</span></td>
-    <td class="num">${cell(r.buckets.g0_6)}</td>
-    <td class="num">${cell(r.buckets.g7_13)}</td>
-    <td class="num">${cell(r.buckets.g14_20)}</td>
-    <td class="num">${cell(r.buckets.g21_27)}</td>
-    <td class="num">${cell(r.buckets.g28_34)}</td>
-    <td class="num">${cell(r.buckets.g35p)}</td>
+    ${cell(r.buckets.g0_6,0)}
+    ${cell(r.buckets.g7_13,1)}
+    ${cell(r.buckets.g14_20,2)}
+    ${cell(r.buckets.g21_27,3)}
+    ${cell(r.buckets.g28_34,4)}
+    ${cell(r.buckets.g35p,5)}
     <td class="num"><span class="num-strong">${TL(r.toplam)}</span></td>
   </tr>`).join('');
+
+  renderYaslandirmaDahaFazlaBtn(gosterilecekSayi, rows.length);
 }
 
 function renderYaslandirmaOzet(report){
   const noktaRows = computeNoktaYaslandirma(report);
   const repRows = computeTemsilciYaslandirma(noktaRows);
   const muduruRows = computeMuduruYaslandirma(repRows);
-  const cell = v => v>0 ? TL(v) : '<span class="zero">—</span>';
   const tbody = document.getElementById('yaslandirmaOzetTbody');
   if(!repRows.length){
     tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">Veri bulunamadı.</div></td></tr>`;
@@ -3253,15 +3308,17 @@ function renderYaslandirmaOzet(report){
     document.getElementById('yaslandirmaOzetMuduruTfoot').innerHTML = '';
     return;
   }
-  tbody.innerHTML = repRows.map(r=>`<tr>
+  const repMaks = yaslandirmaBucketMaksList(repRows);
+  const repCell = (v,i) => `<td class="num${v>0?'':' zero'}"${yaslandirmaIsiStili(v, repMaks[i], i)}>${v>0?TL(v):'—'}</td>`;
+  tbody.innerHTML = repRows.map(r=>`<tr class="data-row">
     <td><span class="temsilci-tag">${escapeHtml(r.temsilci)}</span></td>
     <td><span class="temsilci-tag mudur-tag">${escapeHtml(r.muduru)}</span></td>
-    <td class="num">${cell(r.buckets.g0_6)}</td>
-    <td class="num">${cell(r.buckets.g7_13)}</td>
-    <td class="num">${cell(r.buckets.g14_20)}</td>
-    <td class="num">${cell(r.buckets.g21_27)}</td>
-    <td class="num">${cell(r.buckets.g28_34)}</td>
-    <td class="num">${cell(r.buckets.g35p)}</td>
+    ${repCell(r.buckets.g0_6,0)}
+    ${repCell(r.buckets.g7_13,1)}
+    ${repCell(r.buckets.g14_20,2)}
+    ${repCell(r.buckets.g21_27,3)}
+    ${repCell(r.buckets.g28_34,4)}
+    ${repCell(r.buckets.g35p,5)}
     <td class="num"><span class="num-strong">${TL(r.toplam)}</span></td>
   </tr>`).join('');
 
@@ -3281,15 +3338,17 @@ function renderYaslandirmaOzet(report){
     <td class="num"><span class="num-strong">${TL(grand.toplam)}</span></td>
   </tr>`;
 
+  const muduruMaks = yaslandirmaBucketMaksList(muduruRows);
+  const muduruCell = (v,i) => `<td class="num${v>0?'':' zero'}"${yaslandirmaIsiStili(v, muduruMaks[i], i)}>${v>0?TL(v):'—'}</td>`;
   const mtbody = document.getElementById('yaslandirmaOzetMuduruTbody');
-  mtbody.innerHTML = muduruRows.map(r=>`<tr>
+  mtbody.innerHTML = muduruRows.map(r=>`<tr class="data-row">
     <td><span class="temsilci-tag mudur-tag">${escapeHtml(r.muduru)}</span></td>
-    <td class="num">${cell(r.buckets.g0_6)}</td>
-    <td class="num">${cell(r.buckets.g7_13)}</td>
-    <td class="num">${cell(r.buckets.g14_20)}</td>
-    <td class="num">${cell(r.buckets.g21_27)}</td>
-    <td class="num">${cell(r.buckets.g28_34)}</td>
-    <td class="num">${cell(r.buckets.g35p)}</td>
+    ${muduruCell(r.buckets.g0_6,0)}
+    ${muduruCell(r.buckets.g7_13,1)}
+    ${muduruCell(r.buckets.g14_20,2)}
+    ${muduruCell(r.buckets.g21_27,3)}
+    ${muduruCell(r.buckets.g28_34,4)}
+    ${muduruCell(r.buckets.g35p,5)}
     <td class="num"><span class="num-strong">${TL(r.toplam)}</span></td>
   </tr>`).join('');
   document.getElementById('yaslandirmaOzetMuduruTfoot').innerHTML = `<tr class="totals-row">
@@ -3403,6 +3462,10 @@ wireSortableTable('ticariStokTable', 'tSort', ()=>renderTicariStokTable(state.re
 document.getElementById('yaslandirmaSearchInput').addEventListener('input', debounce(()=>renderYaslandirmaTable(state.report)));
 document.getElementById('yaslandirmaTemsilciFilter').addEventListener('change', ()=>renderYaslandirmaTable(state.report));
 wireSortableTable('yaslandirmaTable', 'ySort', ()=>renderYaslandirmaTable(state.report));
+document.getElementById('yaslandirmaDahaFazlaBtn').addEventListener('click', ()=>{
+  state.yaslandirmaGosterilen += MUSTERI_SAYFA_BOYUTU;
+  renderYaslandirmaTable(state.report, false);
+});
 
 function renderAgingPanel(report){
   const temsilci = document.getElementById('temsilciFilter').value;
