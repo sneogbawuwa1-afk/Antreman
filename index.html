@@ -76,7 +76,7 @@
   .brand-tag{
     display:inline-block;margin-top:5px;
     color:rgba(255,255,255,.72);font-weight:600;
-    font-size:12px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;
+    font-size:12px;letter-spacing:.06em;white-space:nowrap;
   }
   .scroll-top-btn{
     position:fixed;right:22px;bottom:26px;z-index:60;
@@ -153,7 +153,7 @@
   }
   .check-item.done .check-icon{background:var(--success);border-color:var(--success);color:#fff;}
   .check-name{font-weight:700;font-size:13px;color:var(--ink);display:flex;align-items:center;flex-wrap:wrap;gap:7px;}
-  .check-tag{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:2px 7px;border-radius:100px;}
+  .check-tag{font-size:9.5px;font-weight:700;letter-spacing:.03em;padding:2px 7px;border-radius:100px;}
   .check-tag.req{background:var(--danger-soft);color:var(--danger);}
   .check-tag.opt{background:var(--navy-soft);color:var(--navy);}
   .check-desc{font-size:11.5px;color:var(--ink-soft);margin-top:3px;line-height:1.45;}
@@ -181,7 +181,7 @@
     background-size:18px 18px;
   }
   .kpi-hero-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;gap:10px;flex-wrap:wrap;}
-  .kpi-hero-label{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.75);}
+  .kpi-hero-label{font-size:11.5px;font-weight:700;letter-spacing:.06em;color:rgba(255,255,255,.75);}
   .kpi-hero-chip{background:rgba(255,255,255,.16);border-radius:100px;padding:4px 12px;font-size:11px;font-weight:700;white-space:nowrap;}
   .kpi-hero-value{font-family:'Space Grotesk';font-size:32px;font-weight:700;margin-top:9px;position:relative;line-height:1.15;}
   .kpi-hero-sub{font-size:11.5px;color:rgba(255,255,255,.65);margin-top:4px;position:relative;}
@@ -192,9 +192,15 @@
   .kpi-row-card:hover{transform:translateY(-1px);}
   .kpi-row-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background:var(--navy-soft);color:var(--navy);}
   .kpi-row-text{min-width:0;}
-  .kpi-row-text .kpi-row-lbl{font-size:10.5px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .kpi-row-text .kpi-row-lbl{font-size:10.5px;color:var(--ink-soft);font-weight:700;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .kpi-row-text .kpi-row-val{font-family:'Space Grotesk';font-size:15.5px;font-weight:700;margin-top:2px;line-height:1.15;color:var(--ink);}
   .kpi-row-text .kpi-row-extra{font-size:10px;color:var(--ink-faint);margin-top:2px;line-height:1.3;}
+  .kpi-row-top-line{display:flex;align-items:center;gap:11px;}
+  .kpi-row-card.has-chips{flex-direction:column;align-items:stretch;}
+  .kpi-row-chips{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+  .kpi-row-chip{flex:1;min-width:118px;border-radius:9px;padding:6px 10px;}
+  .kpi-row-chip-lbl{font-size:10.5px;font-weight:700;opacity:.85;}
+  .kpi-row-chip-val{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;margin-top:1px;}
 
   .panel{
     background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
@@ -239,7 +245,7 @@
   table{width:100%;border-collapse:collapse;font-size:12.8px;}
   .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
   thead th{
-    text-align:left;padding:9px 12px;font-size:11px;font-weight:700;text-transform:uppercase;
+    text-align:left;padding:9px 12px;font-size:11px;font-weight:700;
     letter-spacing:.03em;color:var(--ink-soft);border-bottom:1.5px solid var(--line);
     cursor:pointer;white-space:nowrap;user-select:none;
   }
@@ -301,7 +307,7 @@
   .yukleme-head-btn{display:flex;align-items:center;gap:7px;border:1px solid var(--accent);color:var(--accent-deep);background:var(--surface);}
   .yukleme-head-btn:hover{background:var(--accent-soft);}
   .yukleme-toplam-top{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
-  .yukleme-toplam-label{font-size:11px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.04em;}
+  .yukleme-toplam-label{font-size:11px;font-weight:700;color:var(--ink-faint);letter-spacing:.04em;}
   .yukleme-toplam-val{font-family:'Space Grotesk';font-size:30px;font-weight:800;color:var(--navy);margin-top:2px;}
   .yukleme-toplam-lt-chip{background:var(--accent-soft);color:var(--accent-deep);font-weight:700;font-size:12.5px;padding:8px 14px;border-radius:10px;white-space:nowrap;}
   .yukleme-toplam-bar{display:flex;height:34px;border-radius:9px;overflow:hidden;margin-bottom:14px;}
@@ -319,7 +325,7 @@
   .cust-info .temsilci-tag{margin-top:5px;display:inline-block;}
   .cust-chevron{color:var(--ink-faint);font-size:16px;flex-shrink:0;margin-top:2px;}
   .cust-kalan-row{display:flex;justify-content:space-between;align-items:baseline;}
-  .cust-kalan-label{font-size:10px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em;}
+  .cust-kalan-label{font-size:10px;color:var(--ink-soft);font-weight:700;letter-spacing:.03em;}
   .cust-kalan-val{font-family:'Space Grotesk';font-size:19px;font-weight:700;color:var(--ink);}
   .cust-card .risk-bar{width:100%;height:7px;border-radius:5px;margin-top:8px;margin-bottom:13px;}
   .cust-stat-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
@@ -333,21 +339,21 @@
     .cust-stat-strip.cols-6{grid-template-columns:repeat(6,minmax(0,1fr));}
   }
   .cust-stat-chip{background:var(--bg);border-radius:9px;padding:7px 6px;text-align:center;}
-  .cust-stat-chip .l{font-size:9px;color:var(--ink-faint);font-weight:700;text-transform:uppercase;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cust-stat-chip .l{font-size:9px;color:var(--ink-faint);font-weight:700;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .cust-stat-chip .v{font-family:'Space Grotesk';font-size:12px;font-weight:700;margin-top:3px;}
   .cust-expanded{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);cursor:default;}
-  .cust-expanded h4{margin:0 0 8px;font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;}
+  .cust-expanded h4{margin:0 0 8px;font-size:12px;font-weight:700;color:var(--ink-soft);letter-spacing:.03em;}
   .cust-secondary-stats{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);margin-bottom:14px;}
   .cust-secondary-stats b{font-family:'Space Grotesk';color:var(--ink);}
 
   .expand-row td{padding:0;border-bottom:1px solid var(--line-soft);}
   .expand-inner{padding:14px 18px 18px 44px;background:#F7F9FC;}
-  .expand-inner h4{margin:0 0 8px;font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;}
+  .expand-inner h4{margin:0 0 8px;font-size:12px;font-weight:700;color:var(--ink-soft);letter-spacing:.03em;}
   .mini-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px;}
   .mini-table.compact{width:auto;min-width:0;}
   .mini-table.compact th,.mini-table.compact td{padding:6px 22px 6px 10px;}
   .mini-table.compact th:last-child,.mini-table.compact td:last-child{padding-right:10px;}
-  .mini-table th{text-align:left;padding:6px 10px;font-size:10.5px;color:var(--ink-faint);border-bottom:1px solid var(--line);text-transform:uppercase;}
+  .mini-table th{text-align:left;padding:6px 10px;font-size:10.5px;color:var(--ink-faint);border-bottom:1px solid var(--line);}
   .mini-table th.num,.mini-table td.num{text-align:right;}
   .mini-table td{padding:6px 10px;border-bottom:1px solid var(--line-soft);}
   .badge{display:inline-block;padding:2px 8px;border-radius:100px;font-size:10.5px;font-weight:600;}
@@ -438,7 +444,7 @@
   .senet-tutar-tipi-opt span{font-size:13px;color:var(--ink);display:flex;flex:1;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;}
   .senet-tutar-tipi-opt span b{font-family:'Space Grotesk';font-weight:700;color:var(--ink);}
   .senet-manuel-tutar-row{margin-top:10px;padding-left:2px;}
-  .senet-manuel-tutar-row label{font-size:11px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em;display:block;margin-bottom:6px;}
+  .senet-manuel-tutar-row label{font-size:11px;color:var(--ink-soft);font-weight:700;letter-spacing:.03em;display:block;margin-bottom:6px;}
   .senet-manuel-tutar-row input{
     width:100%;max-width:220px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;
     font-size:14px;font-family:'Space Grotesk';font-weight:700;background:var(--surface);color:var(--ink);
@@ -463,10 +469,10 @@
     font-weight:700;font-size:13px;flex-shrink:0;
   }
   .senet-vade-card-info{flex:1;min-width:0;}
-  .senet-vade-card-label{font-size:10.5px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+  .senet-vade-card-label{font-size:10.5px;color:var(--ink-soft);font-weight:700;letter-spacing:.04em;}
   .senet-vade-card-tutar{font-family:'Space Grotesk';font-weight:700;font-size:15.5px;color:var(--ink);margin-top:2px;}
   .senet-vade-card-date{display:flex;flex-direction:column;gap:4px;}
-  .senet-vade-card-date label{font-size:10px;color:var(--ink-faint);font-weight:700;text-transform:uppercase;letter-spacing:.03em;}
+  .senet-vade-card-date label{font-size:10px;color:var(--ink-faint);font-weight:700;letter-spacing:.03em;}
   .senet-vade-card-date input{
     padding:7px 9px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;
     font-family:inherit;background:var(--surface);color:var(--ink);width:150px;
@@ -493,7 +499,7 @@
   .trend-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   @media(max-width:800px){.trend-grid{grid-template-columns:1fr;}}
   .trend-chart-card{border:1px solid var(--line);border-radius:9px;padding:14px 16px;background:var(--bg);contain:layout style paint;}
-  .trend-chart-title{font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px;}
+  .trend-chart-title{font-size:12px;font-weight:700;color:var(--ink-soft);letter-spacing:.03em;margin-bottom:8px;}
   .trend-chart-card svg{display:block;width:100%;}
   .trend-chart-ortalama{margin-top:8px;font-size:12px;color:var(--ink-soft);font-weight:600;}
   .aging-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
@@ -517,7 +523,7 @@
   .karne-name{font-weight:700;font-size:14px;}
   .karne-rank{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:800;color:var(--accent-deep);}
   .karne-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
-  .karne-lbl{font-size:10px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.02em;}
+  .karne-lbl{font-size:10px;color:var(--ink-soft);font-weight:700;letter-spacing:.02em;}
   .karne-val{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;margin-top:2px;}
   .karne-val .fine{font-family:'Inter',sans-serif;font-size:10.5px;font-weight:600;color:var(--ink-faint);margin-top:3px;}
   .karne-bar-track{height:6px;background:var(--line-soft);border-radius:4px;overflow:hidden;margin-top:12px;}
@@ -538,7 +544,7 @@
   .fkns-oran{font-family:'Space Grotesk',sans-serif;font-weight:700;}
   .hedef-edit-row{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:13px;padding-top:12px;border-top:1px dashed var(--line);}
   .hedef-field{flex:1;min-width:84px;}
-  .hedef-field label{display:block;font-size:9.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.02em;margin-bottom:3px;}
+  .hedef-field label{display:block;font-size:9.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.02em;margin-bottom:3px;}
   .hedef-field input{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:12.5px;box-sizing:border-box;}
   .hedef-kaydet-btn{padding:7px 11px;border:1px solid var(--navy);background:var(--navy);color:#fff;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
   .hedef-kaydet-btn:hover{opacity:.9;}
@@ -561,18 +567,18 @@
   .ssm-karne-sub{font-size:11px;color:var(--ink-soft);margin-top:1px;}
   .ssm-fkns-ring-wrap{margin-left:auto;text-align:center;flex-shrink:0;}
   .ssm-fkns-ring{width:52px;height:52px;display:block;}
-  .ssm-fkns-ring-label{font-size:9px;color:var(--ink-faint);font-weight:700;text-transform:uppercase;letter-spacing:.02em;margin-top:2px;}
+  .ssm-fkns-ring-label{font-size:9px;color:var(--ink-faint);font-weight:700;letter-spacing:.02em;margin-top:2px;}
   .ssm-kanal-row{margin-bottom:11px;}
   .ssm-kanal-row:last-of-type{margin-bottom:0;}
   .ssm-kanal-top{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;margin-bottom:5px;}
-  .ssm-kanal-top .lbl{font-weight:700;color:var(--ink-soft);text-transform:uppercase;font-size:10px;letter-spacing:.02em;white-space:nowrap;}
+  .ssm-kanal-top .lbl{font-weight:700;color:var(--ink-soft);font-size:10px;letter-spacing:.02em;white-space:nowrap;}
   .ssm-kanal-top .val{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--ink);text-align:right;}
   .ssm-kanal-top .val small{font-family:'Inter',sans-serif;font-weight:600;color:var(--ink-faint);}
   .ssm-kanal-track{height:8px;background:var(--line-soft);border-radius:5px;overflow:hidden;}
   .ssm-kanal-fill{height:100%;border-radius:5px;}
   .ssm-kanal-kalan{font-size:10px;color:var(--ink-faint);font-weight:600;text-align:right;margin-top:4px;}
   .ssm-karne-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);}
-  .ssm-karne-foot .g-lbl{font-size:10px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.02em;}
+  .ssm-karne-foot .g-lbl{font-size:10px;color:var(--ink-soft);font-weight:700;letter-spacing:.02em;}
   .ssm-karne-foot .g-val{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;}
   /* Sell Out temsilci kartındaki stat-chip etiketleri kısa da olsa 5 dar kutuya sığmayabiliyor —
      bu kartlarda satır kaydırmaya izin verip kesilmeyi (…) önlüyoruz. */
@@ -739,12 +745,12 @@
   }
   .senet-baslik{font-family:'Space Grotesk';font-weight:700;font-size:19px;letter-spacing:.06em;color:#1F2E4A;}
   .senet-alacakli{text-align:right;}
-  .senet-alacakli-label{font-size:8.5px;font-weight:700;color:#71809A;text-transform:uppercase;letter-spacing:.06em;}
+  .senet-alacakli-label{font-size:8.5px;font-weight:700;color:#71809A;letter-spacing:.06em;}
   .senet-alacakli-adi{font-size:11px;font-weight:700;color:#1F2E4A;max-width:260px;line-height:1.3;margin-top:1px;}
   .senet-ust-tablo{width:100%;border-collapse:collapse;margin-bottom:14px;}
   .senet-ust-tablo th{
     border:1px solid #1F2E4A;padding:6px 8px;text-align:center;
-    font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+    font-size:9px;font-weight:700;letter-spacing:.04em;
     background:#1F2E4A;color:#fff;
     -webkit-print-color-adjust:exact;print-color-adjust:exact;
   }
@@ -760,7 +766,7 @@
   .senet-taraflar{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;}
   .senet-taraf-box{border:1px solid #C7CCD8;border-radius:5px;padding:9px 11px 10px;background:#FBFBFA;}
   .senet-taraf-baslik{
-    font-family:'Space Grotesk';font-size:9.5px;font-weight:700;text-transform:uppercase;
+    font-family:'Space Grotesk';font-size:9.5px;font-weight:700;
     letter-spacing:.05em;color:#1F2E4A;margin:0 0 6px;padding-bottom:5px;border-bottom:1px solid #DADFE8;
   }
   .senet-taraf-box p{margin:2.5px 0;font-size:10.5px;line-height:1.4;}
@@ -1109,11 +1115,11 @@
       <div class="panel-body">
         <div class="aging-wrap">
           <div>
-            <div style="font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:12px;text-transform:uppercase;letter-spacing:.03em;">Kalan Borç — Vade Grubuna Göre</div>
+            <div style="font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:12px;letter-spacing:.03em;">Kalan Borç — Vade Grubuna Göre</div>
             <div id="agingByAmount"></div>
           </div>
           <div>
-            <div style="font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:12px;text-transform:uppercase;letter-spacing:.03em;">Müşteri Adedi — Vade Grubuna Göre</div>
+            <div style="font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:12px;letter-spacing:.03em;">Müşteri Adedi — Vade Grubuna Göre</div>
             <div id="agingByCount"></div>
           </div>
         </div>
@@ -1688,7 +1694,7 @@
         <div class="panel-body"><div class="trend-chart-card"><div id="dsoTrendChart"></div></div></div>
       </div>
       <div class="panel" id="dsoTrendTablePanel">
-        <div class="panel-head"><div><h2>DSO'yu En Çok Yükselten Müşteriler</h2><span class="count">ağırlıklı vade katkısı — güncel duruma göre</span></div></div>
+        <div class="panel-head"><div><h2>DSO'yu En Çok Yükselten Müşteriler</h2><span class="count">Ağırlıklı Vade Katkısı — Güncel Duruma Göre</span></div></div>
         <div class="panel-body" style="padding:0;">
           <div class="table-scroll">
             <table>
@@ -1723,7 +1729,7 @@
       <div class="as-of" id="nakitAkisAsOf">Veri kaynağı: Kalemler (açık faturaların net vade tarihi) + geçmiş tahsilat gerçekleşme oranı</div>
       <div id="nakitAkisKpiGrid"></div>
       <div class="panel" id="nakitAkisChartPanel">
-        <div class="panel-head"><div><h2>Haftalık Vade Dağılımı</h2><span class="count">vadesi gelen bakiye / ağırlıklı beklenen tahsilat</span></div></div>
+        <div class="panel-head"><div><h2>Haftalık Vade Dağılımı</h2><span class="count">Vadesi Gelen Bakiye / Ağırlıklı Beklenen Tahsilat</span></div></div>
         <div class="panel-body"><div id="nakitAkisChart"></div></div>
       </div>
       <div class="panel" id="nakitAkisTablePanel">
@@ -1761,7 +1767,7 @@
       <div id="supheliAlacakKpiGrid"></div>
       <div class="grid2" style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;">
         <div class="panel">
-          <div class="panel-head"><div><h2>Yaşlandırma Bazlı Karşılık Matrisi</h2><span class="count">oranlar otomatik hesaplanır — dilimin gerçek ortalama gecikme gününe göre</span></div></div>
+          <div class="panel-head"><div><h2>Yaşlandırma Bazlı Karşılık Matrisi</h2><span class="count">Oranlar Otomatik Hesaplanır — Dilimin Gerçek Ortalama Gecikme Gününe Göre</span></div></div>
           <div class="panel-body" style="padding:0;">
             <div class="table-scroll">
               <table class="rate-table">
@@ -1817,11 +1823,11 @@
       </div>
       <div id="karneKpiGrid"></div>
       <div class="panel" id="karneChartPanel">
-        <div class="panel-head"><div><h2>Hedef vs Gerçekleşen — Tahsilat</h2><span class="count" id="karneChartSub">hedef otomatik hesaplanır: cari yaşlandırma + sipariş tutarı</span></div></div>
+        <div class="panel-head"><div><h2>Hedef vs Gerçekleşen — Tahsilat</h2><span class="count" id="karneChartSub">Hedef Otomatik Hesaplanır: Cari Yaşlandırma + Fatura Tutarı</span></div></div>
         <div class="panel-body">
           <div id="karneChart"></div>
           <div class="note" style="font-size:11.5px;color:var(--ink-soft);background:var(--navy-soft);border-radius:9px;padding:9px 12px;margin-top:12px;">
-            <b>Yöntem:</b> Hedef = (temsilcinin müşterilerinin kalan borcu × Şüpheli Alacak'taki otomatik tahsil edilebilirlik oranı) + (açık sipariş + emanet sipariş tutarı × son aylardaki gerçek ortalama tahsilat gerçekleşme oranı). Elle girilen bir hedef yoktur; cari yaşlandırma ve sipariş hacmi değiştikçe hedef de otomatik güncellenir.
+            <b>Yöntem:</b> Hedef = (temsilcinin müşterilerinin kalan borcu × Şüpheli Alacak'taki otomatik tahsil edilebilirlik oranı) + (Fatura Dökümü'ndeki bu ayki Ödenecek Tutar toplamı × son aylardaki gerçek ortalama tahsilat gerçekleşme oranı). Elle girilen bir hedef yoktur; cari yaşlandırma ve fatura hacmi değiştikçe hedef de otomatik güncellenir.
           </div>
         </div>
       </div>
@@ -1925,7 +1931,7 @@
         </div>
       </div>
       <div class="panel" id="ceiRepPanel">
-        <div class="panel-head"><div><h2>Temsilci Bazında Tahsilat Başarı Oranı</h2><span class="count">detaylı görünüm: "Temsilci Tahsilat Verimliliği" sekmesi</span></div></div>
+        <div class="panel-head"><div><h2>Temsilci Bazında Tahsilat Başarı Oranı</h2><span class="count">Detaylı Görünüm: "Temsilci Tahsilat Verimliliği" Sekmesi</span></div></div>
         <div class="panel-body" style="padding:0;">
           <div class="table-scroll">
             <table>
@@ -2730,12 +2736,19 @@ function computeMusteriTrend(musteri){
   const arsiv = state.faturaArsivCache || {};
   const gunler = Object.keys(arsiv).sort();
   const seri = [];
+  const KREDI_ETIKETLERI = new Set(['FaturaIade', 'DepozitoTahsilat']);
   gunler.forEach(gun=>{
     const g = arsiv[gun];
     if(!g.musteriSnapshot) return;
     const m = g.musteriSnapshot.find(x=>x.musteri===musteri);
     if(!m) return;
-    seri.push({tarih: gun, kalanBorc: m.kalanBorc||0, avgVadeGun: m.avgVadeGun||0, toplamRisk: m.toplamRisk||0, cekSenet: m.cekSenet||0});
+    // O gün bu müşteri için Bozuk İade Faturası / Depozito Tahsilatı kredisi var mıydı? — Kalan
+    // Borç trend grafiğinde ani bir düşüş görüldüğünde, bunun normal bir tahsilattan mı yoksa bu
+    // tür bir mahsup kredisinden mi kaynaklandığını görsel olarak ayırt edebilmek için işaretlenir.
+    const kredilerBugun = (g.tahsilatArsiv||[]).filter(r=> r.musteri===musteri && KREDI_ETIKETLERI.has(r.formatKaynagi));
+    const krediGunuMu = kredilerBugun.length>0;
+    const krediTutari = kredilerBugun.reduce((a,r)=>a+(r.tutar||0),0);
+    seri.push({tarih: gun, kalanBorc: m.kalanBorc||0, avgVadeGun: m.avgVadeGun||0, toplamRisk: m.toplamRisk||0, cekSenet: m.cekSenet||0, krediGunuMu, krediTutari});
   });
   return seri;
 }
@@ -3333,6 +3346,16 @@ const NUM = n => (Math.round(n||0)).toLocaleString('tr-TR');
 const MK = n => NUM(n) + ' Mk.';
 const LT = n => NUM(n) + ' Lt.';
 const fmtDate = d => d instanceof Date && !isNaN(d) ? d.toLocaleDateString('tr-TR') : '—';
+// EFES gibi dahili/şirket-içi kayıtlar gerçek bir cari değildir — Fatura Dökümü, Depozito
+// Tahsilatı, Tahsilat Dökümü, Sipariş Dökümü ve Bayi Hak Ediş dosyalarındaki İLGİLİ satırlar bu
+// fonksiyonla TUTARLI şekilde filtrelenir (tek bir yerde tanımlı, her dosya döngüsünde aynı kural).
+const GECERSIZ_MUSTERI_KODLARI = new Set(['EFES']);
+function musteriGecerliMi(musteriNo){
+  const kod = String(musteriNo||'').trim().toUpperCase();
+  if(!kod) return false;
+  return !GECERSIZ_MUSTERI_KODLARI.has(kod);
+}
+
 function dateKeyLocal(d){
   if(!(d instanceof Date) || isNaN(d)) return null;
   const y = d.getFullYear();
@@ -3468,7 +3491,22 @@ function handleFiles(fileList){
         const type = detectType(headers);
         if(!type){
           unmatched.push(file.name);
-          if(unmatched.length) showError('Şu dosya(lar) tanınamadı ve atlandı: ' + unmatched.join(', ') + '. Beklenen kolon başlıklarını içeren bir SAP dışa aktarım dosyası olduğundan emin olun.');
+          // Sadece "tanınamadı" demek yerine, en yakın eşleşen imzayı (en çok kolonu üst üste
+          // düşen dosya tipini) ve o imzada EKSİK olan kolonları göstererek teşhisi hızlandırır.
+          const headerSet = new Set(headers.map(h=>String(h||'').trim()));
+          let enYakinTip = null, enYakinEksik = null, enAzEksikSayisi = Infinity;
+          Object.keys(SIGNATURES).forEach(tip=>{
+            SIGNATURES[tip].forEach(sig=>{
+              const eksik = sig.filter(k=>!headerSet.has(k));
+              if(eksik.length < enAzEksikSayisi){
+                enAzEksikSayisi = eksik.length; enYakinTip = tip; enYakinEksik = eksik;
+              }
+            });
+          });
+          const ipucu = (enYakinTip && enAzEksikSayisi>0 && enAzEksikSayisi<=2)
+            ? ` "${LABELS[enYakinTip]||enYakinTip}" dosyasına en çok benziyor ama şu kolon(lar) eksik: ${enYakinEksik.join(', ')}.`
+            : ` Bulunan kolonlar: ${headers.slice(0,8).join(', ')}${headers.length>8?'…':''}.`;
+          showError('"' + file.name + '" tanınamadı ve atlandı.' + ipucu + ' Beklenen kolon başlıklarını içeren bir SAP dışa aktarım dosyası olduğundan emin olun.');
           return;
         }
         state.files[type] = {name:file.name, headers, data};
@@ -3779,6 +3817,7 @@ function buildReport(files, musteriMasterMap){
     siparisSatirlari.forEach(r=>{
       const musteri = String(r['Müşteri No']||'').trim();
       if(!musteri) return;
+      if(!musteriGecerliMi(musteri)) return;
       const musteriAdi = r['Müşteri Adı'] || musteri;
       const temsilci = r['Satış Temslicisi Adı'] || r['Satış Temsilcisi Adı'] || null;
       const belgeTuru = r['Satış Belge Türü Tnm.'];
@@ -3829,7 +3868,7 @@ function buildReport(files, musteriMasterMap){
       const belgeTarihi = excelDateToJSArti1Gun(r[tarihKolonu]);
       const musteriArsiv = String((formatA ? r['Müşteri'] : r['Müşt. Kodu'])||'').trim();
       const tutarArsiv = Math.abs(Number(formatA ? r['Tutar'] : r['Belge Tutarı'])||0);
-      if(musteriArsiv){
+      if(musteriArsiv && musteriGecerliMi(musteriArsiv)){
         // "gecerli": bu satırın Genel Rapor/Sevk Raporu KPI'sında sayılıp sayılmayacağını (Belge
         // Türü/Ödeme Tipi/Çek-Senet Durumu/Belge Tipi filtreleri) önceden hesaplayıp satıra
         // etiketler; böylece bu gün ileride (başka bir yüklemede, arşivden okunarak) gösterilecek
@@ -3856,9 +3895,9 @@ function buildReport(files, musteriMasterMap){
     files.fatura.data.forEach(r=>{
       const musteri = String(r['Müşteri Numarası']||'').trim();
       if(!musteri) return;
-      // "EFES" Müşteri Numarası gerçek bir cari değil (dahili/şirket içi kayıt) — bu satırlar
-      // tamamen göz ardı edilir: ne faturaArsiv'e, ne bozukIadeTahsilat'a eklenir, ne de arşivlenir.
-      if(musteri.toUpperCase() === 'EFES') return;
+      // EFES gibi dahili/şirket-içi kayıtlar tamamen göz ardı edilir (bkz. musteriGecerliMi) — ne
+      // faturaArsiv'e, ne bozukIadeTahsilat'a eklenir, ne de arşivlenir.
+      if(!musteriGecerliMi(musteri)) return;
       const musteriAdi = r['Müşteri Adı'] || musteri;
       const temsilci = r['Satış Temsilcisi Adı'] || null;
       const tutar = Number(r['Ödenecek Tutar'])||0;
@@ -3892,6 +3931,7 @@ function buildReport(files, musteriMasterMap){
       if(!faturaBelgeNo) return; // tek kriter: Fatura Belge No zorunlu — yoksa satır tamamen es geçilir
       const musteri = String(r['Müşteri Numarası']||'').trim();
       if(!musteri) return;
+      if(!musteriGecerliMi(musteri)) return; // EFES gibi dahili kayıtlar burada da göz ardı edilir
       const musteriAdi = r['Müşteri Adı'] || musteri;
       const tutar = Number(r['Sipariş Net Tutar'])||0;
       // Not: excelDateToJSArti1Gun kullanılır — Türkiye (+3) saat dilimi düzeltmesi (bkz. yukarıdaki
@@ -3928,10 +3968,16 @@ function buildReport(files, musteriMasterMap){
   const doluGunler = Array.from(efektifGunMap.keys()).filter(gk=> (efektifGunMap.get(gk)||[]).length > 0);
   const hedefTahsilatGunKey = enYakinGunKey(doluGunler, bugunGunKeyTahsilat);
 
+  const tahsilatKaynakMap = new Map(); // musteri -> {normal, bozukIade, depozito}
   if(hedefTahsilatGunKey){
     (efektifGunMap.get(hedefTahsilatGunKey)||[]).forEach(r=>{
       if(r.gecerli === false) return;
       tahsilatMap.set(r.musteri, (tahsilatMap.get(r.musteri)||0) + r.tutar);
+      if(!tahsilatKaynakMap.has(r.musteri)) tahsilatKaynakMap.set(r.musteri, {normal:0, bozukIade:0, depozito:0});
+      const kay = tahsilatKaynakMap.get(r.musteri);
+      if(r.formatKaynagi==='FaturaIade') kay.bozukIade += r.tutar;
+      else if(r.formatKaynagi==='DepozitoTahsilat') kay.depozito += r.tutar;
+      else kay.normal += r.tutar;
     });
   }
 
@@ -3956,6 +4002,7 @@ function buildReport(files, musteriMasterMap){
     m.emanetSiparis = emanetSiparisMap.get(musteri)||0;
     m.cekSenet = cekSenetMap.get(musteri)||0;
     m.alinanTahsilat = tahsilatMap.get(musteri)||0;
+    m.alinanTahsilatKaynak = tahsilatKaynakMap.get(musteri)||null;
     m.cekSenetDetay = cekSenetDetayMap.get(musteri)||[];
 
     const sortedOldestFirst = m.invoices.slice().sort((a,b)=>{
@@ -4072,6 +4119,7 @@ function buildReport(files, musteriMasterMap){
     files.bayiHakedis.data.forEach(r=>{
       const musteri = String(r['Müşteri']||'').trim();
       if(!musteri) return;
+      if(!musteriGecerliMi(musteri)) return;
       const musteriAdi = r['Müşteri Unvanı'] || musteri;
       const tutarHam = Number(r['Tutar'])||0;
       const tutar = tutarHam * 1.20;
@@ -4633,36 +4681,55 @@ function renderKpiHeroRow(items, elId){
         <div class="kpi-hero-value">${hero.display!==undefined ? hero.display : TL(hero.value)}</div>
       </div>
     </div>`;
+  // "ring:true" verilen kartlarda ikon yerine yüzdesel halka grafiği (fknsRingSvg — Sell Out/Temsilci
+  // Karnesi'nde zaten kullanılan aynı bileşen) gösterilir; oran değeri "oran" alanından okunur.
+  // "chips: [{label, tutar, renk}]" verilen kartlarda, ana rakamın altında küçük renkli bilgi
+  // kutucukları gösterilir (ör. Normal Tahsilat / Bozuk İade-Depozito dökümü) — eskiden bu tür
+  // dökümler ana "sub" metnine gömülüp 10px gri yazı içinde kayboluyordu; artık kendi rengi ve daha
+  // okunaklı boyutuyla ayrı bir satırda öne çıkıyor.
   const rowHTML = `<div class="kpi-row-grid">` + rest.map(it=>`
-    <div class="kpi-row-card">
-      <div class="kpi-row-icon">${it.icon||'•'}</div>
-      <div class="kpi-row-text">
-        <div class="kpi-row-lbl">${it.label}</div>
-        <div class="kpi-row-val"${it.valueColor?` style="color:${it.valueColor}"`:''}>${it.display!==undefined ? it.display : TL(it.value)}</div>
-        ${it.sub ? `<div class="kpi-row-extra">${it.sub}</div>` : ''}
+    <div class="kpi-row-card${it.chips?' has-chips':''}">
+      <div class="kpi-row-top-line">
+        <div class="kpi-row-icon"${it.ring?' style="background:none;padding:0;"':''}>${it.ring ? fknsRingSvg(it.oran) : (it.icon||'•')}</div>
+        <div class="kpi-row-text">
+          <div class="kpi-row-lbl">${it.label}</div>
+          <div class="kpi-row-val"${it.valueColor?` style="color:${it.valueColor}"`:''}>${it.display!==undefined ? it.display : TL(it.value)}</div>
+          ${it.sub ? `<div class="kpi-row-extra">${it.sub}</div>` : ''}
+        </div>
       </div>
+      ${it.chips ? `<div class="kpi-row-chips">` + it.chips.map(c=>`
+        <div class="kpi-row-chip" style="background:${c.bg};color:${c.renk};">
+          <div class="kpi-row-chip-lbl">${c.label}</div>
+          <div class="kpi-row-chip-val">${TL(c.tutar)}</div>
+        </div>`).join('') + `</div>` : ''}
     </div>`).join('') + `</div>`;
   document.getElementById(elId).innerHTML = heroHTML + rowHTML;
 }
 
 function renderOzet(ozet){
   const items = [
-    {label:'Toplam Kalan Borç', icon:'💰', value:ozet.toplamKalanBorc, sub:ozet.musteriSayisi.toLocaleString('tr-TR')+' müşteri'},
-    {label:'Açık Sipariş', icon:'📦', value:ozet.toplamSiparis, sub:'sevkiyat bekleyen'},
-    {label:'Sevki Ertelenen', icon:'⏳', value:ozet.toplamEmanet, sub:'emanet sipariş'},
-    {label:'Alınan Tahsilat', icon:'✅', value:ozet.toplamTahsilat, sub:'son dönem'},
-    {label:'Ort. Vade', icon:'📅', value:null, display: ozet.ortalamaVade!=null ? ozet.ortalamaVade+' gün' : '—', sub:ozet.siparisliMusteriSayisi.toLocaleString('tr-TR')+' sipariş girilen müşteri'},
+    {label:'Toplam Kalan Borç', icon:'💰', value:ozet.toplamKalanBorc, sub:ozet.musteriSayisi.toLocaleString('tr-TR')+' Müşteri'},
+    {label:'Açık Sipariş', icon:'📦', value:ozet.toplamSiparis, sub:'Sevkiyat Bekleyen'},
+    {label:'Sevki Ertelenen', icon:'⏳', value:ozet.toplamEmanet, sub:'Emanet Sipariş'},
+    {label:'Alınan Tahsilat', icon:'✅', value:ozet.toplamTahsilat, sub:'Son Dönem'},
+    {label:'Ort. Vade', icon:'📅', value:null, display: ozet.ortalamaVade!=null ? ozet.ortalamaVade+' gün' : '—', sub:ozet.siparisliMusteriSayisi.toLocaleString('tr-TR')+' Sipariş Girilen Müşteri'},
   ];
   renderKpiHeroRow(items, 'ozetGrid');
 }
 
 function renderKPIs(kpi){
+  // Tahsilat Oranı: gösterilen dönemde alınan tahsilatın, (tahsilat + ay sonu kalan borç) toplamına
+  // oranı — Sell Out/Temsilci Karnesi'ndeki halka grafik bileşeni burada da kullanılır, böylece
+  // Genel Rapor'un en üstünde de yüzdesel bir gösterge okunaklı şekilde yer alır.
+  const tahsilatOraniPayda = (kpi.toplamTahsilat||0) + (kpi.toplamBakiye||0);
+  const tahsilatOrani = tahsilatOraniPayda>0 ? (kpi.toplamTahsilat/tahsilatOraniPayda*100) : null;
   const items = [
-    {label:'Toplam Kalan Borç', icon:'💰', value:kpi.toplamBakiye, sub:kpi.musteriSayisi.toLocaleString('tr-TR')+' müşteri'},
-    {label:'Ort. Vade', icon:'📅', value:null, display: kpi.ortalamaVade!=null ? kpi.ortalamaVade+' gün' : '—', sub:kpi.musteriSayisi.toLocaleString('tr-TR')+' müşteri'},
-    {label:'Toplam Risk', icon:'⚠️', value:kpi.toplamRisk, sub:'kalan borç + sipariş + çek/senet'},
-    {label:'Çek / Senet Riski', icon:'🧾', value:kpi.toplamCekSenet, sub:'vadesi gelmemiş'},
-    {label:'Alınan Tahsilat', icon:'✅', value:kpi.toplamTahsilat, sub: kpi.tahsilatEslesmeyenToplam>0 ? (TL(kpi.tahsilatEslesmeyenToplam)+' bakiyesi kapalı müşteriden') : 'son dönem'},
+    {label:'Toplam Kalan Borç', icon:'💰', value:kpi.toplamBakiye, sub:kpi.musteriSayisi.toLocaleString('tr-TR')+' Müşteri'},
+    {label:'Ort. Vade', icon:'📅', value:null, display: kpi.ortalamaVade!=null ? kpi.ortalamaVade+' gün' : '—', sub:kpi.musteriSayisi.toLocaleString('tr-TR')+' Müşteri'},
+    {label:'Toplam Risk', icon:'⚠️', value:kpi.toplamRisk, sub:'Kalan Borç + Sipariş + Çek/Senet'},
+    {label:'Çek / Senet Riski', icon:'🧾', value:kpi.toplamCekSenet, sub:'Vadesi Gelmemiş'},
+    {label:'Alınan Tahsilat', icon:'✅', value:kpi.toplamTahsilat, sub: kpi.tahsilatEslesmeyenToplam>0 ? (TL(kpi.tahsilatEslesmeyenToplam)+' Bakiyesi Kapalı Müşteriden') : 'Son Dönem'},
+    {label:'Tahsilat Oranı', ring:true, oran:tahsilatOrani, value:null, display: fmtYuzde(tahsilatOrani), sub:'Tahsilat / (Tahsilat + Kalan Borç)'},
   ];
   renderKpiHeroRow(items, 'kpiGrid');
 }
@@ -5159,6 +5226,20 @@ function renderMusteriDetail(m, showSenetBtn){
       <button type="button" class="btn small senet-yazdir-btn" data-musteri="${escapeHtml(m.musteri)}" data-musteri-adi="${escapeHtml(m.musteriAdi)}" data-tutar="${m.siparisTutari||0}" data-emanet="${m.emanetSiparis||0}" data-kalan-borc="${m.kalanBorc||0}">📄 Senet Yazdır</button>
     </div>`;
   }
+  // Tahsilat kaynak şeffaflığı: gösterilen "Alınan Tahsilat" tutarının ne kadarının normal (nakit)
+  // tahsilat, ne kadarının Bozuk İade Faturası / Depozito Tahsilatı kredisi olduğunu gösterir.
+  // Sadece kredi bileşeni varsa gösterilir (sade tutmak için tamamen normal tahsilatlarda gizli).
+  const kay = m.alinanTahsilatKaynak;
+  if(kay && ((kay.bozukIade||0) > 0 || (kay.depozito||0) > 0)){
+    html += `<div class="note" style="margin-bottom:14px;font-size:11.5px;background:var(--navy-soft);border-radius:9px;padding:9px 12px;">
+      <b>Tahsilat Dökümü:</b> ${TL(m.alinanTahsilat)} toplam
+      <div style="margin-top:4px;display:flex;flex-direction:column;gap:2px;">
+        ${kay.normal>0 ? `<span>· Normal Tahsilat: ${TL(kay.normal)}</span>` : ''}
+        ${kay.bozukIade>0 ? `<span>· Bozuk İade Faturası: ${TL(kay.bozukIade)}</span>` : ''}
+        ${kay.depozito>0 ? `<span>· Depozito Tahsilatı: ${TL(kay.depozito)}</span>` : ''}
+      </div>
+    </div>`;
+  }
   const hakedisRapor = state.bayiHakedisReport;
   const hakedisKaydi = (hakedisRapor && Array.isArray(hakedisRapor.noktalar)) ? hakedisRapor.noktalar.find(n=>n.kod===m.musteri) : null;
   if(hakedisKaydi && hakedisKaydi.kayitlar && hakedisKaydi.kayitlar.length){
@@ -5380,8 +5461,12 @@ async function computeFaturaKontrolRows(report, selectedDate, temsilciFilter, ar
   (birlesikArsiv.tahsilatArsiv||[]).forEach(r=>{
     if(!r.belgeTarihi) return;
     if(dateKeyLocal(r.belgeTarihi) !== selectedDate) return;
-    if(!eslesen.has(r.musteri)) eslesen.set(r.musteri, {seciliSiparis:0, seciliTahsilat:0});
-    eslesen.get(r.musteri).seciliTahsilat += (r.tutar||0);
+    if(!eslesen.has(r.musteri)) eslesen.set(r.musteri, {seciliSiparis:0, seciliTahsilat:0, seciliTahsilatKaynak:{normal:0, bozukIade:0, depozito:0}});
+    const e = eslesen.get(r.musteri);
+    e.seciliTahsilat += (r.tutar||0);
+    if(r.formatKaynagi==='FaturaIade') e.seciliTahsilatKaynak.bozukIade += r.tutar||0;
+    else if(r.formatKaynagi==='DepozitoTahsilat') e.seciliTahsilatKaynak.depozito += r.tutar||0;
+    else e.seciliTahsilatKaynak.normal += r.tutar||0;
   });
 
   const q = String(aramaMetni||'').trim().toLowerCase();
@@ -5392,7 +5477,10 @@ async function computeFaturaKontrolRows(report, selectedDate, temsilciFilter, ar
     if(!m) return;
     if(temsilciFilter && m.temsilci !== temsilciFilter) return;
     if(q && !(String(m.musteriAdi).toLowerCase().includes(q) || String(m.musteri).toLowerCase().includes(q))) return;
-    rows.push(Object.assign({}, m, {seciliSiparis: v.seciliSiparis, seciliTahsilat: v.seciliTahsilat}));
+    // Fatura Kontrol'de gösterilen tahsilat SEÇİLİ TARİHE özgüdür — bu yüzden döküm de (varsa
+    // Genel Rapor'un "bugüne en yakın gün" bazlı dökümü değil) o güne özgü kaynak dağılımıyla
+    // gösterilir (bkz. renderMusteriDetail'daki alinanTahsilatKaynak kullanımı).
+    rows.push(Object.assign({}, m, {seciliSiparis: v.seciliSiparis, seciliTahsilat: v.seciliTahsilat, alinanTahsilat: v.seciliTahsilat, alinanTahsilatKaynak: v.seciliTahsilatKaynak || null}));
   });
 
   const {key,dir} = state.fkSort;
@@ -5507,7 +5595,13 @@ async function renderFaturaKontrolArsivBilgi(){
     return;
   }
   const birlesik = await faturaKontrolArsivBirlestirCached(arsiv);
-  el.textContent = `Buluttaki arşivde ${gunler.length.toLocaleString('tr-TR')} günün verisi var (${fmtDate(new Date(birlesik.ilkGun))} – ${fmtDate(new Date(birlesik.sonGun))}) · ${birlesik.siparisArsiv.length.toLocaleString('tr-TR')} sipariş, ${birlesik.tahsilatArsiv.length.toLocaleString('tr-TR')} tahsilat, ${birlesik.faturaArsiv.length.toLocaleString('tr-TR')} fatura kaydı. ☁️`;
+  const bugunKeyBilgi = dateKeyLocal(turkiyeBugun());
+  // Müşteri Snapshot (Kalan Borç/Vade/Risk trend grafiğinin kaynağı) SADECE o gün "Raporu
+  // Oluştur"a basılırsa yazılır — bugün henüz basılmadıysa kullanıcıyı bilgilendir (bkz.
+  // renderTemsilciKarnesiView/Trend Analiz'deki aynı sınırlamayla ilgili notlar).
+  const bugunVarMi = !!(arsiv[bugunKeyBilgi] && arsiv[bugunKeyBilgi].musteriSnapshot && arsiv[bugunKeyBilgi].musteriSnapshot.length);
+  const bugunUyarisi = bugunVarMi ? '' : ' ⚠️ Bugün için henüz "Raporu Oluştur"a basılmadı — Kalan Borç/Vade/Risk trend grafiğinde bugünün verisi eksik kalacak.';
+  el.textContent = `Buluttaki arşivde veri var (${fmtDate(new Date(birlesik.ilkGun))} – ${fmtDate(new Date(birlesik.sonGun))}) · ${birlesik.siparisArsiv.length.toLocaleString('tr-TR')} sipariş, ${birlesik.tahsilatArsiv.length.toLocaleString('tr-TR')} tahsilat, ${birlesik.faturaArsiv.length.toLocaleString('tr-TR')} fatura kaydı. ☁️` + bugunUyarisi;
 }
 
 const FATURA_ARSIV_TEMIZLEME_SIFRESI = '471252580a';
@@ -5651,23 +5745,35 @@ async function computeMusteriHaftalikOzet(musteri){
   const toplamFatura = faturalar.reduce((a,b)=>a+(b.tutar||0),0);
   const toplamLitre = faturalar.reduce((a,b)=>a+(b.litre||0),0);
   const toplamTahsilat = tahsilatlar.reduce((a,b)=>a+(b.tutar||0),0);
+  // Tahsilat toplamının kaynak dökümü: normal (nakit) tahsilat mı, Bayi Hak Ediş mi, Bozuk İade
+  // Faturası / Depozito Tahsilatı mı — Haftalık Ortalama Tahsilat KPI'sının altında renkli
+  // kutucuklarla (chip) şeffaf şekilde gösterilir.
+  const KREDI_ETIKETLERI = new Set(['FaturaIade', 'DepozitoTahsilat']);
+  const toplamKrediTahsilat = tahsilatlar.reduce((a,b)=> a + (KREDI_ETIKETLERI.has(b.formatKaynagi) ? (b.tutar||0) : 0), 0);
+  const toplamNormalTahsilat = toplamTahsilat - toplamKrediTahsilat - toplamHakedisTahsilat;
   const haftalikFatura = toplamFatura / haftaSayisi;
   const haftalikLitre = toplamLitre / haftaSayisi;
   const haftalikTahsilat = toplamTahsilat / haftaSayisi;
+  const haftalikNormalTahsilat = toplamNormalTahsilat / haftaSayisi;
+  const haftalikKrediTahsilat = toplamKrediTahsilat / haftaSayisi;
+  const haftalikHakedisTahsilat = toplamHakedisTahsilat / haftaSayisi;
   const geriDonusGun = haftalikTahsilat > 0 ? (haftalikFatura / haftalikTahsilat) * 7 : null;
-  return { gunSayisi, haftaSayisi, toplamFatura, toplamLitre, toplamTahsilat, haftalikFatura, haftalikLitre, haftalikTahsilat, geriDonusGun, toplamHakedisTahsilat };
+  return { gunSayisi, haftaSayisi, toplamFatura, toplamLitre, toplamTahsilat, toplamNormalTahsilat, toplamKrediTahsilat,
+    haftalikFatura, haftalikLitre, haftalikTahsilat, haftalikNormalTahsilat, haftalikKrediTahsilat, haftalikHakedisTahsilat, geriDonusGun, toplamHakedisTahsilat };
 }
 
 function renderTrendHaftalikGrid(ozet){
   const el = document.getElementById('trendHaftalikGrid');
   if(!ozet){ el.innerHTML = ''; return; }
-  const tahsilatSub = 'fatura/tahsilat tarihlerine göre '+ozet.gunSayisi.toLocaleString('tr-TR')+' günlük aralık'
-    + (ozet.toplamHakedisTahsilat>0 ? ' · içinde '+TL(ozet.toplamHakedisTahsilat)+' Bayi Hak Ediş dahil' : '');
+  const tahsilatChips = [];
+  if(ozet.haftalikNormalTahsilat>0) tahsilatChips.push({label:'Normal Tahsilat', tutar:ozet.haftalikNormalTahsilat, bg:'var(--accent-soft)', renk:'var(--accent-deep)'});
+  if(ozet.haftalikHakedisTahsilat>0) tahsilatChips.push({label:'Bayi Hak Ediş', tutar:ozet.haftalikHakedisTahsilat, bg:'var(--navy-soft)', renk:'var(--navy)'});
+  if(ozet.haftalikKrediTahsilat>0) tahsilatChips.push({label:'Bozuk İade / Depozito', tutar:ozet.haftalikKrediTahsilat, bg:'#F4DED9', renk:'var(--danger)'});
   const items = [
-    {label:'Haftalık Ortalama Fatura Tutarı', icon:'🧾', value:ozet.haftalikFatura, sub:'fatura/tahsilat tarihlerine göre '+ozet.gunSayisi.toLocaleString('tr-TR')+' günlük aralık'},
-    {label:'Haftalık Ortalama Tahsilat', icon:'✅', value:ozet.haftalikTahsilat, sub:tahsilatSub},
-    {label:'Haftalık Ortalama Fatura Litresi', icon:'💧', value:null, display: ozet.haftalikLitre!=null ? Math.round(ozet.haftalikLitre).toLocaleString('tr-TR')+' Lt' : '—', sub:'fatura dökümündeki Toplam Litre kolonuna göre'},
-    {label:'Fatura Tutarının Ort. Geri Dönüş Süresi', icon:'⏱️', value:null, display: ozet.geriDonusGun!=null ? Math.round(ozet.geriDonusGun).toLocaleString('tr-TR')+' gün' : '—', sub:'haftalık tahsilat hızına göre'},
+    {label:'Haftalık Ortalama Fatura Tutarı', icon:'🧾', value:ozet.haftalikFatura},
+    {label:'Haftalık Ortalama Tahsilat', icon:'✅', value:ozet.haftalikTahsilat, chips: tahsilatChips.length>1 ? tahsilatChips : null},
+    {label:'Haftalık Ortalama Fatura Litresi', icon:'💧', value:null, display: ozet.haftalikLitre!=null ? Math.round(ozet.haftalikLitre).toLocaleString('tr-TR')+' Lt' : '—', sub:'Fatura Dökümündeki Toplam Litre Kolonuna Göre'},
+    {label:'Fatura Tutarının Ort. Geri Dönüş Süresi', icon:'⏱️', value:null, display: ozet.geriDonusGun!=null ? Math.round(ozet.geriDonusGun).toLocaleString('tr-TR')+' gün' : '—', sub:'Haftalık Tahsilat Hızına Göre'},
   ];
   renderKpiHeroRow(items, 'trendHaftalikGrid');
 }
@@ -5678,10 +5784,12 @@ async function renderTrendForMusteri(musteriInfo){
 
   const seri = computeMusteriTrend(musteriInfo.musteri);
   const son = seri.length ? seri[seri.length-1] : null;
+  const krediGunVarMi = seri.some(s=>s.krediGunuMu);
   document.getElementById('trendMusteriBaslik').innerHTML = `
     <div class="musteri-name" style="font-size:15px;">${escapeHtml(musteriInfo.musteriAdi)}</div>
     <div class="musteri-code" style="margin-bottom:6px;">${escapeHtml(musteriInfo.musteri)} · ${escapeHtml(musteriInfo.temsilci||'—')}</div>
-    <div style="font-size:12px;color:var(--ink-soft);">${seri.length ? (seri.length.toLocaleString('tr-TR')+' günlük veri · Güncel: Kalan Borç '+TL(son.kalanBorc)+' · Ortalama Vade '+son.avgVadeGun+' gün · Toplam Risk '+TL(son.toplamRisk)) : 'Bu müşteri için henüz arşivlenmiş trend verisi yok.'}</div>`;
+    <div style="font-size:12px;color:var(--ink-soft);">${seri.length ? ('Güncel: Kalan Borç '+TL(son.kalanBorc)+' · Ortalama Vade '+son.avgVadeGun+' gün · Toplam Risk '+TL(son.toplamRisk)) : 'Bu müşteri için henüz arşivlenmiş trend verisi yok.'}</div>
+    ${krediGunVarMi ? '<div style="font-size:11px;color:var(--ink-faint);margin-top:4px;">⊚ kesikli halka işaretli noktalar: o gün Bozuk İade / Depozito Tahsilatı var</div>' : ''}`;
 
   renderTrendHaftalikGrid(await computeMusteriHaftalikOzet(musteriInfo.musteri));
 
@@ -5739,12 +5847,23 @@ function renderTrendChart(containerId, seri, key, renk, birim){
   }).join('');
   const axisLine = `<line x1="${padL}" y1="${(H-padB).toFixed(1)}" x2="${W-padR}" y2="${(H-padB).toFixed(1)}" stroke="var(--line)" stroke-width="1"></line>`;
 
-  const circles = points.map((p,i)=>`
+  const circles = points.map((p,i)=>{
+    const s = seri[i];
+    // Bu gün bir Bozuk İade Faturası / Depozito Tahsilatı kredisi varsa (bkz. computeMusteriTrend),
+    // noktayı farklı bir görselle (içi boş, kesikli halka) işaretle — kullanıcı "bu gün neden
+    // sıçradı/düştü" sorusunu grafiğe bakarak anlayabilsin.
+    const tooltipEk = s.krediGunuMu ? (' — bu gün ' + TL(s.krediTutari) + ' Bozuk İade / Depozito Tahsilatı var') : '';
+    const marker = s.krediGunuMu
+      ? `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="7" fill="none" stroke="${renk}" stroke-width="2" stroke-dasharray="2,2"></circle>
+         <circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.3" fill="${renk}"></circle>`
+      : `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="5" fill="var(--surface)" stroke="${renk}" stroke-width="2"></circle>
+         <circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.3" fill="${renk}"></circle>`;
+    return `
     <g>
-      <title>${fmtDate(new Date(seri[i].tarih))}: ${fmtTrendDeger(seri[i][key], birim)}</title>
-      <circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="5" fill="var(--surface)" stroke="${renk}" stroke-width="2"></circle>
-      <circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.3" fill="${renk}"></circle>
-    </g>`).join('');
+      <title>${fmtDate(new Date(s.tarih))}: ${fmtTrendDeger(s[key], birim)}${tooltipEk}</title>
+      ${marker}
+    </g>`;
+  }).join('');
 
   const gridY = gridVals.map((v,i)=>`<text x="0" y="${(yScale(v)+3).toFixed(1)}" font-size="10" fill="var(--ink-faint)">${gridLabels[i]}</text>`).join('');
   const xLabels = `<text x="${padL}" y="${H-8}" font-size="10" fill="var(--ink-faint)">${fmtDate(new Date(seri[0].tarih))}</text>` +
@@ -6420,7 +6539,7 @@ function renderYuklemeArsivBilgi(){
     return;
   }
   el.textContent = gunSayisi
-    ? `☁️ Arşivde ${gunSayisi.toLocaleString('tr-TR')} günün ST Tahsilat/Litre kaydı var. Tarih seçiciden geçmişe dönük görüntüleyebilirsiniz.`
+    ? `☁️ Arşivde ST Tahsilat/Litre kaydı var. Tarih seçiciden geçmişe dönük görüntüleyebilirsiniz.`
     : 'Buluttaki ST Tahsilat/Litre arşivinde henüz veri yok. Ana yükleme sayfasında "Tahsilat Dökümü" ve "Yükleme Raporu" dosyalarını yükleyip "Raporu Oluştur"a bastığınızda o günün verisi buluta eklenir. ☁️';
 }
 
@@ -6856,17 +6975,29 @@ async function computeTahsilatVerimlilikAy(report, ayKey, zorla){
   if(!gunler.length) return {yok:true};
   const {ilkKey, sonKey} = ayGunAraligi(ayKey);
 
+  // ÖNEMLİ: Fatura Dökümü/Bayi Hak Ediş artık kendi tarihlerine göre gün bazlı dağıtıldığı için
+  // (bkz. arsivGunlereDagitVeDegistir), bir gün anahtarı arşivde VAR olabilir ama o günün
+  // musteriSnapshot'ı (Kalemler/"Raporu Oluştur" ile yazılan) hiç OLMAYABİLİR — sadece o günün
+  // Fatura/Hak Ediş/Tahsilat verisi barındıran bir "kabuk" gün olabilir. baslangicGunu/bitisGunu
+  // SADECE gerçekten musteriSnapshot'ı olan günler arasından seçilmeli; aksi halde kalanBorc
+  // hesaplaması sessizce 0'a düşer ve "Net Cari Değişim" gibi KPI'lar yanlış (ör. ay sonu bakiyenin
+  // tamamı "değişim" gibi) görünür.
+  const gunlerSnapshotlu = gunler.filter(g=>{
+    const snap = state.faturaArsivCache[g] && state.faturaArsivCache[g].musteriSnapshot;
+    return snap && snap.length;
+  });
+
   let bitisGunu = null;
-  gunler.forEach(g=>{ if(g<=sonKey && (!bitisGunu || g>bitisGunu)) bitisGunu = g; });
+  gunlerSnapshotlu.forEach(g=>{ if(g<=sonKey && (!bitisGunu || g>bitisGunu)) bitisGunu = g; });
   if(!bitisGunu) return {yok:true};
 
   let baslangicGunu = null;
-  gunler.forEach(g=>{ if(g<ilkKey && (!baslangicGunu || g>baslangicGunu)) baslangicGunu = g; });
+  gunlerSnapshotlu.forEach(g=>{ if(g<ilkKey && (!baslangicGunu || g>baslangicGunu)) baslangicGunu = g; });
   // Ay başından önceye ait arşiv kaydı yoksa (ör. haziran verisi arşivlenmemiş), ay içindeki
   // en erken arşiv gününü (ör. 1 Temmuz) yaklaşık başlangıç noktası olarak kullan.
   let baslangicYaklasik = false;
   if(!baslangicGunu){
-    gunler.forEach(g=>{ if(g>=ilkKey && g<=sonKey && (!baslangicGunu || g<baslangicGunu)) baslangicGunu = g; });
+    gunlerSnapshotlu.forEach(g=>{ if(g>=ilkKey && g<=sonKey && (!baslangicGunu || g<baslangicGunu)) baslangicGunu = g; });
     if(baslangicGunu) baslangicYaklasik = true;
   }
 
@@ -6878,17 +7009,32 @@ async function computeTahsilatVerimlilikAy(report, ayKey, zorla){
 
   const birlesikArsiv = await faturaKontrolArsivBirlestirCached(state.faturaArsivCache);
   const ayTahsilatMap = new Map();
+  const ayNakitTahsilatMap = new Map();
+  // "Bozuk İade Faturası" ve "Depozito Tahsilatı" kredileri (formatKaynagi: 'FaturaIade' /
+  // 'DepozitoTahsilat') Kalemler dosyasındaki kalan bakiyeden ZATEN düşülmüş durumda — yani bu
+  // tutarlar Kalan Borç değişiminde bir kez sayılmış oluyor. Bu yüzden "toplamTahsilat" (KPI
+  // gösterimi için, tahsilat hesaplamalarında kullanılır) bu kredileri İÇERİR, ama "tahsilatOrani"/
+  // "gerçekleşme oranı" gibi kalan borç DEĞİŞİMİYLE karşılaştırılan veya gelecek nakit akışını
+  // tahmin etmede kullanılan oranlar bu kredileri İÇERMEYEN "nakit" toplamı (ayNakitTahsilatMap)
+  // kullanır — aksi halde aynı tutar hem borç azalışında hem tahsilat oranında sayılıp oranı
+  // olduğundan yüksek/yanıltıcı gösterir ve Nakit Akış Tahmini gerçekte gerçekleşmeyecek bir nakit
+  // girişini varsaymış olur.
+  const KALAN_BORC_DEGISIMINE_DAHIL_EDILMEYEN_KREDI_ETIKETLERI = new Set(['FaturaIade', 'DepozitoTahsilat']);
   (birlesikArsiv.tahsilatArsiv||[]).forEach(r=>{
     if(!r.belgeTarihi || !musteriTvIcinGecerliMi(r.musteri)) return;
     const gk = dateKeyLocal(r.belgeTarihi);
     if(!gk || gk<ilkKey || gk>sonKey) return;
     ayTahsilatMap.set(r.musteri, (ayTahsilatMap.get(r.musteri)||0) + (r.tutar||0));
+    if(!KALAN_BORC_DEGISIMINE_DAHIL_EDILMEYEN_KREDI_ETIKETLERI.has(r.formatKaynagi)){
+      ayNakitTahsilatMap.set(r.musteri, (ayNakitTahsilatMap.get(r.musteri)||0) + (r.tutar||0));
+    }
   });
   (birlesikArsiv.bayiHakedisArsiv||[]).forEach(r=>{
     if(!r.tahsilatTarihi || !musteriTvIcinGecerliMi(r.musteri)) return;
     const gk = dateKeyLocal(r.tahsilatTarihi);
     if(!gk || gk<ilkKey || gk>sonKey) return;
     ayTahsilatMap.set(r.musteri, (ayTahsilatMap.get(r.musteri)||0) + (r.tutar||0));
+    ayNakitTahsilatMap.set(r.musteri, (ayNakitTahsilatMap.get(r.musteri)||0) + (r.tutar||0));
   });
 
   const cariDegisimVarMi = !!baslangicMap;
@@ -6903,20 +7049,24 @@ async function computeTahsilatVerimlilikAy(report, ayKey, zorla){
     const kalanBorcBitis = bitisM ? (bitisM.kalanBorc||0) : 0;
     const kalanBorcBaslangic = baslangicM ? (baslangicM.kalanBorc||0) : 0;
     const tahsilat = ayTahsilatMap.get(kod) || 0;
+    const nakitTahsilat = ayNakitTahsilatMap.get(kod) || 0;
 
-    if(!map.has(temsilci)) map.set(temsilci, {temsilci, musteriSayisi:0, tahsilatYapilanMusteri:0, toplamTahsilat:0, toplamKalanBorc:0, toplamKalanBorcBaslangic:0});
+    if(!map.has(temsilci)) map.set(temsilci, {temsilci, musteriSayisi:0, tahsilatYapilanMusteri:0, toplamTahsilat:0, toplamNakitTahsilat:0, toplamKalanBorc:0, toplamKalanBorcBaslangic:0});
     const r = map.get(temsilci);
     r.musteriSayisi += 1;
     if(tahsilat > 0) r.tahsilatYapilanMusteri += 1;
     r.toplamTahsilat += tahsilat;
+    r.toplamNakitTahsilat += nakitTahsilat;
     r.toplamKalanBorc += kalanBorcBitis;
     if(cariDegisimVarMi) r.toplamKalanBorcBaslangic += kalanBorcBaslangic;
   });
 
   const rows = Array.from(map.values()).map(r=>{
-    const payda = r.toplamTahsilat + r.toplamKalanBorc;
+    // "gerçekleşme oranı" kalan borç DEĞİŞİMİYLE karşılaştırıldığı için nakit-dışı kredileri
+    // içermeyen toplamNakitTahsilat kullanılır (bkz. yukarıdaki not).
+    const payda = r.toplamNakitTahsilat + r.toplamKalanBorc;
     return Object.assign({}, r, {
-      tahsilatOrani: payda>0 ? (r.toplamTahsilat/payda*100) : null,
+      tahsilatOrani: payda>0 ? (r.toplamNakitTahsilat/payda*100) : null,
       ortalamaTahsilat: r.tahsilatYapilanMusteri>0 ? r.toplamTahsilat/r.tahsilatYapilanMusteri : 0,
       cariDegisim: cariDegisimVarMi ? (r.toplamKalanBorc - r.toplamKalanBorcBaslangic) : null,
     });
@@ -6924,13 +7074,14 @@ async function computeTahsilatVerimlilikAy(report, ayKey, zorla){
 
   const genel = rows.reduce((a,r)=>({
     toplamTahsilat: a.toplamTahsilat + r.toplamTahsilat,
+    toplamNakitTahsilat: a.toplamNakitTahsilat + r.toplamNakitTahsilat,
     toplamKalanBorc: a.toplamKalanBorc + r.toplamKalanBorc,
     toplamKalanBorcBaslangic: a.toplamKalanBorcBaslangic + r.toplamKalanBorcBaslangic,
     musteriSayisi: a.musteriSayisi + r.musteriSayisi,
     tahsilatYapilanMusteri: a.tahsilatYapilanMusteri + r.tahsilatYapilanMusteri,
-  }), {toplamTahsilat:0, toplamKalanBorc:0, toplamKalanBorcBaslangic:0, musteriSayisi:0, tahsilatYapilanMusteri:0});
-  const genelPayda = genel.toplamTahsilat + genel.toplamKalanBorc;
-  genel.tahsilatOrani = genelPayda>0 ? (genel.toplamTahsilat/genelPayda*100) : null;
+  }), {toplamTahsilat:0, toplamNakitTahsilat:0, toplamKalanBorc:0, toplamKalanBorcBaslangic:0, musteriSayisi:0, tahsilatYapilanMusteri:0});
+  const genelPayda = genel.toplamNakitTahsilat + genel.toplamKalanBorc;
+  genel.tahsilatOrani = genelPayda>0 ? (genel.toplamNakitTahsilat/genelPayda*100) : null;
   genel.cariDegisim = cariDegisimVarMi ? (genel.toplamKalanBorc - genel.toplamKalanBorcBaslangic) : null;
   const enVerimli = rows.filter(r=>r.tahsilatOrani!=null && r.musteriSayisi>0).sort((a,b)=>b.tahsilatOrani-a.tahsilatOrani)[0] || null;
 
@@ -6957,11 +7108,28 @@ function fmtYuzde(v){
   return v==null ? '—' : '%'+v.toFixed(1).replace('.',',');
 }
 
-function verimRenk(oran){
+// Tüm rapor kartlarındaki performans renk/etiket mantığının TEK ortak kaynağı. Önceden verimRenk,
+// sellOutRenk, karneDurumPill, ceiDurumPill birbirine çok benzeyen ama ayrı ayrı yazılmış eşik
+// mantıkları içeriyordu; artık hepsi bu iki fonksiyona delege ediyor — her rapor sadece kendi
+// eşiğini (ve varsa özel renklerini) parametre olarak veriyor, mantık tek yerde.
+function performansRenk(oran, esikler){
+  const cfg = Object.assign({iyi:70, orta:40, iyiRenk:'var(--success)', ortaRenk:'var(--accent)', dusukRenk:'var(--danger)'}, esikler||{});
   if(oran==null) return 'var(--ink-faint)';
-  if(oran>=70) return 'var(--success)';
-  if(oran>=40) return 'var(--accent)';
-  return 'var(--danger)';
+  if(oran>=cfg.iyi) return cfg.iyiRenk;
+  if(cfg.orta!=null && oran>=cfg.orta) return cfg.ortaRenk;
+  return cfg.dusukRenk;
+}
+function performansPill(oran, esikler){
+  const cfg = Object.assign({ust:100, hedefte:90, altinda:70}, esikler||{});
+  if(oran==null) return {label:'—', cls:''};
+  if(oran>=cfg.ust) return {label:'Hedef Üstü', cls:'good'};
+  if(oran>=cfg.hedefte) return {label:'Hedefte', cls:'navy'};
+  if(oran>=cfg.altinda) return {label:'Hedef Altı', cls:'warn'};
+  return {label:'Zayıf', cls:'danger'};
+}
+
+function verimRenk(oran){
+  return performansRenk(oran, {iyi:70, orta:40});
 }
 
 function fmtCariDegisim(v){
@@ -6975,17 +7143,17 @@ function fmtCariDegisim(v){
 function renderTahsilatVerimlilikKPI(rep){
   const cariRenk = rep.genel.cariDegisim==null ? 'var(--ink-faint)' : (rep.genel.cariDegisim>0 ? 'var(--danger)' : 'var(--success)');
   const cariDisplay = rep.genel.cariDegisim==null ? '—' : ((rep.genel.cariDegisim>0?'+':'')+TL(rep.genel.cariDegisim));
-  const cariSub = !rep.cariDegisimVarMi ? 'önceki ay arşiv kaydı yok'
+  const cariSub = !rep.cariDegisimVarMi ? 'Önceki Ay Arşiv Kaydı Yok'
     : (rep.baslangicYaklasik
-        ? (fmtDate(new Date(rep.baslangicGunu))+' kaydına göre · yaklaşık (önceki ay verisi yok, negatif = borç azaldı)')
-        : 'ay başına göre (negatif = borç azaldı)');
+        ? (fmtDate(new Date(rep.baslangicGunu))+' Kaydına Göre · Yaklaşık (Önceki Ay Verisi Yok, Negatif = Borç Azaldı)')
+        : 'Ay Başına Göre (Negatif = Borç Azaldı)');
   const items = [
-    {label:'Toplam Alınan Tahsilat', icon:'💰', value:rep.genel.toplamTahsilat, sub:rep.genel.tahsilatYapilanMusteri.toLocaleString('tr-TR')+' müşteriden'},
-    {label:'Kalan Borç (Ay Sonu)', icon:'🏦', value:rep.genel.toplamKalanBorc, sub:rep.genel.musteriSayisi.toLocaleString('tr-TR')+' müşteri'},
+    {label:'Toplam Alınan Tahsilat', icon:'💰', value:rep.genel.toplamTahsilat, sub:rep.genel.tahsilatYapilanMusteri.toLocaleString('tr-TR')+' Müşteriden'},
+    {label:'Kalan Borç (Ay Sonu)', icon:'🏦', value:rep.genel.toplamKalanBorc, sub:rep.genel.musteriSayisi.toLocaleString('tr-TR')+' Müşteri'},
     {label:'Net Cari Değişim (Ay İçi)', icon:'🔁', value:null, display:cariDisplay, sub:cariSub, valueColor:cariRenk},
-    {label:'Genel Tahsilat Oranı', icon:'📈', value:null, display:fmtYuzde(rep.genel.tahsilatOrani), sub:'tahsilat / (tahsilat + ay sonu kalan borç)'},
-    {label:'En Verimli Temsilci', icon:'🏆', value:null, display: rep.enVerimli ? rep.enVerimli.temsilci : '—', sub: rep.enVerimli ? (fmtYuzde(rep.enVerimli.tahsilatOrani)+' oran') : ''},
-    {label:'Tahsilatsız Müşteri', icon:'❗', value:null, display:(rep.genel.musteriSayisi-rep.genel.tahsilatYapilanMusteri).toLocaleString('tr-TR'), sub:'bu ay tahsilat yapılmayan'},
+    {label:'Genel Tahsilat Oranı', icon:'📈', value:null, display:fmtYuzde(rep.genel.tahsilatOrani), sub:'Nakit Tahsilat / (Nakit Tahsilat + Ay Sonu Kalan Borç)'},
+    {label:'En Verimli Temsilci', icon:'🏆', value:null, display: rep.enVerimli ? rep.enVerimli.temsilci : '—', sub: rep.enVerimli ? (fmtYuzde(rep.enVerimli.tahsilatOrani)+' Oran') : ''},
+    {label:'Tahsilatsız Müşteri', icon:'❗', value:null, display:(rep.genel.musteriSayisi-rep.genel.tahsilatYapilanMusteri).toLocaleString('tr-TR'), sub:'Bu Ay Tahsilat Yapılmayan'},
   ];
   renderKpiHeroRow(items, 'tvKpiGrid');
 }
@@ -7068,16 +7236,27 @@ function renderTvArsivBilgi(){
     el.textContent = 'Buluttaki arşivde henüz veri yok. "Raporu Oluştur" ile her yeni yükleme yaptığınızda o günün tahsilat verisi buluta eklenir. ☁️';
     return;
   }
-  el.textContent = `Buluttaki arşivden ${gunSayisi.toLocaleString('tr-TR')} günün tahsilat/cari verisi kullanılıyor. ☁️`;
+  el.textContent = `Buluttaki arşivden tahsilat/cari verisi kullanılıyor. ☁️`;
 }
 
-// Seçilen ay içinde, arşivlenmiş her gün için toplam Kalan Borç serisini üretir.
-// baslangicGunu -> bitisGunu aralığındaki (dahil) tüm arşiv günlerini kapsar.
+// Seçilen ay içinde, arşivlenmiş her gün için toplam Kalan Borç serisini üretir. Grafik SADECE bu
+// ayın günlerini (ayın 1'i → bitisGunu) kapsar — rep.baslangicGunu (önceki ayın son günü, "ay başı
+// bakiye" referansı için computeTahsilatVerimlilikAy'da kullanılır) kasıtlı olarak grafiğe DAHİL
+// EDİLMEZ; aksi halde "Ay İçi Günlük Trend" grafiği yanlışlıkla bir önceki ayın son günüyle
+// başlıyormuş gibi görünür (ör. Temmuz ayı trendi 30 Haziran'dan başlıyormuş gibi).
 // temsilciFiltre '__genel__' ise tüm temsilciler toplanır, aksi halde sadece o temsilci.
 function computeCariGunlukSeri(rep, temsilciFiltre){
-  if(!rep || !rep.baslangicGunu || !rep.bitisGunu) return [];
+  if(!rep || !rep.bitisGunu || !rep.ayKey) return [];
+  const {ilkKey} = ayGunAraligi(rep.ayKey);
   const gunler = Object.keys(state.faturaArsivCache||{}).sort()
-    .filter(g=> g>=rep.baslangicGunu && g<=rep.bitisGunu);
+    .filter(g=> g>=ilkKey && g<=rep.bitisGunu)
+    // Fatura/Bayi Hak Ediş artık kendi tarihine göre dağıtıldığı için bir gün musteriSnapshot'sız
+    // (sadece fatura/hak ediş/tahsilat içeren "kabuk" gün) arşivde yer alabilir — bu günler grafiğe
+    // dahil edilmez, aksi halde Kalan Borç o günde yanlışlıkla 0'a düşmüş gibi görünür.
+    .filter(g=>{
+      const snap = state.faturaArsivCache[g] && state.faturaArsivCache[g].musteriSnapshot;
+      return snap && snap.length;
+    });
   return gunler.map(g=>{
     const snap = ((state.faturaArsivCache[g] && state.faturaArsivCache[g].musteriSnapshot) || [])
       .filter(m=>musteriTvIcinGecerliMi(m.musteri))
@@ -7112,8 +7291,7 @@ function renderTvCariTrend(){
     if(seri.length>=2){
       const fark = seri[seri.length-1].kalanBorc - seri[0].kalanBorc;
       const farkTxt = (fark>0?'+':'')+TL(fark);
-      subEl.textContent = fmtDate(new Date(seri[0].tarih))+' → '+fmtDate(new Date(seri[seri.length-1].tarih))+' arası net değişim: '+farkTxt
-        + (rep.baslangicYaklasik ? ' (yaklaşık başlangıç — önceki ay verisi arşivde yok)' : '');
+      subEl.textContent = fmtDate(new Date(seri[0].tarih))+' → '+fmtDate(new Date(seri[seri.length-1].tarih))+' arası net değişim: '+farkTxt;
     }else{
       subEl.textContent = 'Trend için en az 2 arşivlenmiş gün gerekiyor.';
     }
@@ -7273,7 +7451,7 @@ async function renderDsoTrendView(report, zorla){
   await genelRaporlarIcinArsivGetir(400, zorla);
   const dso = computeDsoTrend(report);
   const gunSayisi = Object.keys(state.faturaArsivCache||{}).length;
-  asOfEl.textContent = 'Veri kaynağı: Fatura Kontrol arşivi — '+gunSayisi.toLocaleString('tr-TR')+' günlük anlık görüntü';
+  asOfEl.textContent = 'Veri kaynağı: Fatura Kontrol arşivi — günlük anlık görüntüler';
 
   if(dso.yok){
     document.getElementById('dsoTrendKpiGrid').innerHTML='';
@@ -7295,7 +7473,7 @@ async function renderDsoTrendView(report, zorla){
     {label:'DSO\'yu En Çok Yükselten', icon:'👥', value:null, display:dso.katkilar.length.toLocaleString('tr-TR')+' müşteri'},
   ];
   renderKpiHeroRow(items, 'dsoTrendKpiGrid');
-  document.getElementById('dsoTrendChartSub').textContent = dso.seri.length.toLocaleString('tr-TR')+' günlük arşiv';
+  document.getElementById('dsoTrendChartSub').textContent = 'Arşiv Geneli';
   renderTrendChart('dsoTrendChart', dso.seri, 'dso', 'var(--accent)', 'gun');
   document.getElementById('dsoTrendTbody').innerHTML = dso.katkilar.map(k=>`
     <tr><td>${escapeHtml(k.musteriAdi)}</td><td>${escapeHtml(k.temsilci)}</td><td class="num num-strong">${TL(k.kalanBorc)}</td><td class="num neg">${k.avgVadeGun}</td></tr>`).join('')
@@ -7372,7 +7550,7 @@ async function renderNakitAkisView(report){
   const items = [
     {label:'Önümüzdeki 6 Hafta — Vadesi Gelen', icon:'📅', value:veri.toplamVadesiGelen},
     {label:'Ağırlıklı Beklenen Tahsilat', icon:'⬆️', value:veri.oranVarMi?veri.toplamBeklenen:0, display:veri.oranVarMi?undefined:'—'},
-    {label:'Vadesi Çoktan Geçmiş', icon:'⏰', value:veri.vadesiGecmis, sub:'ayrıca takip gerekir, tahmine dahil değil'},
+    {label:'Vadesi Çoktan Geçmiş', icon:'⏰', value:veri.vadesiGecmis, sub:'Ayrıca Takip Gerekir, Tahmine Dahil Değil'},
     {label:'Gerçekleşme Oranı (Geçmiş Ort.)', icon:'🎯', value:null, display:veri.oranVarMi?('%'+Math.round(veri.oran*100)):'—'},
   ];
   renderKpiHeroRow(items, 'nakitAkisKpiGrid');
@@ -7442,7 +7620,7 @@ function renderSupheliAlacakView(report){
   const veri = computeSupheliAlacak(report);
   const en90Plus = veri.satirlar[veri.satirlar.length-1];
   const items = [
-    {label:'Toplam Önerilen Karşılık', icon:'⚠️', value:veri.toplamKarsilik, sub: veri.toplamBakiye>0 ? ('toplam bakiyenin %'+(veri.toplamKarsilik/veri.toplamBakiye*100).toFixed(1)+"'i") : ''},
+    {label:'Toplam Önerilen Karşılık', icon:'⚠️', value:veri.toplamKarsilik, sub: veri.toplamBakiye>0 ? ('Toplam Bakiyenin %'+(veri.toplamKarsilik/veri.toplamBakiye*100).toFixed(1)+"'i") : ''},
     {label:'90+ Gün Geciken Müşteri', icon:'🚩', value:null, display:veri.hukuki.length.toLocaleString('tr-TR')},
     {label:'90+ Gün Geciken Bakiye', icon:'🏦', value: en90Plus ? en90Plus.bakiye : 0},
   ];
@@ -7478,37 +7656,34 @@ function renderSupheliAlacakView(report){
 // Hedef artık ELLE GİRİLMEZ — her temsilci için otomatik hesaplanır:
 //   Hedef = Σ(müşterinin kalan borcu × o yaşlandırma diliminin OTOMATİK tahsil edilebilirlik oranı,
 //            yani 100% − Şüpheli Alacak'taki otomatik karşılık oranı)
-//          + (açık sipariş + emanet sipariş tutarı) × son aylardaki GERÇEK ortalama tahsilat
-//            gerçekleşme oranı (Nakit Akış Tahmini'nde kullanılan oranla aynı fonksiyon)
-// Yani hedef, o temsilcinin GERÇEK cari yaşlandırması ve GERÇEK sipariş hacmine göre kendiliğinden
+//          + (Fatura Dökümü'ndeki Ödenecek Tutar — bu ay kesilen faturalar) × son aylardaki GERÇEK
+//            ortalama tahsilat gerçekleşme oranı (Nakit Akış Tahmini'nde kullanılan oranla aynı
+//            fonksiyon)
+// NOT: Bu hesap ÖNCEDEN "açık sipariş + emanet sipariş tutarı" baz alıyordu; artık bunun yerine
+// Fatura Dökümü'ndeki GERÇEKTEN KESİLMİŞ fatura tutarı (Ödenecek Tutar) kullanılıyor — çünkü henüz
+// faturalanmamış siparişler yerine, fiilen faturalanmış (ve dolayısıyla tahsil edilmesi beklenen)
+// tutar daha gerçekçi bir tahsilat hedefi tabanı oluşturuyor.
+// Yani hedef, o temsilcinin GERÇEK cari yaşlandırması ve GERÇEK fatura hacmine göre kendiliğinden
 // değişir; şirketin/kullanıcının uydurduğu sabit bir sayı değildir.
-function computeOtomatikTemsilciHedefi(musterilerBuTemsilci, otomatikKarsilikOranlari, gerceklesmeOrani){
+function computeOtomatikTemsilciHedefi(musterilerBuTemsilci, otomatikKarsilikOranlari, gerceklesmeOrani, ayFaturaMap){
   let tahsilEdilebilirBakiye = 0;
-  let siparisTutari = 0;
+  let faturaTutari = 0;
   musterilerBuTemsilci.forEach(m=>{
     const g = m.avgVadeGun||0;
     const idx = AGING_BUCKETS.findIndex(b=>b.test(g));
     const karsilikOrani = (idx>=0 && otomatikKarsilikOranlari[idx]) ? otomatikKarsilikOranlari[idx].oran : 0;
     tahsilEdilebilirBakiye += (m.kalanBorc||0) * (1 - karsilikOrani/100);
-    siparisTutari += (m.siparisTutari||0) + (m.emanetSiparis||0);
+    faturaTutari += (ayFaturaMap && ayFaturaMap.get(m.musteri)) || 0;
   });
   const oran = gerceklesmeOrani!=null ? gerceklesmeOrani : 0.7; // geçmiş veri yoksa temkinli varsayılan
-  return tahsilEdilebilirBakiye + siparisTutari*oran;
+  return tahsilEdilebilirBakiye + faturaTutari*oran;
 }
 
 function karneDurumPill(gerceklesme){
-  if(gerceklesme==null) return {label:'—', cls:''};
-  if(gerceklesme>=100) return {label:'Hedef Üstü', cls:'good'};
-  if(gerceklesme>=90) return {label:'Hedefte', cls:'navy'};
-  if(gerceklesme>=70) return {label:'Hedef Altı', cls:'warn'};
-  return {label:'Zayıf', cls:'danger'};
+  return performansPill(gerceklesme, {ust:100, hedefte:90, altinda:70});
 }
 function ceiDurumPill(oran){
-  if(oran==null) return {label:'—', cls:''};
-  if(oran>=90) return {label:'Hedef Üstü', cls:'good'};
-  if(oran>=70) return {label:'Hedefte', cls:'navy'};
-  if(oran>=40) return {label:'Hedef Altı', cls:'warn'};
-  return {label:'Zayıf', cls:'danger'};
+  return performansPill(oran, {ust:90, hedefte:70, altinda:40});
 }
 
 // ssmKanalRowHtml'in TL (tahsilat/hedef) versiyonu — Temsilci Karnesi kartında, Sell Out kartındaki
@@ -7534,6 +7709,19 @@ async function computeTemsilciKarnesi(report, zorla){
   const otomatikKarsilikOranlari = computeOtomatikKarsilikOranlari(report.musteriler);
   const gerceklesmeOrani = await ortalamaGecmisTahsilatOrani(report, 3);
 
+  // Hedefin sipariş yerine Fatura Dökümü'ndeki Ödenecek Tutar'ı baz alması için, bu ayın (buAy)
+  // Fatura Dökümü arşivinden müşteri bazlı fatura tutarı toplamı çıkarılır (bkz.
+  // computeOtomatikTemsilciHedefi'ndeki açıklama).
+  const {ilkKey, sonKey} = ayGunAraligi(buAy);
+  const birlesikArsivHedef = await faturaKontrolArsivBirlestirCached(state.faturaArsivCache);
+  const ayFaturaMap = new Map();
+  (birlesikArsivHedef.faturaArsiv||[]).forEach(r=>{
+    if(!r.faturaTarihi || !musteriTvIcinGecerliMi(r.musteri)) return;
+    const gk = dateKeyLocal(r.faturaTarihi);
+    if(!gk || gk<ilkKey || gk>sonKey) return;
+    ayFaturaMap.set(r.musteri, (ayFaturaMap.get(r.musteri)||0) + (r.tutar||0));
+  });
+
   const musterilerByRep = new Map();
   const agingByRep = new Map();
   (report.musteriler||[]).forEach(m=>{
@@ -7553,7 +7741,7 @@ async function computeTemsilciKarnesi(report, zorla){
     const aging = agingByRep.get(r.temsilci) || {agirlikliVade:0, agirlikBorc:0, riskliSayisi:0, riskliMusteriListe:[]};
     const ortVade = aging.agirlikBorc!==0 ? Math.round(aging.agirlikliVade/aging.agirlikBorc) : null;
     const musterileri = musterilerByRep.get(r.temsilci) || [];
-    const hedef = computeOtomatikTemsilciHedefi(musterileri, otomatikKarsilikOranlari, gerceklesmeOrani);
+    const hedef = computeOtomatikTemsilciHedefi(musterileri, otomatikKarsilikOranlari, gerceklesmeOrani, ayFaturaMap);
     const gerceklesme = hedef>0 ? (r.toplamTahsilat/hedef*100) : null;
     return Object.assign({}, r, {ortVade, riskliMusteriSayisi:aging.riskliSayisi, riskliMusteriListe:aging.riskliMusteriListe, hedef, gerceklesme});
   }).sort((a,b)=>(b.gerceklesme||0)-(a.gerceklesme||0));
@@ -7765,7 +7953,7 @@ async function renderYonetimOzetiView(report, zorla){
   ];
   renderKpiHeroRow(items, 'yoKpiGrid');
 
-  document.getElementById('yoChartSub').textContent = ozet.seri.length.toLocaleString('tr-TR')+' günlük arşiv — toplam bakiye';
+  document.getElementById('yoChartSub').textContent = 'Arşiv Geneli — Toplam Bakiye';
   renderTrendChart('yoChart', ozet.seri, 'toplamBakiye', 'var(--navy)', 'tl');
 
   const insights = computeYonetimInsights(ozet, karne);
@@ -7858,7 +8046,7 @@ async function renderCeiView(report, zorla){
 
 async function recomputeAndRenderCei(report, zorla){
   const gunler = Object.keys(state.faturaArsivCache||{}).sort();
-  document.getElementById('ceiArsivBilgi').textContent = gunler.length.toLocaleString('tr-TR')+' günlük arşiv verisi mevcut';
+  document.getElementById('ceiArsivBilgi').textContent = 'Arşiv Verisi Mevcut';
   const ayKey = state.ceiAy;
   if(!ayKey){
     document.getElementById('ceiBosPanel').style.display='block';
@@ -7878,7 +8066,7 @@ async function recomputeAndRenderCei(report, zorla){
   const trend = await computeCeiTrend(report, 12, false);
 
   const items = [
-    {label:'Tahsilat Başarı Oranı (CEI)', icon:'🧮', value:null, display:fmtYuzde(ay.cei), sub: ay.baslangicYaklasik?'yaklaşık (ay başı verisi yok)':(fmtDate(new Date(ayKey+'-01'))+' ayı')},
+    {label:'Tahsilat Başarı Oranı (CEI)', icon:'🧮', value:null, display:fmtYuzde(ay.cei), sub: ay.baslangicYaklasik?'Yaklaşık (Ay Başı Verisi Yok)':(fmtDate(new Date(ayKey+'-01'))+' Ayı')},
     {label:'Dönem Başı Bakiye', icon:'📥', value:ay.donemBasiBakiye},
     {label:'Dönem İçi Satış', icon:'🧾', value:ay.donemIciSatis},
     {label:'Dönem İçi Tahsilat', icon:'💵', value:ay.tahsilat},
@@ -8282,10 +8470,7 @@ function populateSellOutAySelect(){
 }
 
 function sellOutRenk(oran){
-  if(oran==null) return 'var(--ink-faint)';
-  if(oran>=90) return 'var(--success)';
-  if(oran>=75) return 'var(--warn)';
-  return 'var(--danger)';
+  return performansRenk(oran, {iyi:90, orta:75, ortaRenk:'var(--warn)'});
 }
 
 // FKNS (ya da Genel FKNS) oranını gösteren dairesel gösterge (donut) — SSM Karneleri ve Temsilci
@@ -8455,7 +8640,7 @@ async function renderSellOutView(){
   const genelGerceklesmeOraniHero = toplamHedefGenelHero>0 ? ((toplamAcikLitreGenel+toplamKapaliLitreGenel)/toplamHedefGenelHero*100) : null;
 
   const items = [
-    {label:'Gerçekleşme Oranı', icon:'🎯', value:null, display: genelGerceklesmeOraniHero!=null?fmtYuzde(genelGerceklesmeOraniHero):'—', sub: `<span style="display:flex;flex-direction:column;align-items:flex-end;gap:1px;"><span style="font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;opacity:.8;">Toplam Litre</span><span style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:800;line-height:1.15;">${Math.round(report.toplamLitre).toLocaleString('tr-TR')} L</span></span>`},
+    {label:'Gerçekleşme Oranı', icon:'🎯', value:null, display: genelGerceklesmeOraniHero!=null?fmtYuzde(genelGerceklesmeOraniHero):'—', sub: `<span style="display:flex;flex-direction:column;align-items:flex-end;gap:1px;"><span style="font-size:9.5px;font-weight:700;letter-spacing:.04em;opacity:.8;">Toplam Litre</span><span style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:800;line-height:1.15;">${Math.round(report.toplamLitre).toLocaleString('tr-TR')} L</span></span>`},
     {label:'Toplam Açık Kanal LT', icon:'🛢️', value:null, display: LT(toplamAcikLitreGenel)},
     {label:'Toplam Kapalı Kanal LT', icon:'📦', value:null, display: LT(toplamKapaliLitreGenel)},
     {label:'Açık Kanal Kalan Litre', icon:'🏪', value:null, display: LT(acikKalanGenel)},
