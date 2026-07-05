@@ -305,7 +305,7 @@
   @media(min-width:820px){.cust-card-list{grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;}}
   .cust-card{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:14px 15px;cursor:pointer;transition:box-shadow .15s ease,border-color .15s ease;min-width:0;}
   .cust-card:hover{box-shadow:var(--shadow);border-color:var(--line);}
-  .cust-card.is-open{grid-column:1 / -1;background:var(--accent-soft);border-color:var(--accent);}
+  .cust-card.is-open{grid-column:1 / -1;max-width:760px;background:var(--accent-soft);border-color:var(--accent);}
   .musteri-daha-fazla-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:16px;}
   .musteri-daha-fazla-wrap .btn{padding:10px 22px;}
   .musteri-daha-fazla-info{font-size:12px;color:var(--ink-faint);}
@@ -354,17 +354,20 @@
   .cust-expanded h4{margin:0 0 8px;font-size:12px;font-weight:700;color:var(--ink-soft);letter-spacing:.03em;}
   .cust-secondary-stats{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);margin-bottom:14px;}
   .cust-secondary-stats b{font-family:'Space Grotesk';color:var(--ink);}
+  .cust-expanded-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+  .cust-expanded-risk{font-size:12px;color:var(--ink-soft);}
+  .cust-expanded-risk b{font-family:'Space Grotesk';color:var(--ink);}
 
   .expand-row td{padding:0;border-bottom:1px solid var(--line-soft);}
   .expand-inner{padding:14px 18px 18px 44px;background:#F7F9FC;}
   .expand-inner h4{margin:0 0 8px;font-size:12px;font-weight:700;color:var(--ink-soft);letter-spacing:.03em;}
-  .mini-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px;}
+  .mini-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:12px;}
   .mini-table.compact{width:auto;min-width:0;}
-  .mini-table.compact th,.mini-table.compact td{padding:6px 22px 6px 10px;}
-  .mini-table.compact th:last-child,.mini-table.compact td:last-child{padding-right:10px;}
-  .mini-table th{text-align:left;padding:6px 10px;font-size:10.5px;color:var(--ink-faint);border-bottom:1px solid var(--line);}
+  .mini-table.compact th,.mini-table.compact td{padding:5px 20px 5px 8px;}
+  .mini-table.compact th:last-child,.mini-table.compact td:last-child{padding-right:8px;}
+  .mini-table th{text-align:left;padding:5px 8px;font-size:10px;color:var(--ink-faint);border-bottom:1px solid var(--line);white-space:nowrap;}
   .mini-table th.num,.mini-table td.num{text-align:right;}
-  .mini-table td{padding:6px 10px;border-bottom:1px solid var(--line-soft);}
+  .mini-table td{padding:5px 8px;border-bottom:1px solid var(--line-soft);white-space:nowrap;}
   .badge{display:inline-block;padding:2px 8px;border-radius:100px;font-size:10.5px;font-weight:600;}
   .badge.over{background:var(--danger-soft);color:var(--danger);}
   .badge.soon{background:var(--accent-soft);color:var(--accent-deep);}
@@ -897,7 +900,7 @@
 <div id="authGate" style="position:fixed;inset:0;background:var(--bg,#EEF1F6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;">
   <div style="background:#fff;border-radius:16px;padding:36px 32px;max-width:380px;width:100%;box-shadow:0 12px 36px rgba(0,0,0,.10);border:1px solid var(--line,#DBE2EC);">
     <div style="text-align:center;margin-bottom:22px;">
-      <div style="width:44px;height:44px;border-radius:11px;background:var(--navy,#13233F);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;margin:0 auto 12px;" translate="no">V3</div>
+      <div style="width:44px;height:44px;border-radius:11px;background:var(--navy,#13233F);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;margin:0 auto 12px;" translate="no">V2</div>
       <h2 style="margin:0;font-size:18px;" translate="no">Keşan Bayi Takip Paneli</h2>
       <p style="margin:6px 0 0;color:var(--ink-soft,#54617A);font-size:13px;">Devam etmek için giriş yapın</p>
     </div>
@@ -914,7 +917,7 @@
 
   <div class="topbar">
     <div class="brand">
-      <div class="brand-mark" translate="no" style="font-size:13px;letter-spacing:-.02em;">V3</div>
+      <div class="brand-mark" translate="no" style="font-size:13px;letter-spacing:-.02em;">V2.1</div>
       <div>
         <h1 translate="no">Keşan Bayi Takip Paneli</h1>
         <p class="brand-tag" translate="no">Akgün Meşrubat Gıda · Berat Çağlar CAN</p>
@@ -1436,6 +1439,13 @@
             <button type="button" class="btn" id="ticariStokDahaFazlaBtn">Daha fazla göster</button>
             <span class="musteri-daha-fazla-info" id="ticariStokDahaFazlaInfo"></span>
           </div>
+        </div>
+      </div>
+
+      <div class="panel" id="ticariStokMuduruOzetPanel">
+        <div class="panel-head"><h2>Özet — Saha Satış Müdürü Bazlı Ticari Stok</h2></div>
+        <div class="panel-body">
+          <div class="stok-ozet-grid" id="ticariStokMuduruOzetGrid"></div>
         </div>
       </div>
 
@@ -4894,10 +4904,66 @@ function renderTicariStokOzet(report){
   grid.innerHTML = kartlar;
 }
 
+// Saha Satış Müdürü kartları temsilci renk paletinden (kırmızı/altın/mavi/yeşil/lacivert) bilerek
+// farklı, daha soğuk/nötr bir palet kullanır — böylece iki kart grubu görsel olarak birbirinden
+// ayırt edilebilir ama aynı tasarım dilini (renkli sol kenarlık + rozet + bar) paylaşır.
+const STOK_OZET_MUDUR_RENK = [
+  {renk:'#0F7B6C', soft:'rgba(15,123,108,0.12)'},
+  {renk:'#6B4FA0', soft:'rgba(107,79,160,0.12)'},
+  {renk:'#3E5C76', soft:'rgba(62,92,118,0.12)'},
+  {renk:'#9C6B30', soft:'rgba(156,107,48,0.12)'},
+  {renk:'#4A4A68', soft:'rgba(74,74,104,0.12)'},
+];
+
+function renderTicariStokMuduruOzet(report){
+  const ozet = report.ticariStok ? report.ticariStok.ozet : [];
+  const grid = document.getElementById('ticariStokMuduruOzetGrid');
+  if(!grid) return;
+  if(!ozet.length){
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Veri bulunamadı.</div>`;
+    return;
+  }
+
+  const muduruMap = new Map();
+  ozet.forEach(r=>{
+    const muduru = getSahaMuduru(r.temsilci);
+    if(!muduruMap.has(muduru)) muduruMap.set(muduru, {muduru, temsilciSayisi:0, noktaSayisi:0, kalemSayisi:0, depodaKalanMk:0, depodaKalanLt:0});
+    const m = muduruMap.get(muduru);
+    m.temsilciSayisi += 1;
+    m.noktaSayisi += r.noktaSayisi;
+    m.kalemSayisi += r.kalemSayisi;
+    m.depodaKalanMk += r.depodaKalanMk;
+    m.depodaKalanLt += r.depodaKalanLt;
+  });
+  const muduruListe = Array.from(muduruMap.values()).sort((a,b)=>b.depodaKalanLt-a.depodaKalanLt);
+  const toplamLt = muduruListe.reduce((a,r)=>a+r.depodaKalanLt,0) || 1;
+
+  grid.innerHTML = muduruListe.map((r,i)=>{
+    const pay = r.depodaKalanLt/toplamLt*100;
+    const renk = STOK_OZET_MUDUR_RENK[i % STOK_OZET_MUDUR_RENK.length];
+    return `<div class="stok-ozet-card" style="--ozet-renk:${renk.renk};--ozet-renk-soft:${renk.soft};">
+      <div class="stok-ozet-top">
+        <div class="stok-ozet-avatar">${escapeHtml(avatarBaslangic(r.muduru))}</div>
+        <div class="stok-ozet-info">
+          <div class="stok-ozet-name" title="${escapeHtml(r.muduru)}">${escapeHtml(r.muduru)}</div>
+          <div class="stok-ozet-sub">${r.temsilciSayisi.toLocaleString('tr-TR')} temsilci · ${r.kalemSayisi.toLocaleString('tr-TR')} kalem</div>
+        </div>
+        <span class="stok-ozet-badge">%${pay.toFixed(0)} PAY</span>
+      </div>
+      <div class="stok-ozet-values">
+        <span class="stok-ozet-lt">${LT(r.depodaKalanLt)}</span>
+        <span class="stok-ozet-mk">${MK(r.depodaKalanMk)}</span>
+      </div>
+      <div class="stok-ozet-bar-track"><div class="stok-ozet-bar-fill" style="width:${Math.max(2,pay).toFixed(1)}%;"></div></div>
+    </div>`;
+  }).join('');
+}
+
 function renderTicariStokView(report){
   populateTemsilciFilter(report.ticariStok ? report.ticariStok.rows : [], 'ticariStokTemsilciFilter');
   renderTicariStokTable(report);
   renderTicariStokOzet(report);
+  renderTicariStokMuduruOzet(report);
 }
 
 // Bir tablonun (thead th[data-key]) sütun başlıklarına tıklanınca sıralama uygulayan ortak
@@ -5284,7 +5350,6 @@ function renderMusteriTable(report, resetSayfa=true){
       </div>`;
     if(expanded){
       html += `<div class="cust-expanded">
-        <div class="cust-secondary-stats"><span>Toplam Risk: <b>${TL(m.toplamRisk)}</b></span></div>
         ${renderMusteriDetail(m, true)}
       </div>`;
     }
@@ -5570,12 +5635,10 @@ document.getElementById('senetYazdirBtn').addEventListener('click', ()=>{
 });
 
 function renderMusteriDetail(m, showSenetBtn){
-  let html = '';
-  if(showSenetBtn){
-    html += `<div style="margin-bottom:14px;">
-      <button type="button" class="btn small senet-yazdir-btn" data-musteri="${escapeHtml(m.musteri)}" data-musteri-adi="${escapeHtml(m.musteriAdi)}" data-tutar="${m.siparisTutari||0}" data-emanet="${m.emanetSiparis||0}" data-kalan-borc="${m.kalanBorc||0}">📄 Senet Yazdır</button>
-    </div>`;
-  }
+  let html = `<div class="cust-expanded-head">
+    <span class="cust-expanded-risk">Toplam Risk: <b>${TL(m.toplamRisk)}</b></span>
+    ${showSenetBtn ? `<button type="button" class="btn small senet-yazdir-btn" data-musteri="${escapeHtml(m.musteri)}" data-musteri-adi="${escapeHtml(m.musteriAdi)}" data-tutar="${m.siparisTutari||0}" data-emanet="${m.emanetSiparis||0}" data-kalan-borc="${m.kalanBorc||0}">📄 Senet Yazdır</button>` : ''}
+  </div>`;
   // Tahsilat kaynak şeffaflığı: gösterilen "Alınan Tahsilat" tutarının ne kadarının normal (nakit)
   // tahsilat, ne kadarının Bozuk İade Faturası / Depozito Tahsilatı kredisi olduğunu gösterir.
   // Sadece kredi bileşeni varsa gösterilir (sade tutmak için tamamen normal tahsilatlarda gizli).
@@ -5734,7 +5797,6 @@ function renderSevkMusteriTable(report, resetSayfa=true){
       </div>`;
     if(expanded){
       html += `<div class="cust-expanded">
-        <div class="cust-secondary-stats"><span>Toplam Risk: <b>${TL(m.toplamRisk)}</b></span></div>
         ${renderMusteriDetail(m, true)}
       </div>`;
     }
@@ -5935,7 +5997,6 @@ async function renderFaturaKontrolTable(report, resetSayfa=true){
       </div>`;
     if(expanded){
       html += `<div class="cust-expanded">
-        <div class="cust-secondary-stats"><span>Toplam Risk: <b>${TL(m.toplamRisk)}</b></span></div>
         ${renderMusteriDetail(m, true)}
       </div>`;
     }
