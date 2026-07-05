@@ -5455,14 +5455,21 @@ async function computeFaturaKontrolRows(report, selectedDate, temsilciFilter, ar
   (birlesikArsiv.siparisArsiv||[]).forEach(r=>{
     if(!r.istenilenTeslimTarihi) return;
     if(dateKeyLocal(r.istenilenTeslimTarihi) !== selectedDate) return;
-    if(!eslesen.has(r.musteri)) eslesen.set(r.musteri, {seciliSiparis:0, seciliTahsilat:0});
-    eslesen.get(r.musteri).seciliSiparis += (r.tutar||0);
+    if(!eslesen.has(r.musteri)) eslesen.set(r.musteri, {seciliSiparis:0, seciliTahsilat:0, musteriAdi:null, temsilci:null});
+    const e = eslesen.get(r.musteri);
+    e.seciliSiparis += (r.tutar||0);
+    // Arşivdeki sipariş kaydı, o günün KENDİ isim/temsilci bilgisini taşır — mevcut oturumda
+    // yüklü rapora (report.musteriler) kayıtlı olmayan (bakiyesiz) müşteriler için de bu bilgi
+    // aşağıda "isimsiz düşürme" olmadan satır oluşturmaya yeter.
+    if(!e.musteriAdi && r.musteriAdi) e.musteriAdi = r.musteriAdi;
+    if(!e.temsilci && r.temsilci) e.temsilci = r.temsilci;
   });
   (birlesikArsiv.tahsilatArsiv||[]).forEach(r=>{
     if(!r.belgeTarihi) return;
     if(dateKeyLocal(r.belgeTarihi) !== selectedDate) return;
-    if(!eslesen.has(r.musteri)) eslesen.set(r.musteri, {seciliSiparis:0, seciliTahsilat:0, seciliTahsilatKaynak:{normal:0, bozukIade:0, depozito:0}});
+    if(!eslesen.has(r.musteri)) eslesen.set(r.musteri, {seciliSiparis:0, seciliTahsilat:0, musteriAdi:null, temsilci:null, seciliTahsilatKaynak:{normal:0, bozukIade:0, depozito:0}});
     const e = eslesen.get(r.musteri);
+    if(!e.seciliTahsilatKaynak) e.seciliTahsilatKaynak = {normal:0, bozukIade:0, depozito:0};
     e.seciliTahsilat += (r.tutar||0);
     if(r.formatKaynagi==='FaturaIade') e.seciliTahsilatKaynak.bozukIade += r.tutar||0;
     else if(r.formatKaynagi==='DepozitoTahsilat') e.seciliTahsilatKaynak.depozito += r.tutar||0;
@@ -5473,14 +5480,27 @@ async function computeFaturaKontrolRows(report, selectedDate, temsilciFilter, ar
   const musterilerByCode = new Map(report.musteriler.map(m=>[m.musteri, m]));
   let rows = [];
   eslesen.forEach((v, musteri)=>{
-    const m = musterilerByCode.get(musteri);
-    if(!m) return;
+    let m = musterilerByCode.get(musteri);
+    if(!m){
+      // Bu müşterinin mevcut oturumda yüklü Kalemler/rapor içinde kaydı yok (ör. bakiyesi
+      // kapanmış ya da o gün için Kalemler dosyası hiç yüklenmemiş) — ama arşivdeki sipariş/
+      // tahsilat kaydı SEÇİLİ TARİH için var. Önceden bu durumda satır tamamen atlanıyordu ve
+      // "geçmiş siparişler" Fatura Kontrol'de hiç görünmüyordu. Artık arşiv kaydının kendi
+      // isim/temsilci bilgisiyle (bakiyesiz) bir satır olarak gösteriliyor.
+      const temsilciYedek = (state.musteriMasterMap && state.musteriMasterMap.get(musteri)) || v.temsilci || '—';
+      m = {
+        musteri, musteriAdi: v.musteriAdi || musteri, temsilci: temsilciYedek,
+        kalanBorc:0, avgVadeGun:0, cekSenet:0, toplamRisk:0, invoices:[], cekSenetDetay:[], __bakiyesiz:true,
+        siparisTutari: v.seciliSiparis||0, emanetSiparis:0,
+      };
+    }
     if(temsilciFilter && m.temsilci !== temsilciFilter) return;
     if(q && !(String(m.musteriAdi).toLowerCase().includes(q) || String(m.musteri).toLowerCase().includes(q))) return;
     // Fatura Kontrol'de gösterilen tahsilat SEÇİLİ TARİHE özgüdür — bu yüzden döküm de (varsa
     // Genel Rapor'un "bugüne en yakın gün" bazlı dökümü değil) o güne özgü kaynak dağılımıyla
     // gösterilir (bkz. renderMusteriDetail'daki alinanTahsilatKaynak kullanımı).
-    rows.push(Object.assign({}, m, {seciliSiparis: v.seciliSiparis, seciliTahsilat: v.seciliTahsilat, alinanTahsilat: v.seciliTahsilat, alinanTahsilatKaynak: v.seciliTahsilatKaynak || null}));
+    const toplamRisk = m.__bakiyesiz ? v.seciliSiparis : m.toplamRisk;
+    rows.push(Object.assign({}, m, {seciliSiparis: v.seciliSiparis, seciliTahsilat: v.seciliTahsilat, alinanTahsilat: v.seciliTahsilat, alinanTahsilatKaynak: v.seciliTahsilatKaynak || null, toplamRisk}));
   });
 
   const {key,dir} = state.fkSort;
