@@ -829,6 +829,25 @@
   .htk-alt{display:flex;justify-content:space-between;align-items:center;gap:10px;}
   .htk-ceksenet{font-size:12px;color:var(--ink-faint);}
   .htk-alt .fatura-detay-btn{white-space:nowrap;}
+
+  /* === Nokta Bazlı Ticari Stok Raporu — Tasarım 1 (müşteri gruplu) === */
+  .stok-marka-panel{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:14px 16px;margin-bottom:14px;}
+  .stok-marka-baslik{font-size:11.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.03em;margin-bottom:11px;}
+  .stok-marka-row{display:flex;align-items:center;gap:12px;margin-bottom:9px;}
+  .stok-marka-row:last-child{margin-bottom:0;}
+  .stok-marka-label{width:170px;font-size:12px;font-weight:600;color:var(--ink-soft);flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .stok-marka-track{flex:1;height:9px;background:var(--line-soft);border-radius:5px;overflow:hidden;}
+  .stok-marka-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--accent),var(--accent-deep));}
+  .stok-marka-value{width:90px;text-align:right;font-size:12px;font-weight:700;font-family:'Space Grotesk';flex-shrink:0;}
+  .stok-item-head{display:grid;grid-template-columns:64px 1fr 78px 78px 60px;gap:8px;padding:0 0 6px;font-size:10px;font-weight:700;color:var(--ink-faint);letter-spacing:.03em;border-bottom:1px solid var(--line-soft);}
+  .stok-item-row{display:grid;grid-template-columns:64px 1fr 78px 78px 60px;gap:8px;padding:8px 0;font-size:12.5px;align-items:center;border-bottom:1px solid var(--line-soft);}
+  .stok-item-row:last-child{border-bottom:none;}
+  .stok-item-kod{color:var(--ink-faint);font-family:'Space Grotesk';font-size:11.5px;}
+  .stok-ambalaj-badge{font-size:10px;font-weight:600;background:var(--navy-soft);color:var(--navy);padding:1px 7px;border-radius:100px;margin-left:6px;white-space:nowrap;}
+  .stok-item-mk{text-align:right;color:var(--ink-soft);white-space:nowrap;}
+  .stok-item-lt{text-align:right;font-weight:700;color:var(--ink);white-space:nowrap;}
+  .stok-item-bar{height:6px;background:var(--line-soft);border-radius:3px;overflow:hidden;}
+  .stok-item-bar-fill{height:100%;background:var(--accent);border-radius:3px;}
 </style>
 </head>
 <body>
@@ -1361,24 +1380,21 @@
             <div class="search-box">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
               <input type="text" id="ticariStokSearchInput" placeholder="Müşteri, ürün veya temsilci ara…" aria-label="Müşteri, ürün veya temsilci ara" />
+              <button type="button" id="ticariStokSearchClearBtn" class="search-clear-btn" title="Aramayı temizle" aria-label="Aramayı temizle" style="display:none;">✕</button>
             </div>
             <select class="filter-select" id="ticariStokTemsilciFilter"><option value="">Tüm temsilciler</option></select>
           </div>
         </div>
-        <div class="panel-body" style="padding:0;">
-          <div class="table-scroll">
-            <table id="ticariStokTable">
-              <thead><tr>
-                <th data-key="temsilci">Satış Temsilcisi<span class="arrow"></span></th>
-                <th data-key="musteriNo">Müşteri No<span class="arrow"></span></th>
-                <th data-key="musteriAdi">Müşteri Adı<span class="arrow"></span></th>
-                <th data-key="urunKodu">Ürün Kodu<span class="arrow"></span></th>
-                <th data-key="urunAdi">Ürün Adı<span class="arrow"></span></th>
-                <th class="num" data-key="depodaKalanMk">Depoda Kalan Mk.<span class="arrow"></span></th>
-                <th class="num" data-key="depodaKalanLt">Depoda Kalan Lt.<span class="arrow"></span></th>
-              </tr></thead>
-              <tbody id="ticariStokTbody"></tbody>
-            </table>
+        <div class="panel-body">
+          <div id="ticariStokKpiGrid"></div>
+          <div class="stok-marka-panel" id="ticariStokMarkaPanel">
+            <div class="stok-marka-baslik">Marka Dağılımı — Depoda Kalan Lt.</div>
+            <div id="ticariStokMarkaDagilim"></div>
+          </div>
+          <div class="cust-card-list" id="ticariStokMusteriKartlar"></div>
+          <div class="musteri-daha-fazla-wrap" id="ticariStokDahaFazlaWrap" style="display:none;">
+            <button type="button" class="btn" id="ticariStokDahaFazlaBtn">Daha fazla göster</button>
+            <span class="musteri-daha-fazla-info" id="ticariStokDahaFazlaInfo"></span>
           </div>
         </div>
       </div>
@@ -2092,10 +2108,12 @@ const state = {
   fkGosterilen: 30,
   yaslandirmaGosterilen: 30,
   hukukiGosterilen: 25,
+  ticariStokGosterilen: 20,
 };
 
 const MUSTERI_SAYFA_BOYUTU = 30;
 const HUKUKI_SAYFA_BOYUTU = 25;
+const TICARI_STOK_SAYFA_BOYUTU = 20;
 
 const STORAGE_KEY = 'noktaCariTakip_report_v1';
 const DATE_KEYS = new Set(['faturaTarihi','netVade','vade','belgeTarihi','asOf','istenilenTeslimTarihi','tahsilatTarihi']);
@@ -4215,6 +4233,8 @@ function buildReport(files, musteriMasterMap){
         musteriAdi: r['Müşteri Ad'] || '—',
         urunKodu: r['Malzeme Kodu']!=null ? String(r['Malzeme Kodu']) : '—',
         urunAdi: r['Malzeme Açıklaması'] || '—',
+        urunHiyerarsi: r['Ürün Hiyerarşi Tanımı'] || '—',
+        ambalaj: r['Tanım'] || '—',
         depodaKalanMk: Number(r['Depoda Kalan Mk.'])||0,
         depodaKalanLt,
       });
@@ -4673,36 +4693,142 @@ function getFilteredSortedTicariStok(report){
     if(temsilci && r.temsilci !== temsilci) return false;
     return true;
   });
-  const {key,dir} = state.tSort;
-  filtered = filtered.slice().sort((a,b)=>{
-    const av=a[key], bv=b[key];
-    if(typeof av==='string') return dir*String(av).localeCompare(String(bv),'tr');
-    return dir*((av||0)-(bv||0));
-  });
   return filtered;
 }
 
-function renderTicariStokTable(report){
+const STOK_MARKA_RENK = ['var(--accent)','#4E86C6','var(--warn)','#D08A4A','var(--ink-faint)'];
+
+function renderTicariStokTable(report, resetSayfa=true){
+  if(resetSayfa) state.ticariStokGosterilen = TICARI_STOK_SAYFA_BOYUTU;
   const rows = getFilteredSortedTicariStok(report);
-  document.getElementById('ticariStokCount').textContent = rows.length.toLocaleString('tr-TR') + ' kalem';
-  const tbody = document.getElementById('ticariStokTbody');
+  const kartGrid = document.getElementById('ticariStokMusteriKartlar');
+  const dahaFazlaWrap = document.getElementById('ticariStokDahaFazlaWrap');
+
   if(!report.ticariStok || !report.ticariStok.rows.length){
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">Ticari Stok dosyası yüklenmedi ya da depoda kalan litre değeri sıfırın üzerinde satır bulunamadı.</div></td></tr>`;
+    document.getElementById('ticariStokCount').textContent = '';
+    document.getElementById('ticariStokKpiGrid').innerHTML = '';
+    document.getElementById('ticariStokMarkaPanel').style.display = 'none';
+    kartGrid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Ticari Stok dosyası yüklenmedi ya da depoda kalan litre değeri sıfırın üzerinde satır bulunamadı.</div>`;
+    dahaFazlaWrap.style.display = 'none';
     return;
   }
+  document.getElementById('ticariStokMarkaPanel').style.display = '';
+
   if(!rows.length){
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">Filtreyle eşleşen kayıt bulunamadı.</div></td></tr>`;
+    document.getElementById('ticariStokCount').textContent = '0 kalem';
+    document.getElementById('ticariStokKpiGrid').innerHTML = '';
+    document.getElementById('ticariStokMarkaDagilim').innerHTML = '';
+    kartGrid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Filtreyle eşleşen kayıt bulunamadı.</div>`;
+    dahaFazlaWrap.style.display = 'none';
     return;
   }
-  tbody.innerHTML = rows.map(r=>`<tr>
-    <td><span class="temsilci-tag">${escapeHtml(r.temsilci)}</span></td>
-    <td>${escapeHtml(r.musteriNo)}</td>
-    <td>${escapeHtml(r.musteriAdi)}</td>
-    <td>${escapeHtml(r.urunKodu)}</td>
-    <td>${escapeHtml(r.urunAdi)}</td>
-    <td class="num" style="white-space:nowrap;">${MK(r.depodaKalanMk)}</td>
-    <td class="num" style="white-space:nowrap;"><span class="num-strong">${LT(r.depodaKalanLt)}</span></td>
-  </tr>`).join('');
+
+  document.getElementById('ticariStokCount').textContent = rows.length.toLocaleString('tr-TR') + ' kalem';
+
+  // --- Müşteri bazlı gruplama ---
+  const grupMap = new Map();
+  rows.forEach(r=>{
+    const key = r.musteriNo + '|' + r.musteriAdi;
+    if(!grupMap.has(key)) grupMap.set(key, {musteriNo:r.musteriNo, musteriAdi:r.musteriAdi, temsilci:r.temsilci, toplamMk:0, toplamLt:0, items:[]});
+    const g = grupMap.get(key);
+    g.toplamMk += r.depodaKalanMk;
+    g.toplamLt += r.depodaKalanLt;
+    g.items.push(r);
+  });
+  const gruplar = Array.from(grupMap.values()).sort((a,b)=>b.toplamLt-a.toplamLt);
+
+  // --- KPI hesapları ---
+  const toplamLt = rows.reduce((a,r)=>a+r.depodaKalanLt,0);
+  const toplamMk = rows.reduce((a,r)=>a+r.depodaKalanMk,0);
+  const enYuksekNokta = gruplar[0];
+  const temsilciLtMap = new Map();
+  rows.forEach(r=>{ temsilciLtMap.set(r.temsilci, (temsilciLtMap.get(r.temsilci)||0)+r.depodaKalanLt); });
+  const enYukluTemsilci = Array.from(temsilciLtMap.entries()).sort((a,b)=>b[1]-a[1])[0];
+
+  const kpiItems = [
+    {label:'Toplam Litre', icon:'🛢️', value:null, display:LT(toplamLt), sub:gruplar.length.toLocaleString('tr-TR')+' müşteri'},
+    {label:'Toplam Miktar', icon:'📦', value:null, display:MK(toplamMk)},
+    {label:'En Yüksek Nokta', icon:'🏆', value:null, display:enYuksekNokta.musteriAdi, sub:LT(enYuksekNokta.toplamLt)},
+    {label:'En Yüklü Temsilci', icon:'🧑‍💼', value:null, display:enYukluTemsilci[0], sub:LT(enYukluTemsilci[1])+' · %'+(enYukluTemsilci[1]/toplamLt*100).toFixed(0)},
+  ];
+  renderKpiHeroRow(kpiItems, 'ticariStokKpiGrid');
+
+  // --- Marka dağılımı (Ürün Hiyerarşi Tanımı bazlı) ---
+  const markaMap = new Map();
+  rows.forEach(r=>{ markaMap.set(r.urunHiyerarsi, (markaMap.get(r.urunHiyerarsi)||0)+r.depodaKalanLt); });
+  let markaListe = Array.from(markaMap.entries()).sort((a,b)=>b[1]-a[1]);
+  if(markaListe.length > 5){
+    const ilk4 = markaListe.slice(0,4);
+    const digerToplam = markaListe.slice(4).reduce((a,[,v])=>a+v,0);
+    markaListe = ilk4.concat([['Diğer ('+(markaListe.length-4)+' grup)', digerToplam]]);
+  }
+  const maksMarka = Math.max(...markaListe.map(([,v])=>v), 1);
+  document.getElementById('ticariStokMarkaDagilim').innerHTML = markaListe.map(([ad,val],i)=>`
+    <div class="stok-marka-row">
+      <div class="stok-marka-label" title="${escapeHtml(ad)}">${escapeHtml(ad)}</div>
+      <div class="stok-marka-track"><div class="stok-marka-fill" style="width:${Math.max(2,val/maksMarka*100).toFixed(1)}%;background:${STOK_MARKA_RENK[i]||'var(--ink-faint)'};"></div></div>
+      <div class="stok-marka-value">${LT(val)}</div>
+    </div>`).join('');
+
+  // --- Müşteri kartları (expand-to-row) ---
+  const gosterilecekSayi = Math.min(state.ticariStokGosterilen, gruplar.length);
+  const gosterilecekGruplar = gruplar.slice(0, gosterilecekSayi);
+  kartGrid.innerHTML = gosterilecekGruplar.map(g=>{
+    const expandKey = 'stok_'+g.musteriNo;
+    const expanded = state.expanded.has(expandKey);
+    const maksItemLt = Math.max(...g.items.map(it=>it.depodaKalanLt), 1);
+    let html = `<div class="cust-card${expanded?' is-open':''}" data-stok-musteri="${escapeHtml(expandKey)}">
+      <div class="cust-card-top">
+        <div class="cust-avatar">${escapeHtml(avatarBaslangic(g.musteriAdi))}</div>
+        <div class="cust-info">
+          <div class="musteri-name">${escapeHtml(g.musteriAdi)}</div>
+          <div class="musteri-code">${escapeHtml(g.musteriNo)}</div>
+          <span class="temsilci-tag">${escapeHtml(g.temsilci)}</span>
+        </div>
+        <div class="cust-chevron">${expanded?'⌄':'›'}</div>
+      </div>
+      <div class="cust-kalan-row"><span class="cust-kalan-label">DEPODA KALAN</span><span class="cust-kalan-val">${LT(g.toplamLt)}</span></div>
+      <div style="font-size:11.5px;color:var(--ink-faint);margin-top:2px;">${MK(g.toplamMk)} · ${g.items.length} kalem</div>`;
+    if(expanded){
+      const itemsHtml = g.items.slice().sort((a,b)=>b.depodaKalanLt-a.depodaKalanLt).map(it=>`
+        <div class="stok-item-row">
+          <span class="stok-item-kod">${escapeHtml(it.urunKodu)}</span>
+          <span>${escapeHtml(it.urunAdi)}<span class="stok-ambalaj-badge">${escapeHtml(it.ambalaj)}</span></span>
+          <span class="stok-item-mk">${MK(it.depodaKalanMk)}</span>
+          <span class="stok-item-lt">${LT(it.depodaKalanLt)}</span>
+          <div class="stok-item-bar"><div class="stok-item-bar-fill" style="width:${Math.max(4,it.depodaKalanLt/maksItemLt*100).toFixed(1)}%;"></div></div>
+        </div>`).join('');
+      html += `<div class="cust-expanded">
+        <div class="stok-item-head"><span>Kod</span><span>Ürün</span><span style="text-align:right;">Miktar</span><span style="text-align:right;">Litre</span><span>Pay</span></div>
+        ${itemsHtml}
+      </div>`;
+    }
+    html += `</div>`;
+    return html;
+  }).join('');
+
+  kartGrid.querySelectorAll('.cust-card').forEach(card=>{
+    card.addEventListener('click', (e)=>{
+      if(e.target.closest('.cust-expanded')) return;
+      const key = card.getAttribute('data-stok-musteri');
+      if(state.expanded.has(key)) state.expanded.delete(key); else state.expanded.add(key);
+      renderTicariStokTable(state.report, false);
+    });
+  });
+
+  renderTicariStokDahaFazlaBtn(gosterilecekSayi, gruplar.length);
+}
+
+function renderTicariStokDahaFazlaBtn(gosterilenSayi, toplamSayi){
+  const wrap = document.getElementById('ticariStokDahaFazlaWrap');
+  const info = document.getElementById('ticariStokDahaFazlaInfo');
+  if(!wrap) return;
+  if(toplamSayi > gosterilenSayi){
+    wrap.style.display = 'flex';
+    info.textContent = `${gosterilenSayi.toLocaleString('tr-TR')} / ${toplamSayi.toLocaleString('tr-TR')} müşteri gösteriliyor`;
+  } else {
+    wrap.style.display = 'none';
+  }
 }
 
 function renderTicariStokOzet(report){
@@ -4749,9 +4875,13 @@ function wireSortableTable(tableId, sortStateAlan, renderFn){
   });
 }
 
-document.getElementById('ticariStokSearchInput').addEventListener('input', debounce(()=>renderTicariStokTable(state.report)));
+wireSearchInput('ticariStokSearchInput', 'ticariStokSearchClearBtn', debounce(()=>renderTicariStokTable(state.report)));
+wireSearchClear('ticariStokSearchInput', 'ticariStokSearchClearBtn', ()=>renderTicariStokTable(state.report));
 document.getElementById('ticariStokTemsilciFilter').addEventListener('change', ()=>renderTicariStokTable(state.report));
-wireSortableTable('ticariStokTable', 'tSort', ()=>renderTicariStokTable(state.report));
+document.getElementById('ticariStokDahaFazlaBtn').addEventListener('click', ()=>{
+  state.ticariStokGosterilen += TICARI_STOK_SAYFA_BOYUTU;
+  renderTicariStokTable(state.report, false);
+});
 
 document.getElementById('yaslandirmaSearchInput').addEventListener('input', debounce(()=>renderYaslandirmaTable(state.report)));
 document.getElementById('yaslandirmaTemsilciFilter').addEventListener('change', ()=>renderYaslandirmaTable(state.report));
