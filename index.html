@@ -831,7 +831,6 @@
   .htk-alt .fatura-detay-btn{white-space:nowrap;}
 
   /* === Nokta Bazlı Ticari Stok Raporu — Tasarım 1 (müşteri gruplu) === */
-  .stok-marka-panel{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:14px 16px;margin-bottom:14px;}
   .stok-marka-baslik{font-size:11.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.03em;margin-bottom:11px;}
   .stok-marka-row{display:flex;align-items:center;gap:12px;margin-bottom:9px;}
   .stok-marka-row:last-child{margin-bottom:0;}
@@ -839,6 +838,50 @@
   .stok-marka-track{flex:1;height:9px;background:var(--line-soft);border-radius:5px;overflow:hidden;}
   .stok-marka-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--accent),var(--accent-deep));}
   .stok-marka-value{width:90px;text-align:right;font-size:12px;font-weight:700;font-family:'Space Grotesk';flex-shrink:0;}
+
+  .stok-ozet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;padding:0;margin-bottom:20px;}
+  .stok-toplam-banner{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    background:linear-gradient(135deg,var(--navy) 0%, var(--accent) 100%);
+    border-radius:14px;padding:22px 26px;margin-bottom:18px;color:#fff;
+    box-shadow:0 8px 20px -10px rgba(19,34,63,0.45);
+  }
+  .stok-toplam-banner-label{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:700;color:rgba(255,255,255,.78);letter-spacing:.02em;margin-bottom:8px;}
+  .stok-toplam-banner-val{font-family:'Space Grotesk';font-weight:800;font-size:32px;letter-spacing:-.01em;}
+  .stok-toplam-banner-pill{
+    flex-shrink:0;background:rgba(255,255,255,.16);color:#fff;font-size:12px;font-weight:700;
+    padding:8px 16px;border-radius:100px;white-space:nowrap;
+  }
+  .stok-ozet-card{
+    position:relative;background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;
+    padding:16px 16px 15px;box-shadow:var(--shadow);border-left:4px solid var(--ozet-renk,var(--accent));
+    display:flex;flex-direction:column;gap:12px;
+  }
+  .stok-ozet-top{display:flex;align-items:flex-start;gap:11px;}
+  .stok-ozet-avatar{
+    width:38px;height:38px;border-radius:10px;background:var(--navy-soft);color:var(--navy);
+    display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;
+    font-size:13px;flex-shrink:0;
+  }
+  .stok-ozet-info{flex:1;min-width:0;}
+  .stok-ozet-name{font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .stok-ozet-sub{font-size:11.5px;color:var(--ink-faint);margin-top:2px;}
+  .stok-ozet-badge{
+    flex-shrink:0;font-size:11px;font-weight:700;padding:5px 11px;border-radius:100px;
+    background:var(--ozet-renk-soft,var(--accent-soft));color:var(--ozet-renk,var(--accent-deep));white-space:nowrap;
+  }
+  .stok-ozet-values{display:flex;align-items:baseline;gap:8px;}
+  .stok-ozet-lt{font-family:'Space Grotesk';font-weight:800;font-size:21px;color:var(--ink);letter-spacing:-.01em;}
+  .stok-ozet-mk{font-size:12.5px;color:var(--ink-faint);font-weight:600;}
+  .stok-ozet-bar-track{height:7px;border-radius:5px;background:var(--line-soft);overflow:hidden;}
+  .stok-ozet-bar-fill{height:100%;border-radius:5px;background:var(--ozet-renk,var(--accent));}
+  .stok-ozet-toplam-row{
+    grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;background:var(--navy-soft);border-radius:12px;margin-top:2px;
+  }
+  .stok-ozet-toplam-label{font-weight:700;font-size:13px;color:var(--navy);}
+  .stok-ozet-toplam-val{display:flex;align-items:baseline;gap:8px;}
+  .stok-ozet-toplam-val .stok-ozet-lt{color:var(--navy);}
   .stok-item-head{display:grid;grid-template-columns:64px 1fr 78px 78px 60px;gap:8px;padding:0 0 6px;font-size:10px;font-weight:700;color:var(--ink-faint);letter-spacing:.03em;border-bottom:1px solid var(--line-soft);}
   .stok-item-row{display:grid;grid-template-columns:64px 1fr 78px 78px 60px;gap:8px;padding:8px 0;font-size:12.5px;align-items:center;border-bottom:1px solid var(--line-soft);}
   .stok-item-row:last-child{border-bottom:none;}
@@ -1386,32 +1429,12 @@
           </div>
         </div>
         <div class="panel-body">
-          <div id="ticariStokKpiGrid"></div>
-          <div class="stok-marka-panel" id="ticariStokMarkaPanel">
-            <div class="stok-marka-baslik">Marka Dağılımı — Depoda Kalan Lt.</div>
-            <div id="ticariStokMarkaDagilim"></div>
-          </div>
+          <div class="stok-toplam-banner" id="ticariStokToplamBanner"></div>
+          <div class="stok-ozet-grid" id="ticariStokOzetGrid"></div>
           <div class="cust-card-list" id="ticariStokMusteriKartlar"></div>
           <div class="musteri-daha-fazla-wrap" id="ticariStokDahaFazlaWrap" style="display:none;">
             <button type="button" class="btn" id="ticariStokDahaFazlaBtn">Daha fazla göster</button>
             <span class="musteri-daha-fazla-info" id="ticariStokDahaFazlaInfo"></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel" id="ticariStokOzetPanel">
-        <div class="panel-head"><h2>Özet — ST Bazlı Ticari Stok</h2></div>
-        <div class="panel-body" style="padding:0;">
-          <div class="table-scroll">
-            <table id="ticariStokOzetTable">
-              <thead><tr>
-                <th>Satış Temsilcisi</th>
-                <th class="num">Depoda Kalan Mk.</th>
-                <th class="num">Depoda Kalan Lt.</th>
-              </tr></thead>
-              <tbody id="ticariStokOzetTbody"></tbody>
-              <tfoot id="ticariStokOzetTfoot"></tfoot>
-            </table>
           </div>
         </div>
       </div>
@@ -2916,6 +2939,28 @@ const CLOUD = {
 };
 function cloudEnabled(){ return !!(CLOUD.dbUrl && CLOUD.dbUrl.trim()); }
 
+// Çıplak fetch() çağrılarının varsayılan bir zaman aşımı yoktur: ağ yavaşsa, DNS/ISP tarafında
+// bulut adresi engelleniyorsa veya bağlantı sessizce düşüyorsa, tarayıcı isteği süresiz olarak
+// beklemede tutabilir. Bu da "Bulut verisi kontrol ediliyor…" durumunun ekranda asılı kalmasına
+// (hiç sonuçlanmamasına) yol açar. Bulut ile ilgili TÜM istekler bu sarmalayıcıdan geçer; belirli
+// bir süre (varsayılan 15 sn) içinde yanıt gelmezse istek iptal edilir ve normal bir hata olarak
+// fırlatılır, böylece çağıran taraftaki try/catch bloğu devreye girip yerel/mevcut veriye döner.
+async function cloudFetch(url, options, timeoutMs){
+  timeoutMs = timeoutMs || 15000;
+  const controller = new AbortController();
+  const timer = setTimeout(()=> controller.abort(), timeoutMs);
+  try{
+    return await fetch(url, Object.assign({}, options||{}, {signal: controller.signal}));
+  }catch(err){
+    if(err && err.name === 'AbortError'){
+      throw new Error('Bulut isteği zaman aşımına uğradı (' + Math.round(timeoutMs/1000) + ' sn)');
+    }
+    throw err;
+  }finally{
+    clearTimeout(timer);
+  }
+}
+
 const FIREBASE_CONFIG = {
   apiKey: 'AIzaSyB3v7dzM9OVf-NfR7Kj5pRHVrnjXaRM75s',
   authDomain: 'ortalama-vade-gun.firebaseapp.com',
@@ -3003,7 +3048,7 @@ document.getElementById('authLogoutBtn').addEventListener('click', ()=>{
 async function saveReportToCloud(report){
   if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${CLOUD.path}.json${await authQuery()}`, {
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${CLOUD.path}.json${await authQuery()}`, {
       method:'PUT',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify(report),
@@ -3019,7 +3064,7 @@ async function saveReportToCloud(report){
 async function loadReportFromCloud(){
   if(!cloudEnabled()) return null;
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${CLOUD.path}.json${await authQuery()}`);
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${CLOUD.path}.json${await authQuery()}`);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text = await res.text();
     if(!text || text==='null') return null;
@@ -3131,7 +3176,7 @@ function noktaPasifVeyaIptalMi(durum){
 async function saveMusteriMasterToCloud(obj){
   if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_CLOUD_PATH}.json${await authQuery()}`, {
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_CLOUD_PATH}.json${await authQuery()}`, {
       method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(obj),
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
@@ -3141,7 +3186,7 @@ async function saveMusteriMasterToCloud(obj){
 async function loadMusteriMasterFromCloud(){
   if(!cloudEnabled()) return null;
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_CLOUD_PATH}.json${await authQuery()}`);
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_CLOUD_PATH}.json${await authQuery()}`);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text = await res.text();
     if(!text || text==='null') return null;
@@ -3162,7 +3207,7 @@ async function loadMusteriMasterFromLocal(){
 async function saveMusteriMasterDetayToCloud(obj){
   if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_DETAY_CLOUD_PATH}.json${await authQuery()}`, {
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_DETAY_CLOUD_PATH}.json${await authQuery()}`, {
       method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(obj),
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
@@ -3172,7 +3217,7 @@ async function saveMusteriMasterDetayToCloud(obj){
 async function loadMusteriMasterDetayFromCloud(){
   if(!cloudEnabled()) return null;
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_DETAY_CLOUD_PATH}.json${await authQuery()}`);
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_DETAY_CLOUD_PATH}.json${await authQuery()}`);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text = await res.text();
     if(!text || text==='null') return null;
@@ -3193,7 +3238,7 @@ async function loadMusteriMasterDetayFromLocal(){
 async function saveMusteriMasterDurumToCloud(obj){
   if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_DURUM_CLOUD_PATH}.json${await authQuery()}`, {
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_DURUM_CLOUD_PATH}.json${await authQuery()}`, {
       method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(obj),
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
@@ -3203,7 +3248,7 @@ async function saveMusteriMasterDurumToCloud(obj){
 async function loadMusteriMasterDurumFromCloud(){
   if(!cloudEnabled()) return null;
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_DURUM_CLOUD_PATH}.json${await authQuery()}`);
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_DURUM_CLOUD_PATH}.json${await authQuery()}`);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text = await res.text();
     if(!text || text==='null') return null;
@@ -3275,7 +3320,7 @@ function bayiHakedisReviver(key, value){
 async function saveBayiHakedisToCloud(rapor){
   if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${BAYI_HAKEDIS_CLOUD_PATH}.json${await authQuery()}`, {
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${BAYI_HAKEDIS_CLOUD_PATH}.json${await authQuery()}`, {
       method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(rapor),
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
@@ -3285,7 +3330,7 @@ async function saveBayiHakedisToCloud(rapor){
 async function loadBayiHakedisFromCloud(){
   if(!cloudEnabled()) return null;
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${BAYI_HAKEDIS_CLOUD_PATH}.json${await authQuery()}`);
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${BAYI_HAKEDIS_CLOUD_PATH}.json${await authQuery()}`);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text = await res.text();
     if(!text || text==='null') return null;
@@ -3319,7 +3364,7 @@ const FATURA_ARSIV_CLOUD_PATH = CLOUD.path + '_faturaKontrolArsiv';
 async function saveFaturaKontrolArsivToCloud(arsiv){
   if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${FATURA_ARSIV_CLOUD_PATH}.json${await authQuery()}`, {
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${FATURA_ARSIV_CLOUD_PATH}.json${await authQuery()}`, {
       method:'PUT',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify(arsiv),
@@ -3335,7 +3380,7 @@ async function saveFaturaKontrolArsivToCloud(arsiv){
 async function loadFaturaKontrolArsivFromCloud(){
   if(!cloudEnabled()) return null;
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${FATURA_ARSIV_CLOUD_PATH}.json${await authQuery()}`);
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${FATURA_ARSIV_CLOUD_PATH}.json${await authQuery()}`);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text = await res.text();
     if(!text || text==='null') return null;
@@ -3373,7 +3418,7 @@ async function loadFaturaKontrolArsivGunAnahtarlariFromCloud(){
     const params = new URLSearchParams({shallow:'true'});
     const token = await authTokenParam();
     if(token) params.set('auth', token);
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${FATURA_ARSIV_CLOUD_PATH}.json?${params.toString()}`);
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${FATURA_ARSIV_CLOUD_PATH}.json?${params.toString()}`);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text = await res.text();
     if(!text || text==='null') return [];
@@ -3400,7 +3445,7 @@ async function loadFaturaKontrolArsivAraligiFromCloud(baslangicGunKey, bitisGunK
     });
     const token = await authTokenParam();
     if(token) params.set('auth', token);
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${FATURA_ARSIV_CLOUD_PATH}.json?${params.toString()}`);
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${FATURA_ARSIV_CLOUD_PATH}.json?${params.toString()}`);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text = await res.text();
     if(!text || text==='null') return {};
@@ -3425,7 +3470,7 @@ async function saveFaturaKontrolArsivGunleriToCloud(guncellemeler){
   if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
   if(!guncellemeler || !Object.keys(guncellemeler).length) return {ok:true};
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${FATURA_ARSIV_CLOUD_PATH}.json${await authQuery()}`, {
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${FATURA_ARSIV_CLOUD_PATH}.json${await authQuery()}`, {
       method:'PATCH',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify(guncellemeler),
@@ -4243,15 +4288,18 @@ function buildReport(files, musteriMasterMap){
   const ticariStokOzetMap = new Map();
   ticariStokRows.forEach(r=>{
     const key = r.temsilci || '—';
-    if(!ticariStokOzetMap.has(key)) ticariStokOzetMap.set(key, {temsilci:key, kalemSayisi:0, depodaKalanMk:0, depodaKalanLt:0});
+    if(!ticariStokOzetMap.has(key)) ticariStokOzetMap.set(key, {temsilci:key, kalemSayisi:0, depodaKalanMk:0, depodaKalanLt:0, noktaSet:new Set()});
     const o = ticariStokOzetMap.get(key);
     o.kalemSayisi += 1;
     o.depodaKalanMk += r.depodaKalanMk;
     o.depodaKalanLt += r.depodaKalanLt;
+    o.noktaSet.add(r.musteriNo);
   });
   const ticariStok = {
     rows: ticariStokRows,
-    ozet: Array.from(ticariStokOzetMap.values()).sort((a,b)=>b.depodaKalanLt-a.depodaKalanLt),
+    ozet: Array.from(ticariStokOzetMap.values())
+      .map(o=>({temsilci:o.temsilci, kalemSayisi:o.kalemSayisi, depodaKalanMk:o.depodaKalanMk, depodaKalanLt:o.depodaKalanLt, noktaSayisi:o.noktaSet.size}))
+      .sort((a,b)=>b.depodaKalanLt-a.depodaKalanLt),
   };
 
   const bayiHakedis = [];
@@ -4696,7 +4744,6 @@ function getFilteredSortedTicariStok(report){
   return filtered;
 }
 
-const STOK_MARKA_RENK = ['var(--accent)','#4E86C6','var(--warn)','#D08A4A','var(--ink-faint)'];
 
 function renderTicariStokTable(report, resetSayfa=true){
   if(resetSayfa) state.ticariStokGosterilen = TICARI_STOK_SAYFA_BOYUTU;
@@ -4706,18 +4753,16 @@ function renderTicariStokTable(report, resetSayfa=true){
 
   if(!report.ticariStok || !report.ticariStok.rows.length){
     document.getElementById('ticariStokCount').textContent = '';
-    document.getElementById('ticariStokKpiGrid').innerHTML = '';
-    document.getElementById('ticariStokMarkaPanel').style.display = 'none';
+    document.getElementById('ticariStokToplamBanner').innerHTML = '';
+    document.getElementById('ticariStokOzetGrid').innerHTML = '';
     kartGrid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Ticari Stok dosyası yüklenmedi ya da depoda kalan litre değeri sıfırın üzerinde satır bulunamadı.</div>`;
     dahaFazlaWrap.style.display = 'none';
     return;
   }
-  document.getElementById('ticariStokMarkaPanel').style.display = '';
 
   if(!rows.length){
     document.getElementById('ticariStokCount').textContent = '0 kalem';
-    document.getElementById('ticariStokKpiGrid').innerHTML = '';
-    document.getElementById('ticariStokMarkaDagilim').innerHTML = '';
+    document.getElementById('ticariStokToplamBanner').innerHTML = '';
     kartGrid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Filtreyle eşleşen kayıt bulunamadı.</div>`;
     dahaFazlaWrap.style.display = 'none';
     return;
@@ -4737,38 +4782,14 @@ function renderTicariStokTable(report, resetSayfa=true){
   });
   const gruplar = Array.from(grupMap.values()).sort((a,b)=>b.toplamLt-a.toplamLt);
 
-  // --- KPI hesapları ---
+  // --- Toplam Litre banner ---
   const toplamLt = rows.reduce((a,r)=>a+r.depodaKalanLt,0);
-  const toplamMk = rows.reduce((a,r)=>a+r.depodaKalanMk,0);
-  const enYuksekNokta = gruplar[0];
-  const temsilciLtMap = new Map();
-  rows.forEach(r=>{ temsilciLtMap.set(r.temsilci, (temsilciLtMap.get(r.temsilci)||0)+r.depodaKalanLt); });
-  const enYukluTemsilci = Array.from(temsilciLtMap.entries()).sort((a,b)=>b[1]-a[1])[0];
-
-  const kpiItems = [
-    {label:'Toplam Litre', icon:'🛢️', value:null, display:LT(toplamLt), sub:gruplar.length.toLocaleString('tr-TR')+' müşteri'},
-    {label:'Toplam Miktar', icon:'📦', value:null, display:MK(toplamMk)},
-    {label:'En Yüksek Nokta', icon:'🏆', value:null, display:enYuksekNokta.musteriAdi, sub:LT(enYuksekNokta.toplamLt)},
-    {label:'En Yüklü Temsilci', icon:'🧑‍💼', value:null, display:enYukluTemsilci[0], sub:LT(enYukluTemsilci[1])+' · %'+(enYukluTemsilci[1]/toplamLt*100).toFixed(0)},
-  ];
-  renderKpiHeroRow(kpiItems, 'ticariStokKpiGrid');
-
-  // --- Marka dağılımı (Ürün Hiyerarşi Tanımı bazlı) ---
-  const markaMap = new Map();
-  rows.forEach(r=>{ markaMap.set(r.urunHiyerarsi, (markaMap.get(r.urunHiyerarsi)||0)+r.depodaKalanLt); });
-  let markaListe = Array.from(markaMap.entries()).sort((a,b)=>b[1]-a[1]);
-  if(markaListe.length > 5){
-    const ilk4 = markaListe.slice(0,4);
-    const digerToplam = markaListe.slice(4).reduce((a,[,v])=>a+v,0);
-    markaListe = ilk4.concat([['Diğer ('+(markaListe.length-4)+' grup)', digerToplam]]);
-  }
-  const maksMarka = Math.max(...markaListe.map(([,v])=>v), 1);
-  document.getElementById('ticariStokMarkaDagilim').innerHTML = markaListe.map(([ad,val],i)=>`
-    <div class="stok-marka-row">
-      <div class="stok-marka-label" title="${escapeHtml(ad)}">${escapeHtml(ad)}</div>
-      <div class="stok-marka-track"><div class="stok-marka-fill" style="width:${Math.max(2,val/maksMarka*100).toFixed(1)}%;background:${STOK_MARKA_RENK[i]||'var(--ink-faint)'};"></div></div>
-      <div class="stok-marka-value">${LT(val)}</div>
-    </div>`).join('');
+  document.getElementById('ticariStokToplamBanner').innerHTML = `
+    <div>
+      <div class="stok-toplam-banner-label"><span>📦</span><span>Toplam Litre</span></div>
+      <div class="stok-toplam-banner-val">${LT(toplamLt)}</div>
+    </div>
+    <span class="stok-toplam-banner-pill">${gruplar.length.toLocaleString('tr-TR')} müşteri</span>`;
 
   // --- Müşteri kartları (expand-to-row) ---
   const gosterilecekSayi = Math.min(state.ticariStokGosterilen, gruplar.length);
@@ -4831,25 +4852,46 @@ function renderTicariStokDahaFazlaBtn(gosterilenSayi, toplamSayi){
   }
 }
 
+const STOK_OZET_RENK = [
+  {renk:'var(--danger)', soft:'var(--danger-soft)'},
+  {renk:'var(--warn)', soft:'var(--warn-soft)'},
+  {renk:'var(--accent)', soft:'var(--accent-soft)'},
+  {renk:'var(--success)', soft:'var(--success-soft)'},
+  {renk:'var(--navy)', soft:'var(--navy-soft)'},
+  {renk:'var(--ink-faint)', soft:'var(--line-soft)'},
+];
+
 function renderTicariStokOzet(report){
   const ozet = report.ticariStok ? report.ticariStok.ozet : [];
-  const tbody = document.getElementById('ticariStokOzetTbody');
+  const grid = document.getElementById('ticariStokOzetGrid');
   if(!ozet.length){
-    tbody.innerHTML = `<tr><td colspan="3"><div class="empty-state">Veri bulunamadı.</div></td></tr>`;
-    document.getElementById('ticariStokOzetTfoot').innerHTML = '';
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Veri bulunamadı.</div>`;
     return;
   }
-  tbody.innerHTML = ozet.map(r=>`<tr>
-    <td><span class="temsilci-tag">${escapeHtml(r.temsilci)}</span></td>
-    <td class="num" style="white-space:nowrap;">${MK(r.depodaKalanMk)}</td>
-    <td class="num" style="white-space:nowrap;"><span class="num-strong">${LT(r.depodaKalanLt)}</span></td>
-  </tr>`).join('');
   const grand = ozet.reduce((a,r)=>({depodaKalanMk:a.depodaKalanMk+r.depodaKalanMk, depodaKalanLt:a.depodaKalanLt+r.depodaKalanLt}), {depodaKalanMk:0,depodaKalanLt:0});
-  document.getElementById('ticariStokOzetTfoot').innerHTML = `<tr class="totals-row">
-    <td>Genel Toplam</td>
-    <td class="num" style="white-space:nowrap;">${MK(grand.depodaKalanMk)}</td>
-    <td class="num" style="white-space:nowrap;"><span class="num-strong">${LT(grand.depodaKalanLt)}</span></td>
-  </tr>`;
+  const toplamLt = grand.depodaKalanLt || 1;
+
+  const kartlar = ozet.map((r,i)=>{
+    const pay = r.depodaKalanLt/toplamLt*100;
+    const renk = STOK_OZET_RENK[i % STOK_OZET_RENK.length];
+    return `<div class="stok-ozet-card" style="--ozet-renk:${renk.renk};--ozet-renk-soft:${renk.soft};">
+      <div class="stok-ozet-top">
+        <div class="stok-ozet-avatar">${escapeHtml(avatarBaslangic(r.temsilci))}</div>
+        <div class="stok-ozet-info">
+          <div class="stok-ozet-name" title="${escapeHtml(r.temsilci)}">${escapeHtml(r.temsilci)}</div>
+          <div class="stok-ozet-sub">${r.noktaSayisi.toLocaleString('tr-TR')} nokta · ${r.kalemSayisi.toLocaleString('tr-TR')} kalem</div>
+        </div>
+        <span class="stok-ozet-badge">%${pay.toFixed(0)} PAY</span>
+      </div>
+      <div class="stok-ozet-values">
+        <span class="stok-ozet-lt">${LT(r.depodaKalanLt)}</span>
+        <span class="stok-ozet-mk">${MK(r.depodaKalanMk)}</span>
+      </div>
+      <div class="stok-ozet-bar-track"><div class="stok-ozet-bar-fill" style="width:${Math.max(2,pay).toFixed(1)}%;"></div></div>
+    </div>`;
+  }).join('');
+
+  grid.innerHTML = kartlar;
 }
 
 function renderTicariStokView(report){
@@ -6669,7 +6711,7 @@ function yuklemeArsivReviver(key, value){
 async function saveYuklemeArsivToCloud(arsiv){
   if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${YUKLEME_ARSIV_CLOUD_PATH}.json${await authQuery()}`, {
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${YUKLEME_ARSIV_CLOUD_PATH}.json${await authQuery()}`, {
       method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(arsiv),
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
@@ -6679,7 +6721,7 @@ async function saveYuklemeArsivToCloud(arsiv){
 async function loadYuklemeArsivFromCloud(){
   if(!cloudEnabled()) return null;
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${YUKLEME_ARSIV_CLOUD_PATH}.json${await authQuery()}`);
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${YUKLEME_ARSIV_CLOUD_PATH}.json${await authQuery()}`);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text = await res.text();
     if(!text || text==='null') return null;
@@ -8715,7 +8757,7 @@ function applySellOutHedef(baseReport, hedefMap){
 async function saveSellOutHedefToCloud(obj){
   if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${SELLOUT_HEDEF_CLOUD_PATH}.json${await authQuery()}`, {
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${SELLOUT_HEDEF_CLOUD_PATH}.json${await authQuery()}`, {
       method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(obj),
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
@@ -8725,7 +8767,7 @@ async function saveSellOutHedefToCloud(obj){
 async function loadSellOutHedefFromCloud(){
   if(!cloudEnabled()) return null;
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${SELLOUT_HEDEF_CLOUD_PATH}.json${await authQuery()}`);
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${SELLOUT_HEDEF_CLOUD_PATH}.json${await authQuery()}`);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text = await res.text();
     if(!text || text==='null') return null;
@@ -8755,7 +8797,7 @@ async function sellOutHedefKaydet(obj){
 async function saveSellOutReportToCloud(rapor){
   if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${SELLOUT_REPORT_CLOUD_PATH}.json${await authQuery()}`, {
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${SELLOUT_REPORT_CLOUD_PATH}.json${await authQuery()}`, {
       method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(rapor),
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
@@ -8765,7 +8807,7 @@ async function saveSellOutReportToCloud(rapor){
 async function loadSellOutReportFromCloud(){
   if(!cloudEnabled()) return null;
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${SELLOUT_REPORT_CLOUD_PATH}.json${await authQuery()}`);
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${SELLOUT_REPORT_CLOUD_PATH}.json${await authQuery()}`);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text = await res.text();
     if(!text || text==='null') return null;
@@ -8816,7 +8858,7 @@ async function sellOutRaporuOlustur(){
 async function saveSellOutArsivAyToCloud(ayKey, rapor){
   if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${SELLOUT_ARSIV_CLOUD_PATH}/${encodeURIComponent(ayKey)}.json${await authQuery()}`, {
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${SELLOUT_ARSIV_CLOUD_PATH}/${encodeURIComponent(ayKey)}.json${await authQuery()}`, {
       method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(rapor),
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
@@ -8826,7 +8868,7 @@ async function saveSellOutArsivAyToCloud(ayKey, rapor){
 async function loadSellOutArsivFromCloud(){
   if(!cloudEnabled()) return null;
   try{
-    const res = await fetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${SELLOUT_ARSIV_CLOUD_PATH}.json${await authQuery()}`);
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${SELLOUT_ARSIV_CLOUD_PATH}.json${await authQuery()}`);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text = await res.text();
     if(!text || text==='null') return {};
