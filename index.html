@@ -159,15 +159,16 @@
 
   .upload-card{
     background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
-    padding:32px;box-shadow:var(--shadow);
+    padding:32px;
   }
   .dropzone{
-    border:1.5px dashed #C3CEDD;border-radius:12px;
+    border:1.5px dashed #C9CFDB;border-radius:12px;
     padding:44px 24px;text-align:center;cursor:pointer;
-    transition:all .18s ease; background:linear-gradient(180deg,#FBFCFE,#EEF1F6);
+    transition:all .18s ease; background:var(--bg);
   }
   .dropzone.drag{border-color:var(--accent);background:var(--accent-soft);}
   .dropzone svg{margin-bottom:10px;opacity:.65;}
+  .dropzone .fa-cloud-arrow-up{margin-bottom:2px;}
   .dropzone .dz-title{font-weight:600;font-size:15px;color:var(--ink);}
   .dropzone .dz-sub{font-size:12.5px;color:var(--ink-soft);margin-top:6px;}
   .dropzone .dz-sub b{color:var(--accent-deep);}
@@ -180,7 +181,7 @@
     contain:layout style;
   }
   .check-item:hover{border-color:var(--line);box-shadow:var(--shadow);transform:translateY(-1px);}
-  .check-item.done{border-color:var(--success);background:var(--success-soft);}
+  .check-item.done{border-color:var(--success);border-left:3px solid var(--success);background:var(--success-soft);}
   .check-icon{
     width:24px;height:24px;border-radius:50%;flex-shrink:0;margin-top:1px;
     display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;
@@ -208,16 +209,17 @@
   .kpi-hero-card{
     position:relative;overflow:hidden;border-radius:16px;padding:22px 22px;
     background:var(--navy);
-    color:#fff;box-shadow:var(--shadow);
+    color:#fff;
   }
   .kpi-hero-card::before{
     content:'';position:absolute;top:0;left:0;right:0;height:2px;pointer-events:none;
     background:var(--accent);
   }
   .kpi-hero-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;gap:10px;flex-wrap:wrap;}
-  .kpi-hero-label{font-size:11.5px;font-weight:700;letter-spacing:.06em;color:var(--accent-soft);display:inline-flex;align-items:center;gap:7px;}
-  .kpi-hero-chip{background:rgba(255,255,255,.16);border-radius:100px;padding:4px 12px;font-size:11px;font-weight:700;white-space:nowrap;}
-  .kpi-hero-value{font-family:var(--font-figures);font-size:32px;font-weight:700;margin-top:9px;position:relative;line-height:1.15;}
+  .kpi-hero-label{font-size:11.5px;font-weight:700;letter-spacing:.06em;color:rgba(255,255,255,.75);display:inline-flex;align-items:center;gap:7px;}
+  .kpi-hero-label .fa-solid{color:#F0DCA6;}
+  .kpi-hero-chip{background:rgba(255,255,255,.16);border-radius:100px;padding:4px 12px;font-size:11px;font-weight:700;white-space:nowrap;color:#F0DCA6;}
+  .kpi-hero-value{font-family:var(--font-figures);font-size:32px;font-weight:700;margin-top:9px;position:relative;line-height:1.15;color:#F0DCA6;}
   .kpi-hero-value::after{
     content:'';display:block;width:180px;max-width:60%;height:6px;margin-top:11px;
     background-image:radial-gradient(circle,rgba(201,150,44,0.65) 1.5px,transparent 1.6px);
@@ -257,7 +259,7 @@
 
   .panel{
     background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
-    box-shadow:var(--shadow);margin-bottom:20px;overflow:hidden;
+    margin-bottom:20px;overflow:hidden;
     contain:layout style;
   }
   .panel-head{
@@ -353,12 +355,17 @@
   .musteri-daha-fazla-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:16px;}
   .musteri-daha-fazla-wrap .btn{padding:10px 22px;}
   .musteri-daha-fazla-info{font-size:12px;color:var(--ink-faint);}
+  .panel-head.panel-head-navy-hero{background:var(--navy);border-bottom:2px solid var(--accent);}
+  .panel-head.panel-head-navy-hero h2{color:#fff;}
+  .panel-head.panel-head-navy-hero .count{color:rgba(255,255,255,.72);}
   .yukleme-head-left{display:flex;align-items:center;gap:13px;min-width:0;}
-  .yukleme-head-badge{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,var(--navy) 0%, var(--accent) 100%);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+  .yukleme-head-badge{width:40px;height:40px;border-radius:11px;background:rgba(201,150,44,0.16);border:1px solid rgba(201,150,44,0.4);color:#F0DCA6;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
   .yukleme-head-chips{margin-top:5px;display:flex;gap:8px;flex-wrap:wrap;}
-  .yukleme-head-chips .chip{font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;background:var(--navy-soft);color:var(--navy);white-space:nowrap;}
-  .yukleme-head-btn{display:flex;align-items:center;gap:7px;border:1px solid var(--accent);color:var(--accent-deep);background:var(--surface);}
-  .yukleme-head-btn:hover{background:var(--accent-soft);}
+  .yukleme-head-chips .chip{font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;background:rgba(255,255,255,0.1);color:rgba(255,255,255,.85);white-space:nowrap;}
+  .yukleme-head-btn{display:flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,0.3);color:#fff;background:rgba(255,255,255,0.08);}
+  .yukleme-head-btn:hover{background:rgba(255,255,255,0.18);}
+  .yukleme-head-btn.danger{border-color:rgba(201,150,44,0.5);color:#F0DCA6;background:rgba(201,150,44,0.12);}
+  .yukleme-head-btn.danger:hover{background:rgba(201,150,44,0.22);}
   .yukleme-toplam-top{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
   .yukleme-toplam-label{font-size:11px;font-weight:700;color:var(--ink-faint);letter-spacing:.04em;}
   .yukleme-toplam-val{font-family:var(--font-figures);font-size:30px;font-weight:800;color:var(--navy);margin-top:2px;}
@@ -492,7 +499,7 @@
   /* --- .modal-head-navy: düz lacivert başlık (Seçenek A) — Detay popup'larında ortak kullanım --- */
   .panel-head.modal-head-navy{background:var(--navy);padding:16px 52px 16px 20px;position:relative;border-bottom:2px solid var(--accent);}
   .modal-head-navy-top{display:flex;align-items:center;gap:11px;}
-  .modal-head-navy-avatar{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.14);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;font-size:13px;flex-shrink:0;}
+  .modal-head-navy-avatar{width:36px;height:36px;border-radius:10px;background:rgba(201,150,44,0.16);color:#F0DCA6;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;font-size:13px;flex-shrink:0;}
   .modal-head-navy-name{font-family:'Space Grotesk';font-weight:700;font-size:15px;color:#fff;line-height:1.3;}
   .modal-head-navy-sub{font-size:11px;color:rgba(255,255,255,.65);margin-top:1px;font-weight:500;}
   .modal-head-navy-pill{margin-top:10px;display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.12);color:#fff;font-size:11px;font-weight:700;padding:4px 11px;border-radius:100px;}
@@ -504,6 +511,8 @@
     display:inline-flex;align-items:center;gap:5px;transition:background .15s ease;
   }
   .modal-head-navy-analiz-btn:hover{background:rgba(255,255,255,0.22);}
+  .modal-head-navy-analiz-btn.gold{border-color:rgba(255,255,255,0.35);background:rgba(255,255,255,0.1);color:#fff;}
+  .modal-head-navy-analiz-btn.gold:hover{background:rgba(255,255,255,0.22);}
   .fatura-toplam-divider{margin:10px 20px 0;border-top:2px solid var(--line-soft);}
   .fatura-toplam-strip{display:grid;grid-template-columns:1fr 1fr 1fr;padding:14px 20px;background:var(--bg);}
 
@@ -538,7 +547,7 @@
   }
   .senet-modal .panel-head h2{color:#fff;font-size:16.5px;margin:0;}
   .senet-modal-sub{font-size:11.5px;color:rgba(255,255,255,0.78);margin-top:3px;font-weight:500;}
-  .senet-modal-kalanborc{color:#fff;font-weight:700;font-family:var(--font-figures);font-size:12.5px;margin-top:5px;}
+  .senet-modal-kalanborc{color:#F0DCA6;font-weight:700;font-family:var(--font-figures);font-size:12.5px;margin-top:5px;}
   .senet-modal .modal-close{background:rgba(255,255,255,0.14);color:#fff;box-shadow:none;}
   .senet-modal .modal-close:hover{background:rgba(255,255,255,0.28);color:#fff;}
   .senet-modal-body{padding:20px 22px 20px;}
@@ -633,7 +642,7 @@
   .rep-card .rstat b{font-weight:700;color:var(--ink);}
 
   .karne-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;}
-  .karne-card{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:15px;box-shadow:var(--shadow);}
+  .karne-card{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:15px;}
   .karne-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
   .karne-name{font-weight:700;font-size:14px;}
   .karne-rank{font-family:var(--font-figures);font-size:19px;font-weight:800;color:var(--accent-deep);}
@@ -723,8 +732,15 @@
   .week-fill{height:100%;border-radius:4px 0 0 4px;background:var(--accent);}
   .week-val{width:100px;text-align:right;flex-shrink:0;font-size:12px;font-weight:500;font-family:var(--font-figures);}
 
-  .insight-list{font-size:12.8px;line-height:1.95;}
-  .insight-list .ins-row{display:flex;gap:8px;align-items:flex-start;}
+  .insight-list{font-size:12.8px;}
+  .insight-list .ins-row{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-soft);}
+  .insight-list .ins-row:last-child{border-bottom:none;}
+  .ins-icon{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;}
+  .ins-icon-success{background:var(--success-soft);color:var(--success);}
+  .ins-icon-warn{background:var(--warn-soft);color:var(--warn);}
+  .ins-icon-danger{background:var(--danger-soft);color:var(--danger);}
+  .ins-icon-neutral{background:var(--line-soft);color:var(--ink-faint);}
+  .ins-icon-accent{background:var(--accent-soft);color:var(--accent-deep);}
 
   .formula-table td.formula-op{color:var(--ink-faint);width:24px;}
   .formula-table tr.formula-total td{border-top:1.5px solid var(--line);font-weight:700;}
@@ -795,7 +811,7 @@
   .totals-row td{border-top:1.5px solid var(--line);background:var(--bg);font-weight:700;}
   .totals-row td.num .num-strong{font-family:var(--font-figures);}
 
-  .empty-state{text-align:center;padding:40px 20px;color:var(--ink-faint);font-size:13px;}
+  .empty-state{text-align:center;padding:34px 20px;color:var(--ink-soft);font-size:13.5px;font-weight:500;border:1px dashed var(--line);border-radius:12px;}
   footer{text-align:center;color:var(--ink-faint);font-size:11.5px;margin-top:30px;}
   .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-soft);margin-top:10px;}
   .legend span{display:inline-flex;align-items:center;gap:5px;}
@@ -991,14 +1007,15 @@
     box-shadow:0 8px 20px -10px rgba(19,34,63,0.45);
   }
   .stok-toplam-banner-label{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:700;color:rgba(255,255,255,.78);letter-spacing:.02em;margin-bottom:8px;}
-  .stok-toplam-banner-val{font-family:var(--font-figures);font-weight:800;font-size:32px;letter-spacing:-.01em;}
+  .stok-toplam-banner-label .fa-solid{color:#F0DCA6;}
+  .stok-toplam-banner-val{font-family:var(--font-figures);font-weight:800;font-size:32px;letter-spacing:-.01em;color:#F0DCA6;}
   .stok-toplam-banner-pill{
-    flex-shrink:0;background:rgba(255,255,255,.16);color:#fff;font-size:12px;font-weight:700;
+    flex-shrink:0;background:rgba(201,150,44,.16);color:#F0DCA6;font-size:12px;font-weight:700;
     padding:8px 16px;border-radius:100px;white-space:nowrap;
   }
   .stok-ozet-card{
     position:relative;background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;
-    padding:16px 16px 15px;box-shadow:var(--shadow);border-left:4px solid var(--ozet-renk,var(--accent));
+    padding:16px 16px 15px;border-left:4px solid var(--ozet-renk,var(--accent));
     display:flex;flex-direction:column;gap:12px;
   }
   .stok-ozet-top{display:flex;align-items:flex-start;gap:11px;}
@@ -1058,15 +1075,15 @@
 </head>
 <body>
 <div id="authGate" style="position:fixed;inset:0;background:var(--bg,#EEF1F6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:#fff;border-radius:16px;padding:36px 32px;max-width:380px;width:100%;box-shadow:0 12px 36px rgba(0,0,0,.10);border:1px solid var(--line,#DBE2EC);">
+  <div style="background:#fff;border-radius:14px;padding:36px 32px;max-width:380px;width:100%;border:1px solid var(--line,#DBE2EC);border-top:3px solid #8A6D1F;">
     <div style="text-align:center;margin-bottom:22px;">
-      <div style="width:44px;height:44px;border-radius:11px;background:var(--navy,#13233F);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;margin:0 auto 12px;" translate="no">V2</div>
-      <h2 style="margin:0;font-size:18px;" translate="no">Keşan Bayi Takip Paneli</h2>
+      <div style="width:44px;height:44px;border-radius:11px;background:#0C1B33;border:1px solid rgba(201,150,44,0.5);color:#D9B25C;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Space Grotesk';margin:0 auto 12px;" translate="no">V2.1</div>
+      <h2 style="margin:0;font-size:18px;font-family:'Space Grotesk';" translate="no">Keşan Bayi Takip Paneli</h2>
       <p style="margin:6px 0 0;color:var(--ink-soft,#54617A);font-size:13px;">Devam etmek için giriş yapın</p>
     </div>
     <div style="display:flex;flex-direction:column;gap:10px;">
-      <input type="text" id="authKullaniciKodu" placeholder="Kullanıcı Kodu" aria-label="Kullanıcı Kodu" autocomplete="username" inputmode="numeric" style="padding:11px 13px;border:1px solid var(--line,#DBE2EC);border-radius:9px;font-size:14px;font-family:inherit;" />
-      <input type="password" id="authPassword" placeholder="Şifre" aria-label="Şifre" autocomplete="current-password" style="padding:11px 13px;border:1px solid var(--line,#DBE2EC);border-radius:9px;font-size:14px;font-family:inherit;" />
+      <input type="text" id="authKullaniciKodu" placeholder="Kullanıcı Kodu" aria-label="Kullanıcı Kodu" autocomplete="username" inputmode="numeric" style="padding:11px 13px;border:1px solid var(--line,#DBE2EC);border-radius:9px;font-size:16px;font-family:inherit;" />
+      <input type="password" id="authPassword" placeholder="Şifre" aria-label="Şifre" autocomplete="current-password" style="padding:11px 13px;border:1px solid var(--line,#DBE2EC);border-radius:9px;font-size:16px;font-family:inherit;" />
       <button type="button" id="authLoginBtn" class="btn primary" style="width:100%;justify-content:center;">Giriş Yap</button>
       <div id="authError" style="display:none;color:var(--danger,#B23A2C);font-size:12.5px;text-align:center;"></div>
       <div id="authStatus" style="display:none;color:var(--ink-soft,#54617A);font-size:12.5px;text-align:center;"></div>
@@ -1096,7 +1113,7 @@
 
   <div class="upload-card" id="uploadCard">
     <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Excel dosyalarını sürükleyip bırakın veya seçmek için Enter'a basın">
-      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#5C6577" stroke-width="1.6" aria-hidden="true"><path d="M12 3v12m0-12 4 4m-4-4-4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+      <i class="fa-solid fa-cloud-arrow-up" style="font-size:32px;color:#8A6D1F;" aria-hidden="true"></i>
       <div class="dz-title">Excel dosyalarını buraya sürükleyin ya da tıklayıp seçin</div>
       <div class="dz-sub">12 dosyayı aynı anda seçebilirsiniz — sistem her birini <b>otomatik tanır</b> (Kalemler, Sipariş, Tahsilat, Çek/Senet, Ticari Stok, Fatura Dökümü, Bayi Hak Ediş, Yükleme Raporu, Müşteri Master, Ciro Primi, Dönemsel İskonto, Depozito Tahsilatı)</div>
     </div>
@@ -1400,7 +1417,12 @@
     <div id="sevkView" style="display:none;" role="tabpanel" aria-labelledby="tabbtn-sevk">
 
       <div class="panel" id="sevkOzetiPanel">
-        <div class="panel-head"><h2 id="ozetTitle">Sevk Özeti — Tüm Temsilciler</h2></div>
+        <div class="panel-head panel-head-navy-hero">
+          <div class="yukleme-head-left">
+            <div class="yukleme-head-badge"><i class="fa-solid fa-truck" aria-hidden="true"></i></div>
+            <h2 id="ozetTitle">Sevk Özeti — Tüm Temsilciler</h2>
+          </div>
+        </div>
         <div class="panel-body">
           <div id="ozetGrid"></div>
         </div>
@@ -1458,7 +1480,7 @@
     <div id="yuklemeView" style="display:none;" role="tabpanel" aria-labelledby="tabbtn-yukleme">
 
       <div class="panel" id="yuklemePanel" style="display:none;">
-        <div class="panel-head yukleme-head">
+        <div class="panel-head yukleme-head panel-head-navy-hero">
           <div class="yukleme-head-left">
             <div class="yukleme-head-badge"><i class="fa-solid fa-box" aria-hidden="true"></i></div>
             <div>
@@ -1469,7 +1491,6 @@
           <div class="toolbar">
             <select class="filter-select" id="yuklemeTarihSelect"></select>
             <button class="btn yukleme-head-btn" id="yuklemeYenileBtn" type="button"><i class="fa-solid fa-arrow-rotate-right" aria-hidden="true"></i> Arşivi Yenile</button>
-            <button class="btn small yukleme-head-btn" id="yuklemeArsivTemizleBtn" type="button" title="ST Tahsilat/Litre için biriktirilen tüm günlerin arşivini siler (şifre gerektirir)"><i class="fa-solid fa-lock" aria-hidden="true"></i> Arşivi Temizle</button>
           </div>
         </div>
         <div class="panel-body">
@@ -1501,8 +1522,11 @@
     <div id="yaslandirmaView" style="display:none;" role="tabpanel" aria-labelledby="tabbtn-yaslandirma">
 
       <div class="panel" id="yaslandirmaPanel">
-        <div class="panel-head">
-          <div><h2>Nokta Bazlı Yaşlandırma Raporu</h2><span class="count" id="yaslandirmaCount"></span></div>
+        <div class="panel-head panel-head-navy-hero">
+          <div class="yukleme-head-left">
+            <div class="yukleme-head-badge"><i class="fa-solid fa-clock" aria-hidden="true"></i></div>
+            <div><h2>Nokta Bazlı Yaşlandırma Raporu</h2><span class="count" id="yaslandirmaCount"></span></div>
+          </div>
         </div>
         <div class="panel-body" style="padding:16px 20px 0;">
           <div class="stok-section-divider" style="margin-top:0;padding-top:0;border-top:none;margin-bottom:16px;">
@@ -1590,8 +1614,11 @@
     <div id="ticariStokView" style="display:none;" role="tabpanel" aria-labelledby="tabbtn-ticariStok">
 
       <div class="panel" id="ticariStokPanel">
-        <div class="panel-head">
-          <div><h2>Nokta Bazlı Ticari Stok Raporu</h2><span class="count" id="ticariStokCount"></span></div>
+        <div class="panel-head panel-head-navy-hero">
+          <div class="yukleme-head-left">
+            <div class="yukleme-head-badge"><i class="fa-solid fa-box" aria-hidden="true"></i></div>
+            <div><h2>Nokta Bazlı Ticari Stok Raporu</h2><span class="count" id="ticariStokCount"></span></div>
+          </div>
         </div>
         <div class="panel-body">
           <div class="stok-toplam-banner" id="ticariStokToplamBanner"></div>
@@ -1627,8 +1654,11 @@
     <div id="faturaKontrolView" style="display:none;" role="tabpanel" aria-labelledby="tabbtn-faturaKontrol">
 
       <div class="panel" id="faturaKontrolPanel">
-        <div class="panel-head">
-          <div><h2>Fatura Kontrol</h2><span class="count" id="faturaKontrolCount"></span></div>
+        <div class="panel-head panel-head-navy-hero">
+          <div class="yukleme-head-left">
+            <div class="yukleme-head-badge"><i class="fa-solid fa-file-circle-check" aria-hidden="true"></i></div>
+            <div><h2>Fatura Kontrol</h2><span class="count" id="faturaKontrolCount"></span></div>
+          </div>
         </div>
         <div class="panel-body">
           <div class="stok-section-divider" style="margin-top:0;padding-top:0;border-top:none;">
@@ -1642,8 +1672,7 @@
                 <button type="button" id="faturaKontrolSearchClearBtn" class="search-clear-btn" title="Aramayı temizle" aria-label="Aramayı temizle" style="display:none;">✕</button>
               </div>
               <button type="button" class="btn small" id="faturaKontrolArsivYenileBtn" title="Buluttaki arşivi yeniden çeker"><i class="fa-solid fa-arrow-rotate-right" aria-hidden="true"></i> Yenile</button>
-              <button type="button" class="btn small" id="faturaKontrolArsivSikistirBtn" title="Tahsilat/Fatura için aynı takvim gününe ait daha eski/yinelenen yükleme kayıtlarını (gölge kayıtları) siler. Sipariş için ise Satış Belge No bazlı temizliği (Red/İptal/Teslim Edilemedi olan siparişlerin TÜM kayıtlarını ve aynı gün mükerrer kayıtlarını) arşivin tamamı üzerinde yeniden çalıştırır. Bakiye geçmişine (Trend Analizi) dokunmaz."><i class="fa-solid fa-eraser" aria-hidden="true"></i> Arşivi Temizle</button>
-              <button type="button" class="btn small" id="faturaKontrolArsivTemizleBtn" title="Fatura Kontrol için biriktirilen tüm günlerin arşivini siler (şifre gerektirir)"><i class="fa-solid fa-lock" aria-hidden="true"></i> Arşivi Temizle</button>
+              <button type="button" class="btn small" id="faturaKontrolArsivSikistirBtn" title="Tahsilat/Fatura için aynı takvim gününe ait daha eski/yinelenen yükleme kayıtlarını (gölge kayıtları) siler. Sipariş için ise Satış Belge No bazlı temizliği (Red/İptal/Teslim Edilemedi olan siparişlerin TÜM kayıtlarını ve aynı gün mükerrer kayıtlarını) arşivin tamamı üzerinde yeniden çalıştırır. Bakiye geçmişine (Trend Analizi) dokunmaz."><i class="fa-solid fa-broom" aria-hidden="true"></i> Arşivi Sıkıştır</button>
             </div>
           </div>
           <div class="as-of" id="faturaKontrolArsivBilgi"></div>
@@ -1677,8 +1706,11 @@
     <div id="bayiHakedisView" style="display:none;" role="tabpanel" aria-labelledby="tabbtn-bayiHakedis">
 
       <div class="panel" id="bayiHakedisPanel" style="display:none;">
-        <div class="panel-head">
-          <div><h2>Bayi Hakediş</h2><span class="count" id="bayiHakedisCount"></span></div>
+        <div class="panel-head panel-head-navy-hero">
+          <div class="yukleme-head-left">
+            <div class="yukleme-head-badge"><i class="fa-solid fa-award" aria-hidden="true"></i></div>
+            <div><h2>Bayi Hakediş</h2><span class="count" id="bayiHakedisCount"></span></div>
+          </div>
         </div>
         <div class="panel-body">
           <div class="stok-section-divider" style="margin-top:0;padding-top:0;border-top:none;">
@@ -2257,8 +2289,8 @@
           </div>
           <div class="modal-head-navy-pill-row" style="margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <div class="modal-head-navy-pill" id="faturaModalSub" style="margin-top:0;"></div>
-            <button type="button" class="modal-head-navy-analiz-btn" id="faturaModalAnalizBtn"><i class="fa-solid fa-chart-column" aria-hidden="true"></i> Analiz</button>
-            <button type="button" class="modal-head-navy-analiz-btn" id="faturaModalTahsilatTahminiBtn"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Tahsilat Tahmini</button>
+            <button type="button" class="modal-head-navy-analiz-btn gold" id="faturaModalAnalizBtn"><i class="fa-solid fa-chart-column" aria-hidden="true"></i> Analiz</button>
+            <button type="button" class="modal-head-navy-analiz-btn gold" id="faturaModalTahsilatTahminiBtn"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Tahsilat Tahmini</button>
             <button type="button" class="modal-head-navy-analiz-btn" id="faturaModalCekSenetBtn" style="display:none;"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Çek/Senet</button>
             <button type="button" class="modal-head-navy-analiz-btn" id="faturaModalHakedisBtn" style="display:none;"><i class="fa-solid fa-award" aria-hidden="true"></i> Hakediş</button>
           </div>
@@ -3279,13 +3311,16 @@ async function faturaKontrolArsivBirlestirCached(arsiv){
   return promise;
 }
 
+// Tüm arşivi silen özellik kaldırıldı — musteriSnapshot (ve arşivin tamamı) hiçbir koşulda
+// silinmemeli. Bu fonksiyon artık kasıtlı olarak hiçbir şey yapmayan güvenli bir no-op'tur;
+// başka bir yerden çağrılırsa bile arşive dokunmaz.
 async function clearFaturaKontrolArsiv(){
-  state.faturaArsivCache = {};
-  await saveFaturaKontrolArsivToLocal({});
-  tvGunAnahtarlariOnbellek = null;
-  tvAyVerisiGetirilenler.clear();
-  if(cloudEnabled()) await saveFaturaKontrolArsivToCloud({});
+  console.warn('clearFaturaKontrolArsiv() devre dışı bırakıldı — arşiv kalıcı olarak korunuyor.');
 }
+
+// Bu şifre artık arşiv silme için kullanılmıyor (o özellik tamamen kaldırıldı) — yalnızca Sell
+// Out'taki "hedef litre" elle düzenleme korumasında (sellOutHedefKaydetHandler) kullanılıyor.
+const FATURA_ARSIV_TEMIZLEME_SIFRESI = '471252580a';
 
 const CLOUD = {
   dbUrl: 'https://ortalama-vade-gun-default-rtdb.firebaseio.com',
@@ -4063,7 +4098,7 @@ function updateChecklist(){
     const info = state.files[type];
     if(info){
       item.classList.add('done');
-      item.querySelector('.check-icon').textContent = '✓';
+      item.querySelector('.check-icon').innerHTML = '<i class="fa-solid fa-check" aria-hidden="true"></i>';
       meta.textContent = info.name + ' · ' + info.data.length.toLocaleString('tr-TR') + ' satır';
     }else{
       item.classList.remove('done');
@@ -6665,23 +6700,6 @@ async function renderFaturaKontrolArsivBilgi(){
   el.textContent = `Buluttaki arşivde veri var (${fmtDate(new Date(birlesik.ilkGun))} – ${fmtDate(new Date(birlesik.sonGun))}) · ${birlesik.siparisArsiv.length.toLocaleString('tr-TR')} sipariş, ${birlesik.tahsilatArsiv.length.toLocaleString('tr-TR')} tahsilat, ${birlesik.faturaArsiv.length.toLocaleString('tr-TR')} fatura kaydı. ☁️` + bugunUyarisi;
 }
 
-const FATURA_ARSIV_TEMIZLEME_SIFRESI = '471252580a';
-document.getElementById('faturaKontrolArsivTemizleBtn').addEventListener('click', async ()=>{
-  const gunSayisi = Object.keys(state.faturaArsivCache||{}).length;
-  if(!gunSayisi){ await renderFaturaKontrolArsivBilgi(); return; }
-  const girilenSifre = prompt('Bu işlem, buluttaki Fatura Kontrol arşivindeki tüm günlerin verisini kalıcı olarak siler (tüm cihazlardan) ve geri alınamaz.\n\nDevam etmek için şifreyi girin:');
-  if(girilenSifre === null) return;
-  if(girilenSifre !== FATURA_ARSIV_TEMIZLEME_SIFRESI){
-    alert('Şifre yanlış. Arşiv silinmedi.');
-    return;
-  }
-  const onay = confirm(`Şifre doğru. Arşivdeki ${gunSayisi} günlük veri kalıcı olarak silinecek. Emin misiniz?`);
-  if(!onay) return;
-  await clearFaturaKontrolArsiv();
-  await renderFaturaKontrolArsivBilgi();
-  if(state.report) await renderFaturaKontrolTable(state.report);
-});
-
 document.getElementById('faturaKontrolArsivYenileBtn').addEventListener('click', async ()=>{
   await renderFaturaKontrolView(state.report || {musteriler:[]}, true);
 });
@@ -6689,7 +6707,7 @@ document.getElementById('faturaKontrolArsivYenileBtn').addEventListener('click',
 document.getElementById('faturaKontrolArsivSikistirBtn').addEventListener('click', async ()=>{
   const btn = document.getElementById('faturaKontrolArsivSikistirBtn');
   const orijinalMetin = btn.textContent;
-  btn.disabled = true; btn.textContent = '🧹 Temizleniyor…';
+  btn.disabled = true; btn.textContent = 'Sıkıştırılıyor…';
   try{
     // Sıkıştırma tüm geçmişi taradığından, önbellekte yalnızca kısmi (örn. tek bir aya ait) veri
     // olma ihtimaline karşı burada TAM bir tazeleme zorlanır — aksi halde başka günlerdeki gölge
@@ -7486,10 +7504,10 @@ async function yuklemeArsivYenile(){
 // Hesaplama mantığı değiştiğinde (örn. gün eşleştirme kuralı düzeltildiğinde) eski mantıkla
 // kaydedilmiş arşiv kayıtları artık geçersiz/tutarsız hale gelebilir; bu fonksiyon ST Tahsilat/Litre
 // arşivinin tamamını (bulut + cihaz) kalıcı olarak temizler.
+// Tüm arşivi silen özellik kaldırıldı — arşiv hiçbir koşulda silinmemeli. Artık kasıtlı olarak
+// hiçbir şey yapmayan güvenli bir no-op'tur.
 async function clearYuklemeArsiv(){
-  state.yuklemeArsivCache = {};
-  await saveYuklemeArsivToLocal({});
-  if(cloudEnabled()) await saveYuklemeArsivToCloud({});
+  console.warn('clearYuklemeArsiv() devre dışı bırakıldı — arşiv kalıcı olarak korunuyor.');
 }
 
 function populateYuklemeTarihSelect(){
@@ -7595,22 +7613,6 @@ document.getElementById('yuklemeTarihSelect').addEventListener('change', (e)=>{
   if(rapor) renderYuklemeTable(rapor);
 });
 document.getElementById('yuklemeYenileBtn').addEventListener('click', renderYuklemeView);
-document.getElementById('yuklemeArsivTemizleBtn').addEventListener('click', async ()=>{
-  const gunSayisi = Object.keys(state.yuklemeArsivCache||{}).length;
-  if(!gunSayisi){ renderYuklemeArsivBilgi(); return; }
-  const girilenSifre = prompt('Bu işlem, buluttaki ST Tahsilat/Litre arşivindeki tüm günlerin verisini kalıcı olarak siler (tüm cihazlardan) ve geri alınamaz.\n\nDevam etmek için şifreyi girin:');
-  if(girilenSifre === null) return;
-  if(girilenSifre !== FATURA_ARSIV_TEMIZLEME_SIFRESI){
-    alert('Şifre yanlış. Arşiv silinmedi.');
-    return;
-  }
-  const onay = confirm(`Şifre doğru. Arşivdeki ${gunSayisi} günlük veri kalıcı olarak silinecek. Emin misiniz?`);
-  if(!onay) return;
-  await clearYuklemeArsiv();
-  state.yuklemeReport = null;
-  state.yuklemeSeciliGun = null;
-  await renderYuklemeView();
-});
 
 const yuklemeSortSelect = document.getElementById('yuklemeSortSelect');
 const yuklemeSortDirBtn = document.getElementById('yuklemeSortDirBtn');
@@ -9103,17 +9105,17 @@ async function computeYonetimOzeti(report, zorla){
 function computeYonetimInsights(ozet, karne){
   const insights = [];
   if(ozet.dsoDegisim!=null){
-    if(ozet.dsoDegisim<=-0.5) insights.push('<i class="fa-solid fa-circle" style="color:var(--success);font-size:9px;" aria-hidden="true"></i> DSO son 1 haftada '+Math.abs(ozet.dsoDegisim).toFixed(1)+' gün iyileşti');
-    else if(ozet.dsoDegisim>=0.5) insights.push('<i class="fa-solid fa-circle" style="color:var(--warn);font-size:9px;" aria-hidden="true"></i> DSO son 1 haftada '+ozet.dsoDegisim.toFixed(1)+' gün arttı');
-    else insights.push('<i class="fa-solid fa-minus" style="color:var(--ink-faint);font-size:11px;" aria-hidden="true"></i> DSO son 1 haftada durağan seyretti');
+    if(ozet.dsoDegisim<=-0.5) insights.push({icon:'fa-arrow-trend-down', cls:'success', text:'DSO son 1 haftada '+Math.abs(ozet.dsoDegisim).toFixed(1)+' gün iyileşti'});
+    else if(ozet.dsoDegisim>=0.5) insights.push({icon:'fa-arrow-trend-up', cls:'warn', text:'DSO son 1 haftada '+ozet.dsoDegisim.toFixed(1)+' gün arttı'});
+    else insights.push({icon:'fa-minus', cls:'neutral', text:'DSO son 1 haftada durağan seyretti'});
   }
-  if(ozet.dikkatSayisi>0) insights.push('<i class="fa-solid fa-circle" style="color:var(--danger);font-size:9px;" aria-hidden="true"></i> '+ozet.dikkatSayisi.toLocaleString('tr-TR')+' müşteri 90+ gün gecikmede');
-  insights.push('<i class="fa-solid fa-coins" aria-hidden="true"></i> Bu hafta '+TL(ozet.haftalikTahsilat)+' tahsilat yapıldı');
-  if(ozet.haftalikLitre>0) insights.push('<i class="fa-solid fa-box" aria-hidden="true"></i> Bu hafta '+Math.round(ozet.haftalikLitre).toLocaleString('tr-TR')+' Lt sevkiyat gerçekleşti');
-  if(ozet.haftalikHakedis>0) insights.push('<i class="fa-solid fa-award" aria-hidden="true"></i> Bu hafta '+TL(ozet.haftalikHakedis)+' bayi hakediş tahakkuk etti');
+  if(ozet.dikkatSayisi>0) insights.push({icon:'fa-triangle-exclamation', cls:'danger', text:ozet.dikkatSayisi.toLocaleString('tr-TR')+' müşteri 90+ gün gecikmede'});
+  insights.push({icon:'fa-coins', cls:'success', text:'Bu hafta '+TL(ozet.haftalikTahsilat)+' tahsilat yapıldı'});
+  if(ozet.haftalikLitre>0) insights.push({icon:'fa-box', cls:'neutral', text:'Bu hafta '+Math.round(ozet.haftalikLitre).toLocaleString('tr-TR')+' Lt sevkiyat gerçekleşti'});
+  if(ozet.haftalikHakedis>0) insights.push({icon:'fa-award', cls:'accent', text:'Bu hafta '+TL(ozet.haftalikHakedis)+' bayi hakediş tahakkuk etti'});
   if(karne && karne.rows && karne.rows.length){
     const enIyi = karne.rows[0];
-    if(enIyi && enIyi.gerceklesme!=null) insights.push('<i class="fa-solid fa-trophy" aria-hidden="true"></i> En yüksek tahsilat gerçekleşmesi: '+enIyi.temsilci+' ('+fmtYuzde(enIyi.gerceklesme)+')');
+    if(enIyi && enIyi.gerceklesme!=null) insights.push({icon:'fa-trophy', cls:'accent', text:'En yüksek tahsilat gerçekleşmesi: '+enIyi.temsilci+' ('+fmtYuzde(enIyi.gerceklesme)+')'});
   }
   return insights;
 }
@@ -9138,7 +9140,7 @@ async function renderYonetimOzetiView(report, zorla){
 
   const insights = computeYonetimInsights(ozet, karne);
   document.getElementById('yoInsights').innerHTML = insights.length
-    ? insights.map(t=>`<div class="ins-row"><span>${t}</span></div>`).join('')
+    ? insights.map(it=>`<div class="ins-row"><span class="ins-icon ins-icon-${it.cls}"><i class="fa-solid ${it.icon}" aria-hidden="true"></i></span><span>${it.text}</span></div>`).join('')
     : '<div class="empty-state">Henüz yeterli veri yok</div>';
 
   const aksiyonlar = [];
