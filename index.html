@@ -123,9 +123,44 @@
   .sb-submenu .sb-link i.sb-ic{font-size:12px;}
   .app-main{flex:1 1 auto;min-width:0;margin-left:var(--sidebar-w);padding:0 0 0 clamp(20px,1.8vw,32px);position:relative;}
   @media(max-width:980px){
-    .sidebar{display:none;}
+    .sidebar{
+      transform:translateX(-100%);
+      transition:transform .22s ease;
+    }
+    body.sb-drawer-open .sidebar{transform:translateX(0);box-shadow:8px 0 28px -8px rgba(15,27,51,.45);}
     .app-main{margin-left:0;padding:0;}
   }
+  .sb-drawer-overlay{
+    display:none;position:fixed;inset:0;background:rgba(15,27,51,.45);z-index:49;
+  }
+  body.sb-drawer-open .sb-drawer-overlay{display:block;}
+  @media(min-width:981px){
+    .sb-drawer-overlay{display:none !important;}
+  }
+  /* Mobil hamburger üst çubuğu — sadece rapor açıldıktan sonra (has-sidebar) ve dar ekranda
+     görünür; masaüstünde ve rapor öncesi (upload/login) ekranda hiç render edilmez. */
+  .mobile-header{display:none;}
+  @media(max-width:980px){
+    body.has-sidebar .mobile-header{
+      display:flex;align-items:center;gap:12px;
+      position:sticky;top:0;z-index:40;
+      background:var(--navy);border-bottom:2px solid var(--accent);
+      padding:calc(12px + env(safe-area-inset-top)) 14px 12px;
+      margin:0 -12px 16px;
+    }
+    body.has-sidebar .topbar{display:none;}
+  }
+  .mobile-header-burger{
+    width:38px;height:38px;border-radius:9px;flex-shrink:0;
+    border:1px solid rgba(255,255,255,0.22);background:transparent;color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;
+  }
+  .mobile-header-burger:active{transform:scale(.94);}
+  .mobile-header-title{
+    font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:14.5px;color:#fff;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;
+  }
+  .mobile-header-title span{color:#F0DCA6;}
   /* Masaüstü sidebar'da "Sell Out Raporu" linki gizlendi — DOM'dan kaldırılmadı (id/JS
      referansları ve dropdown senkronizasyonu bozulmasın diye), sadece görünürlüğü kapatıldı.
      Mobil tabbar'daki eşdeğeri (tabbtn-sellOut) bu kuraldan etkilenmez, aynen görünür kalır. */
@@ -853,10 +888,13 @@
   }
   .tab-dropdown-menu .dropdown-item:hover{opacity:1;background:var(--navy-soft);}
   .tab-dropdown-menu .dropdown-item.active{opacity:1;background:var(--navy-soft);color:var(--navy);font-weight:800;}
-  @media(min-width:981px){
-    body.has-sidebar .tabbar,
-    body.has-sidebar .quick-access-bar{display:none;}
-  }
+  body.has-sidebar .tabbar,
+  body.has-sidebar .quick-access-bar{display:none;}
+  /* Mobilde navigasyon tamamen sidebar drawer üzerinden yapılıyor — bu yüzden dropdown
+     menüler de (Cari Detay/Dağıtım/Finansal Analiz açılır listeleri) rapor açıkken hiç
+     açılamaz hale getirildi (JS zaten TAB_DROPDOWNS ile bunlara referans veriyor, DOM'dan
+     kaldırmak yerine sadece görünürlüğü kapatılıyor ki referanslar kırılmasın). */
+  body.has-sidebar .tab-dropdown-menu{display:none !important;}
 
   .info-box{background:var(--navy-soft);border:1px solid var(--line);border-radius:12px;margin-bottom:16px;overflow:hidden;}
   .info-box summary{cursor:pointer;list-style:none;padding:12px 15px;font-size:12.8px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:8px;user-select:none;}
@@ -1182,6 +1220,12 @@
     font-size:12.5px;font-weight:600;color:var(--ink-soft);white-space:nowrap;
   }
   .app-date-chip i{color:var(--accent);font-size:12px;}
+  @media(max-width:980px){
+    /* Marka bilgisi mobilde .mobile-header'da zaten gösteriliyor — burada tekrar etmesin,
+       sadece durum/aksiyon şeridi (senkron/yükle/çıkış/tarih) kalsın. */
+    .app-header-brand{display:none;}
+    .app-header{justify-content:flex-end;padding-top:10px;}
+  }
   @media(max-width:760px){
     .app-header{position:static;flex-direction:column;align-items:flex-start;}
     .app-topbar-actions{justify-content:flex-start;width:100%;}
@@ -1525,7 +1569,14 @@
       </div>
     </nav>
 
+    <div class="sb-drawer-overlay" id="sbDrawerOverlay"></div>
+
     <div class="app-main">
+
+    <div class="mobile-header">
+      <button type="button" class="mobile-header-burger" id="mobileHamburgerBtn" aria-label="Menüyü aç" aria-expanded="false" aria-controls="appSidebar"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
+      <div class="mobile-header-title" translate="no">AKGÜN <span>MEŞRUBAT GIDA</span></div>
+    </div>
 
     <div class="app-header">
       <div class="app-header-brand">
@@ -5771,7 +5822,32 @@ function setActiveView(view){
 }
 
 document.querySelectorAll('.sb-nav-link[data-view]').forEach(btn=>{
-  btn.addEventListener('click', ()=> setActiveView(btn.getAttribute('data-view')));
+  btn.addEventListener('click', ()=>{
+    setActiveView(btn.getAttribute('data-view'));
+    closeSidebarDrawer();
+  });
+});
+
+// ---- Mobil hamburger menü (sidebar'ı kayan panel/drawer olarak aç-kapat) ----
+function openSidebarDrawer(){
+  document.body.classList.add('sb-drawer-open');
+  document.getElementById('mobileHamburgerBtn')?.setAttribute('aria-expanded','true');
+}
+function closeSidebarDrawer(){
+  document.body.classList.remove('sb-drawer-open');
+  document.getElementById('mobileHamburgerBtn')?.setAttribute('aria-expanded','false');
+}
+document.getElementById('mobileHamburgerBtn')?.addEventListener('click', ()=>{
+  if(document.body.classList.contains('sb-drawer-open')) closeSidebarDrawer(); else openSidebarDrawer();
+});
+document.getElementById('sbDrawerOverlay')?.addEventListener('click', closeSidebarDrawer);
+document.addEventListener('keydown', (e)=>{
+  if(e.key==='Escape') closeSidebarDrawer();
+});
+// Ekran mobil eşiğin (980px) üzerine büyürse (ör. tablet döndürme/pencere genişletme) drawer
+// state'i temizlensin — masaüstü görünümde sidebar zaten her zaman açık/sabit olduğundan.
+window.addEventListener('resize', ()=>{
+  if(window.innerWidth > 980) closeSidebarDrawer();
 });
 
 document.querySelectorAll('.tab-btn').forEach(btn=>{
