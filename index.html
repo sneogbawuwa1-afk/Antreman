@@ -13,7 +13,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Outfit:wght@500;600;700;800&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
   :root{
     --bg:#EEF1F6;
@@ -21,9 +22,9 @@
     --ink:#152238;
     --ink-soft:#54617A;
     --ink-faint:#71809A;
-    --accent:#1B5FAE;
-    --accent-deep:#123E73;
-    --accent-soft:#DCE8F7;
+    --accent:#8A6D1F;
+    --accent-deep:#63500F;
+    --accent-soft:#F1E6C9;
     --line:#DBE2EC;
     --line-soft:#EEF2F7;
     --danger:#B23A2C;
@@ -38,6 +39,9 @@
     --shadow: 0 1px 2px rgba(19,34,63,0.05), 0 8px 24px -12px rgba(19,34,63,0.14);
     /* Sayfanın yatay iç boşluğu — topbar'ın kenara taşması (bleed) da bununla eşleşir. */
     --page-pad: clamp(20px, 1.8vw, 36px);
+    /* Rakamsal değerler (tutar, adet, oran) için ayrı bir yazı tipi — başlıklardaki
+       Space Grotesk ile karışmasın diye tek noktadan yönetilen bir değişken. */
+    --font-figures: 'Outfit', system-ui, sans-serif;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -75,16 +79,17 @@
     position:sticky;top:0;z-index:40;
     margin:0 calc(-1 * var(--page-pad)) 24px;
     padding:calc(18px + env(safe-area-inset-top)) var(--page-pad) 18px;
-    background:linear-gradient(135deg,var(--navy) 0%, var(--accent) 100%);
+    background:var(--navy);
+    border-bottom:2px solid var(--accent);
     box-shadow:0 6px 18px -8px rgba(15,27,51,0.35);
     contain:layout style;
   }
   .brand{display:flex;align-items:center;gap:16px;min-width:0;}
   .brand-mark{
     width:48px;height:48px;border-radius:12px;
-    background:rgba(255,255,255,0.14);
+    background:transparent;border:1px solid rgba(201,150,44,0.5);
     display:flex;align-items:center;justify-content:center;
-    color:#8FD1FF;font-family:'Space Grotesk';font-weight:800;font-size:16px;
+    color:#D9B25C;font-family:'Space Grotesk';font-weight:800;font-size:16px;
     flex-shrink:0;
   }
   .brand h1{font-size:21px;margin:0;font-weight:700;color:#fff;letter-spacing:-.01em;line-height:1.25;}
@@ -119,14 +124,20 @@
   .pill.warn{background:var(--warn-soft);color:var(--warn);}
   .pill.danger{background:var(--danger-soft);color:var(--danger);}
   .pill.navy{background:var(--navy-soft);color:var(--navy);}
+  /* #statusPill her zaman lacivert topbar üzerinde durur — paylaşılan .pill sınıfının
+     beyaz zemin üzerindeki durum rozetlerini (tablolardaki ok/warn/danger etiketleri)
+     bozmadan, yalnızca bu örneği altın çerçeveli/şeffaf hale getiriyoruz. */
+  #statusPill{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.25);color:rgba(255,255,255,.85);gap:7px;}
+  #statusPill.ok{background:rgba(201,150,44,0.14);border-color:var(--accent);color:#F0DCA6;}
   .icon-btn{
-    width:42px;height:42px;line-height:42px;text-align:center;flex-shrink:0;
-    border:none;border-radius:50%;background:var(--surface);box-shadow:var(--shadow);
-    font-size:16px;cursor:pointer;transition:transform .1s ease,box-shadow .15s ease;padding:0;
+    width:38px;height:38px;line-height:36px;text-align:center;flex-shrink:0;
+    border:1px solid rgba(255,255,255,0.22);border-radius:9px;background:transparent;
+    color:#fff;font-size:15px;cursor:pointer;transition:background .15s ease,border-color .15s ease,transform .1s ease;padding:0;
   }
-  .icon-btn:hover{box-shadow:0 4px 12px -4px rgba(19,34,63,0.28);}
+  .icon-btn:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.4);}
   .icon-btn:active{transform:scale(.93);}
-  .icon-btn.danger{background:var(--danger-soft);color:var(--danger);}
+  .icon-btn.danger{border-color:var(--accent);background:rgba(201,150,44,0.12);}
+  .icon-btn.danger:hover{background:rgba(201,150,44,0.22);}
   .btn{
     border:1px solid var(--line);background:var(--surface);color:var(--ink);
     padding:9px 15px;border-radius:9px;font-size:13px;font-weight:600;
@@ -139,11 +150,12 @@
   .btn:disabled{opacity:.4;cursor:not-allowed;}
   .btn:disabled:active{transform:none;}
   .btn.small{padding:6px 11px;font-size:12px;}
-  .quick-access-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-4px 0 16px;}
-  .quick-access-label{font-size:11px;font-weight:700;color:var(--ink-faint);letter-spacing:.03em;margin-right:2px;}
-  .quick-access-btn{background:var(--surface);border:1px solid var(--line);color:var(--ink-soft);padding:6px 13px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;transition:border-color .15s ease,color .15s ease,background .15s ease;}
-  .quick-access-btn:hover{border-color:var(--accent);color:var(--accent-deep);}
-  .quick-access-btn.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+  .quick-access-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:-4px 0 16px;}
+  .quick-access-label{font-size:12.5px;font-weight:700;color:var(--ink-faint);letter-spacing:.03em;margin-right:2px;}
+  .tab-btn.quick-access-btn{background:var(--surface);border:1px solid var(--line);color:var(--ink-soft);padding:9px 18px;border-radius:100px;font-size:13.5px;font-weight:600;cursor:pointer;transition:border-color .15s ease,color .15s ease,background .15s ease;}
+  .tab-btn.quick-access-btn .fa-solid{font-size:15px;}
+  .tab-btn.quick-access-btn:hover{border-color:var(--accent);color:var(--accent-deep);}
+  .tab-btn.quick-access-btn.active{background:var(--navy);border-color:var(--navy);color:#fff;}
 
   .upload-card{
     background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
@@ -195,38 +207,52 @@
   .kpi-hero-wrap{margin-bottom:12px;}
   .kpi-hero-card{
     position:relative;overflow:hidden;border-radius:16px;padding:22px 22px;
-    background:linear-gradient(135deg,var(--navy) 0%, var(--accent-deep) 55%, var(--accent) 130%);
+    background:var(--navy);
     color:#fff;box-shadow:var(--shadow);
   }
   .kpi-hero-card::before{
-    content:'';position:absolute;top:0;left:0;right:0;height:3px;pointer-events:none;
-    background:linear-gradient(90deg, #8FD1FF 0%, rgba(143,209,255,0) 100%);
+    content:'';position:absolute;top:0;left:0;right:0;height:2px;pointer-events:none;
+    background:var(--accent);
   }
   .kpi-hero-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;gap:10px;flex-wrap:wrap;}
-  .kpi-hero-label{font-size:11.5px;font-weight:700;letter-spacing:.06em;color:rgba(255,255,255,.75);}
+  .kpi-hero-label{font-size:11.5px;font-weight:700;letter-spacing:.06em;color:var(--accent-soft);display:inline-flex;align-items:center;gap:7px;}
   .kpi-hero-chip{background:rgba(255,255,255,.16);border-radius:100px;padding:4px 12px;font-size:11px;font-weight:700;white-space:nowrap;}
-  .kpi-hero-value{font-family:'Space Grotesk';font-size:32px;font-weight:700;margin-top:9px;position:relative;line-height:1.15;}
+  .kpi-hero-value{font-family:var(--font-figures);font-size:32px;font-weight:700;margin-top:9px;position:relative;line-height:1.15;}
+  .kpi-hero-value::after{
+    content:'';display:block;width:180px;max-width:60%;height:6px;margin-top:11px;
+    background-image:radial-gradient(circle,rgba(201,150,44,0.65) 1.5px,transparent 1.6px);
+    background-size:9px 100%;background-repeat:repeat-x;
+  }
   .kpi-hero-sub{font-size:11.5px;color:rgba(255,255,255,.65);margin-top:4px;position:relative;}
   @media(max-width:480px){.kpi-hero-value{font-size:25px;}}
 
   .kpi-row-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:22px;}
-  .kpi-row-card{background:var(--surface);border-radius:14px;padding:13px 14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:11px;transition:transform .15s ease;}
+  .kpi-row-card{
+    background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--ink-faint);
+    border-radius:0 10px 10px 0;padding:13px 14px;display:flex;flex-direction:column;
+    transition:transform .15s ease;
+  }
   .kpi-row-card:hover{transform:translateY(-1px);}
-  .kpi-row-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background:var(--line-soft);color:var(--ink-soft);}
-  .kpi-row-icon.accent{background:var(--navy-soft);color:var(--navy);}
-  .kpi-row-icon.danger{background:var(--danger-soft);color:var(--danger);}
-  .kpi-row-icon.success{background:var(--success-soft);color:var(--success);}
-  .kpi-row-icon.warn{background:var(--warn-soft);color:var(--warn);}
+  .kpi-row-card.cls-neutral{border-left-color:#6B7A99;}
+  .kpi-row-card.cls-warn{border-left-color:var(--warn);}
+  .kpi-row-card.cls-danger{border-left-color:var(--danger);}
+  .kpi-row-card.cls-success{border-left-color:var(--success);}
+  .kpi-row-card.cls-accent{border-left-color:var(--accent);}
+  .kpi-row-top-line{display:flex;align-items:center;gap:6px;}
+  .kpi-row-icon{font-size:13px;color:var(--ink-faint);display:inline-flex;flex-shrink:0;}
+  .kpi-row-card.cls-warn .kpi-row-icon{color:var(--warn);}
+  .kpi-row-card.cls-danger .kpi-row-icon{color:var(--danger);}
+  .kpi-row-card.cls-success .kpi-row-icon{color:var(--success);}
+  .kpi-row-card.cls-accent .kpi-row-icon{color:var(--accent);}
   .kpi-row-text{min-width:0;}
-  .kpi-row-text .kpi-row-lbl{font-size:10.5px;color:var(--ink-soft);font-weight:700;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .kpi-row-text .kpi-row-val{font-family:'Space Grotesk';font-size:15.5px;font-weight:700;margin-top:2px;line-height:1.15;color:var(--ink);}
-  .kpi-row-text .kpi-row-extra{font-size:10px;color:var(--ink-faint);margin-top:2px;line-height:1.3;}
-  .kpi-row-top-line{display:flex;align-items:center;gap:11px;}
-  .kpi-row-card.has-chips{flex-direction:column;align-items:stretch;}
+  .kpi-row-text .kpi-row-lbl{font-size:10px;color:var(--ink-faint);font-weight:700;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .kpi-row-text .kpi-row-val{font-family:var(--font-figures);font-size:19px;font-weight:700;margin-top:6px;line-height:1.15;color:var(--ink);}
+  .kpi-row-text .kpi-row-extra{font-size:10.5px;color:var(--ink-faint);margin-top:3px;line-height:1.3;}
+  .kpi-row-card.has-chips{align-items:stretch;}
   .kpi-row-chips{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
   .kpi-row-chip{flex:1;min-width:118px;border-radius:9px;padding:6px 10px;}
   .kpi-row-chip-lbl{font-size:10.5px;font-weight:700;opacity:.85;}
-  .kpi-row-chip-val{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;margin-top:1px;}
+  .kpi-row-chip-val{font-family:var(--font-figures);font-size:14px;font-weight:700;margin-top:1px;}
   .trend-arrow{font-size:11px;font-weight:700;margin-left:6px;white-space:nowrap;}
 
   .panel{
@@ -296,9 +322,9 @@
   }
   .verim-pill{
     display:inline-block;padding:3px 10px;border-radius:100px;border:1.5px solid currentColor;
-    font-weight:700;font-size:12px;font-family:'Space Grotesk';white-space:nowrap;
+    font-weight:700;font-size:12px;font-family:var(--font-figures);white-space:nowrap;
   }
-  .num-strong{font-weight:700;font-family:'Space Grotesk';}
+  .num-strong{font-weight:700;font-family:var(--font-figures);}
   .neg{color:var(--danger);}
   .zero{color:var(--ink-faint);}
 
@@ -335,7 +361,7 @@
   .yukleme-head-btn:hover{background:var(--accent-soft);}
   .yukleme-toplam-top{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
   .yukleme-toplam-label{font-size:11px;font-weight:700;color:var(--ink-faint);letter-spacing:.04em;}
-  .yukleme-toplam-val{font-family:'Space Grotesk';font-size:30px;font-weight:800;color:var(--navy);margin-top:2px;}
+  .yukleme-toplam-val{font-family:var(--font-figures);font-size:30px;font-weight:800;color:var(--navy);margin-top:2px;}
   .yukleme-toplam-lt-chip{background:var(--accent-soft);color:var(--accent-deep);font-weight:700;font-size:12.5px;padding:8px 14px;border-radius:10px;white-space:nowrap;}
   .yukleme-toplam-bar{display:flex;height:34px;border-radius:9px;overflow:hidden;margin-bottom:14px;}
   .yukleme-toplam-bar span{display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;}
@@ -353,7 +379,7 @@
   .cust-chevron{color:var(--ink-faint);font-size:16px;flex-shrink:0;margin-top:2px;}
   .cust-kalan-row{display:flex;justify-content:space-between;align-items:baseline;}
   .cust-kalan-label{font-size:10px;color:var(--ink-soft);font-weight:700;letter-spacing:.03em;}
-  .cust-kalan-val{font-family:'Space Grotesk';font-size:19px;font-weight:700;color:var(--ink);}
+  .cust-kalan-val{font-family:var(--font-figures);font-size:19px;font-weight:700;color:var(--ink);}
   .cust-card .risk-bar{width:100%;height:7px;border-radius:5px;margin-top:8px;margin-bottom:13px;}
   .cust-stat-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
   @media(min-width:820px){.cust-stat-strip{grid-template-columns:repeat(5,minmax(0,1fr));}}
@@ -367,14 +393,14 @@
   }
   .cust-stat-chip{background:var(--bg);border-radius:9px;padding:7px 6px;text-align:center;}
   .cust-stat-chip .l{font-size:9px;color:var(--ink-faint);font-weight:700;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .cust-stat-chip .v{font-family:'Space Grotesk';font-size:12px;font-weight:700;margin-top:3px;}
+  .cust-stat-chip .v{font-family:var(--font-figures);font-size:12px;font-weight:700;margin-top:3px;}
   .cust-expanded{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);cursor:default;}
   .cust-expanded h4{margin:0 0 8px;font-size:12px;font-weight:700;color:var(--ink-soft);letter-spacing:.03em;}
   .cust-secondary-stats{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);margin-bottom:14px;}
-  .cust-secondary-stats b{font-family:'Space Grotesk';color:var(--ink);}
+  .cust-secondary-stats b{font-family:var(--font-figures);color:var(--ink);}
   .cust-expanded-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
   .cust-expanded-risk{font-size:12px;color:var(--ink-soft);}
-  .cust-expanded-risk b{font-family:'Space Grotesk';color:var(--ink);}
+  .cust-expanded-risk b{font-family:var(--font-figures);color:var(--ink);}
 
   .expand-row td{padding:0;border-bottom:1px solid var(--line-soft);}
   .expand-inner{padding:14px 18px 18px 44px;background:#F7F9FC;}
@@ -438,7 +464,7 @@
   @media(min-width:761px){
     .modal{zoom:1.2;}
   }
-  .modal .panel-head{background:linear-gradient(180deg,var(--surface),#FBFCFE);position:relative;padding-right:52px;}
+  .modal .panel-head{background:linear-gradient(180deg,var(--surface),#FBF9F3);position:relative;padding-right:52px;border-bottom:2px solid var(--accent-soft);}
   .modal .panel-head h2{color:var(--ink);}
   .modal .count{color:var(--ink-soft);font-weight:700;}
   .modal-sub{font-size:11.5px;color:var(--ink-soft);padding:12px 20px 0;}
@@ -464,7 +490,7 @@
   #dikkatTable tbody tr:hover{background:var(--danger-soft);}
 
   /* --- .modal-head-navy: düz lacivert başlık (Seçenek A) — Detay popup'larında ortak kullanım --- */
-  .panel-head.modal-head-navy{background:var(--navy);padding:16px 52px 16px 20px;position:relative;}
+  .panel-head.modal-head-navy{background:var(--navy);padding:16px 52px 16px 20px;position:relative;border-bottom:2px solid var(--accent);}
   .modal-head-navy-top{display:flex;align-items:center;gap:11px;}
   .modal-head-navy-avatar{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.14);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;font-size:13px;flex-shrink:0;}
   .modal-head-navy-name{font-family:'Space Grotesk';font-weight:700;font-size:15px;color:#fff;line-height:1.3;}
@@ -501,7 +527,8 @@
 
   /* --- .senet-modal: dedicated navy theme modifier for the Senet Yazdır modal --- */
   .senet-modal .panel-head{
-    background:linear-gradient(135deg,var(--navy) 0%, #2C3F63 100%);
+    background:var(--navy);
+    border-bottom:2px solid var(--accent);
     padding:18px 52px 18px 20px;
   }
   .senet-modal-head-inner{display:flex;align-items:center;gap:13px;}
@@ -511,7 +538,7 @@
   }
   .senet-modal .panel-head h2{color:#fff;font-size:16.5px;margin:0;}
   .senet-modal-sub{font-size:11.5px;color:rgba(255,255,255,0.78);margin-top:3px;font-weight:500;}
-  .senet-modal-kalanborc{color:#fff;font-weight:700;font-family:'Space Grotesk';font-size:12.5px;margin-top:5px;}
+  .senet-modal-kalanborc{color:#fff;font-weight:700;font-family:var(--font-figures);font-size:12.5px;margin-top:5px;}
   .senet-modal .modal-close{background:rgba(255,255,255,0.14);color:#fff;box-shadow:none;}
   .senet-modal .modal-close:hover{background:rgba(255,255,255,0.28);color:#fff;}
   .senet-modal-body{padding:20px 22px 20px;}
@@ -529,17 +556,17 @@
   .senet-tutar-tipi-opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft);}
   .senet-tutar-tipi-opt input[type="radio"]{width:16px;height:16px;flex-shrink:0;accent-color:var(--accent);}
   .senet-tutar-tipi-opt span{font-size:13px;color:var(--ink);display:flex;flex:1;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;}
-  .senet-tutar-tipi-opt span b{font-family:'Space Grotesk';font-weight:700;color:var(--ink);}
+  .senet-tutar-tipi-opt span b{font-family:var(--font-figures);font-weight:700;color:var(--ink);}
   .senet-manuel-tutar-row{margin-top:10px;padding-left:2px;}
   .senet-manuel-tutar-row label{font-size:11px;color:var(--ink-soft);font-weight:700;letter-spacing:.03em;display:block;margin-bottom:6px;}
   .senet-manuel-tutar-row input{
     width:100%;max-width:220px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;
-    font-size:14px;font-family:'Space Grotesk';font-weight:700;background:var(--surface);color:var(--ink);
+    font-size:14px;font-family:var(--font-figures);font-weight:700;background:var(--surface);color:var(--ink);
   }
   .senet-manuel-tutar-row input:focus{outline:2px solid var(--accent-soft);border-color:var(--accent);}
   .senet-adet-input{
     width:78px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;
-    font-size:14.5px;font-family:'Space Grotesk';font-weight:700;text-align:center;
+    font-size:14.5px;font-family:var(--font-figures);font-weight:700;text-align:center;
     background:var(--bg);color:var(--ink);
   }
   .senet-adet-input:focus{outline:2px solid var(--accent-soft);border-color:var(--accent);}
@@ -557,7 +584,7 @@
   }
   .senet-vade-card-info{flex:1;min-width:0;}
   .senet-vade-card-label{font-size:10.5px;color:var(--ink-soft);font-weight:700;letter-spacing:.04em;}
-  .senet-vade-card-tutar{font-family:'Space Grotesk';font-weight:700;font-size:15.5px;color:var(--ink);margin-top:2px;}
+  .senet-vade-card-tutar{font-family:var(--font-figures);font-weight:700;font-size:15.5px;color:var(--ink);margin-top:2px;}
   .senet-vade-card-date{display:flex;flex-direction:column;gap:4px;}
   .senet-vade-card-date label{font-size:10px;color:var(--ink-faint);font-weight:700;letter-spacing:.03em;}
   .senet-vade-card-date input{
@@ -593,7 +620,7 @@
   .aging-label{width:110px;font-size:12px;font-weight:600;color:var(--ink-soft);flex-shrink:0;}
   .aging-track{flex:1;height:16px;background:var(--line-soft);border-radius:5px;overflow:hidden;}
   .aging-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-deep));border-radius:5px 0 0 5px;}
-  .aging-value{width:110px;text-align:right;font-size:12.5px;font-weight:700;font-family:'Space Grotesk';flex-shrink:0;}
+  .aging-value{width:110px;text-align:right;font-size:12.5px;font-weight:700;font-family:var(--font-figures);flex-shrink:0;}
 
   .rep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
   .rep-card{
@@ -608,10 +635,10 @@
   .karne-card{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:15px;box-shadow:var(--shadow);}
   .karne-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
   .karne-name{font-weight:700;font-size:14px;}
-  .karne-rank{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:800;color:var(--accent-deep);}
+  .karne-rank{font-family:var(--font-figures);font-size:19px;font-weight:800;color:var(--accent-deep);}
   .karne-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
   .karne-lbl{font-size:10px;color:var(--ink-soft);font-weight:700;letter-spacing:.02em;}
-  .karne-val{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;margin-top:2px;}
+  .karne-val{font-family:var(--font-figures);font-size:14px;font-weight:700;margin-top:2px;}
   .karne-val .fine{font-family:'Inter',sans-serif;font-size:10.5px;font-weight:600;color:var(--ink-faint);margin-top:3px;}
   .karne-bar-track{height:6px;background:var(--line-soft);border-radius:4px;overflow:hidden;margin-top:12px;}
   .karne-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-deep));border-radius:4px;}
@@ -622,13 +649,13 @@
   .bar-label{width:170px;font-size:12px;font-weight:600;color:var(--ink);flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .bar-track{flex:1;height:16px;background:var(--line-soft);border-radius:5px;overflow:hidden;}
   .bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-deep));border-radius:5px 0 0 5px;}
-  .bar-value{width:170px;text-align:right;font-size:12.5px;font-weight:700;font-family:'Space Grotesk',sans-serif;flex-shrink:0;}
+  .bar-value{width:170px;text-align:right;font-size:12.5px;font-weight:700;font-family:var(--font-figures);flex-shrink:0;}
   .bar-value small{font-family:'Inter',sans-serif;font-weight:600;color:var(--ink-faint);margin-left:4px;}
   .channel-bar{display:flex;height:36px;border-radius:9px;overflow:hidden;margin-bottom:6px;}
   .channel-bar span{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;}
   .share-track{width:90px;height:8px;background:var(--line-soft);border-radius:5px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:8px;}
   .share-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-deep));border-radius:5px;}
-  .fkns-oran{font-family:'Space Grotesk',sans-serif;font-weight:700;}
+  .fkns-oran{font-family:var(--font-figures);font-weight:700;}
   .hedef-edit-row{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:13px;padding-top:12px;border-top:1px dashed var(--line);}
   .hedef-field{flex:1;min-width:84px;}
   .hedef-field label{display:block;font-size:9.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.02em;margin-bottom:3px;}
@@ -673,14 +700,14 @@
   .ssm-kanal-row:last-of-type{margin-bottom:0;}
   .ssm-kanal-top{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;margin-bottom:5px;}
   .ssm-kanal-top .lbl{font-weight:700;color:var(--ink-soft);font-size:10px;letter-spacing:.02em;white-space:nowrap;}
-  .ssm-kanal-top .val{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--ink);text-align:right;}
+  .ssm-kanal-top .val{font-family:var(--font-figures);font-weight:700;color:var(--ink);text-align:right;}
   .ssm-kanal-top .val small{font-family:'Inter',sans-serif;font-weight:600;color:var(--ink-faint);}
   .ssm-kanal-track{height:8px;background:var(--line-soft);border-radius:5px;overflow:hidden;}
   .ssm-kanal-fill{height:100%;border-radius:5px;}
   .ssm-kanal-kalan{font-size:10px;color:var(--ink-faint);font-weight:600;text-align:right;margin-top:4px;}
   .ssm-karne-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);}
   .ssm-karne-foot .g-lbl{font-size:10px;color:var(--ink-soft);font-weight:700;letter-spacing:.02em;}
-  .ssm-karne-foot .g-val{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;}
+  .ssm-karne-foot .g-val{font-family:var(--font-figures);font-size:15px;font-weight:700;}
   .ssm-karne-card{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:14px 15px;}
   /* Sell Out temsilci kartındaki stat-chip etiketleri kısa da olsa 5 dar kutuya sığmayabiliyor —
      bu kartlarda satır kaydırmaya izin verip kesilmeyi (…) önlüyoruz. */
@@ -693,7 +720,7 @@
   .week-label{width:96px;flex-shrink:0;font-size:12px;font-weight:600;color:var(--ink-soft);}
   .week-track{flex:1;height:16px;background:var(--line-soft);border-radius:5px;overflow:hidden;position:relative;}
   .week-fill{height:100%;border-radius:5px 0 0 5px;background:linear-gradient(90deg,var(--accent),var(--accent-deep));}
-  .week-val{width:118px;text-align:right;flex-shrink:0;font-size:12.5px;font-weight:700;font-family:'Space Grotesk',sans-serif;}
+  .week-val{width:118px;text-align:right;flex-shrink:0;font-size:12.5px;font-weight:700;font-family:var(--font-figures);}
 
   .insight-list{font-size:12.8px;line-height:1.95;}
   .insight-list .ins-row{display:flex;gap:8px;align-items:flex-start;}
@@ -704,8 +731,9 @@
   @media(max-width:820px){.grid2{grid-template-columns:1fr;}}
 
   .tabbar{
-    display:flex;gap:2px;margin-bottom:22px;
-    background:var(--navy-soft);border-radius:100px;padding:5px;
+    display:flex;gap:clamp(22px, 1.8vw, 36px);margin-bottom:24px;
+    background:var(--surface);border-radius:0;padding:0;
+    border-bottom:1px solid var(--line);
     overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
     scroll-snap-type:x proximity;
     position:sticky;top:70px;z-index:30;
@@ -713,13 +741,15 @@
   }
   .tabbar::-webkit-scrollbar{display:none;}
   .tab-btn{
-    border:none;background:transparent;color:var(--navy);opacity:.55;font-family:inherit;
-    font-size:13px;font-weight:700;padding:10px 16px;cursor:pointer;
-    border-radius:100px;white-space:nowrap;flex-shrink:0;scroll-snap-align:start;
-    transition:background .15s ease,opacity .15s ease,box-shadow .15s ease;
+    border:none;border-bottom:2px solid transparent;margin-bottom:-1px;
+    background:transparent;color:var(--ink-faint);font-family:inherit;
+    font-size:16px;font-weight:600;padding:18px 2px;cursor:pointer;
+    border-radius:0;white-space:nowrap;flex-shrink:0;scroll-snap-align:start;
+    transition:color .15s ease,border-color .15s ease;
   }
-  .tab-btn:hover{opacity:.85;}
-  .tab-btn.active{opacity:1;background:#fff;box-shadow:0 2px 8px -2px rgba(19,34,63,.3);}
+  .tab-btn:hover{color:var(--ink);}
+  .tab-btn.active{color:var(--navy);font-weight:700;border-bottom-color:var(--accent);}
+  .tab-btn .fa-solid{font-size:18px;margin-right:8px;vertical-align:-3px;}
 
   .tab-dropdown-btn{display:inline-flex;align-items:center;gap:5px;}
   .tab-dropdown-btn .dd-arrow{font-size:10px;transition:transform .15s ease;display:inline-block;}
@@ -733,7 +763,7 @@
   .tab-dropdown-menu.open{display:flex;}
   .tab-dropdown-menu .dropdown-item{
     text-align:left;opacity:.72;border-radius:9px;padding:10px 12px;width:100%;
-    box-shadow:none;background:transparent;
+    box-shadow:none;background:transparent;border-bottom:none;margin-bottom:0;
   }
   .tab-dropdown-menu .dropdown-item:hover{opacity:1;background:var(--navy-soft);}
   .tab-dropdown-menu .dropdown-item.active{opacity:1;background:var(--navy-soft);color:var(--navy);font-weight:800;}
@@ -754,10 +784,15 @@
   .info-box-body h4:first-child{margin-top:0;}
   @media(max-width:760px){.info-box-body{padding-left:16px;}}
 
-  .storage-note{font-size:11.5px;font-weight:600;color:var(--success);display:inline-flex;align-items:center;gap:6px;background:var(--success-soft);padding:7px 14px;border-radius:100px;}
+  .storage-note{
+    font-size:12px;font-weight:600;color:#7A6224;display:flex;align-items:center;gap:8px;
+    background:var(--accent-soft);border:1px solid var(--accent);
+    padding:10px 16px;border-radius:10px;width:100%;box-sizing:border-box;
+  }
+  .storage-note .fa-solid{font-size:14px;flex-shrink:0;}
 
   .totals-row td{border-top:1.5px solid var(--line);background:var(--bg);font-weight:700;}
-  .totals-row td.num .num-strong{font-family:'Space Grotesk';}
+  .totals-row td.num .num-strong{font-family:var(--font-figures);}
 
   .empty-state{text-align:center;padding:40px 20px;color:var(--ink-faint);font-size:13px;}
   footer{text-align:center;color:var(--ink-faint);font-size:11.5px;margin-top:30px;}
@@ -788,8 +823,8 @@
     .dropzone .dz-sub{font-size:11.5px;}
     .file-checklist{grid-template-columns:1fr;margin-top:16px;}
 
-    .tabbar{top:calc(64px + env(safe-area-inset-top));padding:5px;border-radius:11px;}
-    .tab-btn{white-space:nowrap;padding:11px 14px;font-size:13px;flex-shrink:0;min-height:40px;}
+    .tabbar{top:calc(64px + env(safe-area-inset-top));gap:16px;}
+    .tab-btn{white-space:nowrap;padding:12px 2px;font-size:13px;flex-shrink:0;min-height:40px;}
 
     .panel-head{padding:14px 14px;}
     .panel-body{padding:14px 14px 16px;}
@@ -858,7 +893,7 @@
   .senet-ust{
     display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;
   }
-  .senet-baslik{font-family:'Space Grotesk';font-weight:700;font-size:19px;letter-spacing:.06em;color:#1F2E4A;}
+  .senet-baslik{font-family:'Space Grotesk';font-weight:700;font-size:19px;letter-spacing:.06em;color:#1F2E4A;border-bottom:2px solid var(--accent);padding-bottom:3px;display:inline-block;}
   .senet-alacakli{text-align:right;}
   .senet-alacakli-label{font-size:8.5px;font-weight:700;color:#71809A;letter-spacing:.06em;}
   .senet-alacakli-adi{font-size:11px;font-weight:700;color:#1F2E4A;max-width:260px;line-height:1.3;margin-top:1px;}
@@ -871,10 +906,10 @@
   }
   .senet-ust-tablo td{
     border:1px solid #1F2E4A;padding:8px 8px;text-align:center;
-    font-weight:700;font-size:12.5px;font-family:'Space Grotesk';background:#fff;
+    font-weight:700;font-size:12.5px;font-family:var(--font-figures);background:#fff;
   }
   .senet-ust-tablo td.senet-tutar-hucre{
-    background:#DCE8F7;color:#123E73;font-size:14px;
+    background:var(--accent-soft);color:var(--accent-deep);font-size:14px;
     -webkit-print-color-adjust:exact;print-color-adjust:exact;
   }
   .senet-metin{font-size:11.5px;line-height:1.6;text-align:justify;margin:0 0 14px;color:#20242c;}
@@ -927,7 +962,7 @@
   .htk-inline-stats b{color:var(--ink);font-weight:600;}
   .htk-stat-item{display:flex;flex-direction:column;gap:2px;}
   .htk-stat-item .l{font-size:9.5px;font-weight:700;color:var(--ink-faint);letter-spacing:.03em;text-transform:uppercase;}
-  .htk-stat-item .v{font-family:'Space Grotesk';font-size:13px;font-weight:700;color:var(--ink);}
+  .htk-stat-item .v{font-family:var(--font-figures);font-size:13px;font-weight:700;color:var(--ink);}
   .htk-stat-item .v.zero{color:var(--ink-faint);font-weight:600;}
   .htk-stat-item .v.c-siparis{color:var(--accent-deep);}
   .htk-stat-item .v.c-sevk{color:var(--warn);}
@@ -943,17 +978,18 @@
   .stok-marka-label{width:170px;font-size:12px;font-weight:600;color:var(--ink-soft);flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .stok-marka-track{flex:1;height:9px;background:var(--line-soft);border-radius:5px;overflow:hidden;}
   .stok-marka-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--accent),var(--accent-deep));}
-  .stok-marka-value{width:90px;text-align:right;font-size:12px;font-weight:700;font-family:'Space Grotesk';flex-shrink:0;}
+  .stok-marka-value{width:90px;text-align:right;font-size:12px;font-weight:700;font-family:var(--font-figures);flex-shrink:0;}
 
   .stok-ozet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;padding:0;margin-bottom:20px;}
   .stok-toplam-banner{
     display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
-    background:linear-gradient(135deg,var(--navy) 0%, var(--accent) 100%);
+    background:var(--navy);
+    border-bottom:2px solid var(--accent);
     border-radius:14px;padding:22px 26px;margin-bottom:18px;color:#fff;
     box-shadow:0 8px 20px -10px rgba(19,34,63,0.45);
   }
   .stok-toplam-banner-label{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:700;color:rgba(255,255,255,.78);letter-spacing:.02em;margin-bottom:8px;}
-  .stok-toplam-banner-val{font-family:'Space Grotesk';font-weight:800;font-size:32px;letter-spacing:-.01em;}
+  .stok-toplam-banner-val{font-family:var(--font-figures);font-weight:800;font-size:32px;letter-spacing:-.01em;}
   .stok-toplam-banner-pill{
     flex-shrink:0;background:rgba(255,255,255,.16);color:#fff;font-size:12px;font-weight:700;
     padding:8px 16px;border-radius:100px;white-space:nowrap;
@@ -977,7 +1013,7 @@
     background:var(--ozet-renk-soft,var(--accent-soft));color:var(--ozet-renk,var(--accent-deep));white-space:nowrap;
   }
   .stok-ozet-values{display:flex;align-items:baseline;gap:8px;}
-  .stok-ozet-lt{font-family:'Space Grotesk';font-weight:800;font-size:21px;color:var(--ink);letter-spacing:-.01em;}
+  .stok-ozet-lt{font-family:var(--font-figures);font-weight:800;font-size:21px;color:var(--ink);letter-spacing:-.01em;}
   .stok-ozet-mk{font-size:12.5px;color:var(--ink-faint);font-weight:600;}
   .stok-ozet-bar-track{height:7px;border-radius:5px;background:var(--line-soft);overflow:hidden;}
   .stok-ozet-bar-fill{height:100%;border-radius:5px;background:var(--ozet-renk,var(--accent));}
@@ -1046,14 +1082,14 @@
       </div>
     </div>
     <div class="topbar-actions">
-      <span class="pill" id="statusPill">Veri bekleniyor</span>
-      <button class="icon-btn" id="syncBtn" style="display:none;" title="Diğer Cihazdan Güncelle" aria-label="Diğer Cihazdan Güncelle">🔄</button>
-      <button class="icon-btn" id="resetBtn" style="display:none;" title="Yeni veri yükle" aria-label="Yeni veri yükle">⬆️</button>
-      <button class="icon-btn danger" id="authLogoutBtn" style="display:none;" title="Çıkış Yap" aria-label="Çıkış Yap">🔒</button>
+      <span class="pill" id="statusPill"><i class="fa-solid fa-cloud" aria-hidden="true"></i><span id="statusPillMsg">Veri bekleniyor</span></span>
+      <button class="icon-btn" id="syncBtn" style="display:none;" title="Diğer Cihazdan Güncelle" aria-label="Diğer Cihazdan Güncelle"><i class="fa-solid fa-arrow-rotate-right" aria-hidden="true"></i></button>
+      <button class="icon-btn" id="resetBtn" style="display:none;" title="Yeni veri yükle" aria-label="Yeni veri yükle"><i class="fa-solid fa-upload" aria-hidden="true"></i></button>
+      <button class="icon-btn danger" id="authLogoutBtn" style="display:none;" title="Çıkış Yap" aria-label="Çıkış Yap"><i class="fa-solid fa-lock" aria-hidden="true"></i></button>
     </div>
   </div>
   <div id="storageNote" style="display:none;margin:0 0 20px;">
-    <span class="storage-note" id="storageNoteText">💾 Veriler bu cihazda saklanıyor — sayfayı kapatıp tekrar açsanız da rapor kaybolmaz.</span>
+    <span class="storage-note" id="storageNoteText"><i class="fa-solid fa-cloud" aria-hidden="true"></i><span id="storageNoteMsg">Veriler bu cihazda saklanıyor — sayfayı kapatıp tekrar açsanız da rapor kaybolmaz.</span></span>
   </div>
 
   <div class="upload-card" id="uploadCard">
@@ -1181,48 +1217,48 @@
   <div id="reportSection">
 
     <div class="tabbar" id="tabBar" role="tablist" aria-label="Rapor sekmeleri">
-      <button class="tab-btn tab-dropdown-btn active" id="tabbtn-cariDetay" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="cariDetayDropdownMenu">📇 Cari Detay <span class="dd-arrow">▾</span></button>
-      <button class="tab-btn tab-dropdown-btn" id="tabbtn-dagitim" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="dagitimDropdownMenu">🚚 Dağıtım <span class="dd-arrow">▾</span></button>
-      <button class="tab-btn" id="tabbtn-bayiHakedis" data-view="bayiHakedis" type="button" role="tab" aria-selected="false" aria-controls="bayiHakedisView">🏷️ Bayi Hakediş</button>
-      <button class="tab-btn" id="tabbtn-sellOut" data-view="sellOut" type="button" role="tab" aria-selected="false" aria-controls="sellOutView">📈 Sell Out Raporu</button>
-      <button class="tab-btn tab-dropdown-btn" id="tabbtn-finansalAnaliz" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="finansalDropdownMenu">📊 Finansal Analiz <span class="dd-arrow">▾</span></button>
+      <button class="tab-btn tab-dropdown-btn active" id="tabbtn-cariDetay" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="cariDetayDropdownMenu"><i class="fa-solid fa-file-invoice" aria-hidden="true"></i> Cari Detay <span class="dd-arrow">▾</span></button>
+      <button class="tab-btn tab-dropdown-btn" id="tabbtn-dagitim" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="dagitimDropdownMenu"><i class="fa-solid fa-truck-fast" aria-hidden="true"></i> Dağıtım <span class="dd-arrow">▾</span></button>
+      <button class="tab-btn" id="tabbtn-bayiHakedis" data-view="bayiHakedis" type="button" role="tab" aria-selected="false" aria-controls="bayiHakedisView"><i class="fa-solid fa-award" aria-hidden="true"></i> Bayi Hakediş</button>
+      <button class="tab-btn" id="tabbtn-sellOut" data-view="sellOut" type="button" role="tab" aria-selected="false" aria-controls="sellOutView"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Sell Out Raporu</button>
+      <button class="tab-btn tab-dropdown-btn" id="tabbtn-finansalAnaliz" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="finansalDropdownMenu"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i> Finansal Analiz <span class="dd-arrow">▾</span></button>
     </div>
 
     <div class="quick-access-bar">
       <span class="quick-access-label">SIK KULLANILAN</span>
-      <button class="tab-btn quick-access-btn" data-view="sevk" type="button">🚚 Sevk Raporu</button>
-      <button class="tab-btn quick-access-btn" data-view="yukleme" type="button">📦 ST Tahsilat/Litre</button>
-      <button class="tab-btn quick-access-btn" data-view="faturaKontrol" type="button">🧾 Fatura Kontrol</button>
-      <button class="tab-btn quick-access-btn" data-view="sellOut" type="button">📈 Sell Out Raporu</button>
+      <button class="tab-btn quick-access-btn" data-view="sevk" type="button"><i class="fa-solid fa-truck" aria-hidden="true"></i> Sevk Raporu</button>
+      <button class="tab-btn quick-access-btn" data-view="yukleme" type="button"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> ST Tahsilat/Litre</button>
+      <button class="tab-btn quick-access-btn" data-view="faturaKontrol" type="button"><i class="fa-solid fa-file-circle-check" aria-hidden="true"></i> Fatura Kontrol</button>
+      <button class="tab-btn quick-access-btn" data-view="sellOut" type="button"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Sell Out Raporu</button>
     </div>
 
     <div class="tab-dropdown-menu" id="cariDetayDropdownMenu" role="menu" aria-hidden="true" aria-labelledby="tabbtn-cariDetay">
-      <button class="tab-btn dropdown-item active" id="tabbtn-genel" data-view="genel" type="button" role="tab" aria-selected="true" aria-controls="genelView">📊 Genel Rapor</button>
-      <button class="tab-btn dropdown-item" id="tabbtn-yaslandirma" data-view="yaslandirma" type="button" role="tab" aria-selected="false" aria-controls="yaslandirmaView">⏱️ Yaşlandırma Raporu</button>
+      <button class="tab-btn dropdown-item active" id="tabbtn-genel" data-view="genel" type="button" role="tab" aria-selected="true" aria-controls="genelView"><i class="fa-solid fa-chart-column" aria-hidden="true"></i> Genel Rapor</button>
+      <button class="tab-btn dropdown-item" id="tabbtn-yaslandirma" data-view="yaslandirma" type="button" role="tab" aria-selected="false" aria-controls="yaslandirmaView"><i class="fa-solid fa-clock" aria-hidden="true"></i> Yaşlandırma Raporu</button>
     </div>
 
     <div class="tab-dropdown-menu" id="dagitimDropdownMenu" role="menu" aria-hidden="true" aria-labelledby="tabbtn-dagitim">
-      <button class="tab-btn dropdown-item" id="tabbtn-sevk" data-view="sevk" type="button" role="tab" aria-selected="false" aria-controls="sevkView">🚚 Sevk Raporu</button>
-      <button class="tab-btn dropdown-item" id="tabbtn-faturaKontrol" data-view="faturaKontrol" type="button" role="tab" aria-selected="false" aria-controls="faturaKontrolView">🧾 Fatura Kontrol</button>
-      <button class="tab-btn dropdown-item" id="tabbtn-yukleme" data-view="yukleme" type="button" role="tab" aria-selected="false" aria-controls="yuklemeView">📦 ST Tahsilat/Litre</button>
-      <button class="tab-btn dropdown-item" id="tabbtn-ticariStok" data-view="ticariStok" type="button" role="tab" aria-selected="false" aria-controls="ticariStokView">🛢️ Ticari Stok Raporu</button>
+      <button class="tab-btn dropdown-item" id="tabbtn-sevk" data-view="sevk" type="button" role="tab" aria-selected="false" aria-controls="sevkView"><i class="fa-solid fa-truck" aria-hidden="true"></i> Sevk Raporu</button>
+      <button class="tab-btn dropdown-item" id="tabbtn-faturaKontrol" data-view="faturaKontrol" type="button" role="tab" aria-selected="false" aria-controls="faturaKontrolView"><i class="fa-solid fa-file-circle-check" aria-hidden="true"></i> Fatura Kontrol</button>
+      <button class="tab-btn dropdown-item" id="tabbtn-yukleme" data-view="yukleme" type="button" role="tab" aria-selected="false" aria-controls="yuklemeView"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> ST Tahsilat/Litre</button>
+      <button class="tab-btn dropdown-item" id="tabbtn-ticariStok" data-view="ticariStok" type="button" role="tab" aria-selected="false" aria-controls="ticariStokView"><i class="fa-solid fa-box" aria-hidden="true"></i> Ticari Stok Raporu</button>
     </div>
 
     <div class="tab-dropdown-menu" id="finansalDropdownMenu" role="menu" aria-hidden="true" aria-labelledby="tabbtn-finansalAnaliz">
-      <button class="tab-btn dropdown-item" id="tabbtn-temsilciKarnesi" data-view="temsilciKarnesi" type="button" role="tab" aria-selected="false" aria-controls="temsilciKarnesiView">🏆 Temsilci Karnesi</button>
-      <button class="tab-btn dropdown-item" id="tabbtn-tahsilatVerimlilik" data-view="tahsilatVerimlilik" type="button" role="tab" aria-selected="false" aria-controls="tahsilatVerimlilikView">💹 Temsilci Tahsilat Verimliliği</button>
-      <button class="tab-btn dropdown-item" id="tabbtn-cei" data-view="cei" type="button" role="tab" aria-selected="false" aria-controls="ceiView">🧮 Tahsilat Başarı Oranı</button>
-      <button class="tab-btn dropdown-item" id="tabbtn-nakitAkis" data-view="nakitAkis" type="button" role="tab" aria-selected="false" aria-controls="nakitAkisView">💰 Nakit Akış Tahmini</button>
-      <button class="tab-btn dropdown-item" id="tabbtn-supheliAlacak" data-view="supheliAlacak" type="button" role="tab" aria-selected="false" aria-controls="supheliAlacakView">⚠️ Şüpheli Alacak</button>
-      <button class="tab-btn dropdown-item" id="tabbtn-dsoTrend" data-view="dsoTrend" type="button" role="tab" aria-selected="false" aria-controls="dsoTrendView">📉 DSO Trendi</button>
-      <button class="tab-btn dropdown-item" id="tabbtn-yonetimOzeti" data-view="yonetimOzeti" type="button" role="tab" aria-selected="false" aria-controls="yonetimOzetiView">🗂️ Yönetim Özeti</button>
+      <button class="tab-btn dropdown-item" id="tabbtn-temsilciKarnesi" data-view="temsilciKarnesi" type="button" role="tab" aria-selected="false" aria-controls="temsilciKarnesiView"><i class="fa-solid fa-trophy" aria-hidden="true"></i> Temsilci Karnesi</button>
+      <button class="tab-btn dropdown-item" id="tabbtn-tahsilatVerimlilik" data-view="tahsilatVerimlilik" type="button" role="tab" aria-selected="false" aria-controls="tahsilatVerimlilikView"><i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i> Temsilci Tahsilat Verimliliği</button>
+      <button class="tab-btn dropdown-item" id="tabbtn-cei" data-view="cei" type="button" role="tab" aria-selected="false" aria-controls="ceiView"><i class="fa-solid fa-calculator" aria-hidden="true"></i> Tahsilat Başarı Oranı</button>
+      <button class="tab-btn dropdown-item" id="tabbtn-nakitAkis" data-view="nakitAkis" type="button" role="tab" aria-selected="false" aria-controls="nakitAkisView"><i class="fa-solid fa-money-bill" aria-hidden="true"></i> Nakit Akış Tahmini</button>
+      <button class="tab-btn dropdown-item" id="tabbtn-supheliAlacak" data-view="supheliAlacak" type="button" role="tab" aria-selected="false" aria-controls="supheliAlacakView"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Şüpheli Alacak</button>
+      <button class="tab-btn dropdown-item" id="tabbtn-dsoTrend" data-view="dsoTrend" type="button" role="tab" aria-selected="false" aria-controls="dsoTrendView"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> DSO Trendi</button>
+      <button class="tab-btn dropdown-item" id="tabbtn-yonetimOzeti" data-view="yonetimOzeti" type="button" role="tab" aria-selected="false" aria-controls="yonetimOzetiView"><i class="fa-solid fa-folder" aria-hidden="true"></i> Yönetim Özeti</button>
     </div>
 
     <div class="modal-overlay" id="senetModalOverlay">
       <div class="modal senet-modal" id="senetModal" role="dialog" aria-modal="true" aria-labelledby="senetModalTitle" style="max-width:560px;">
         <div class="panel-head">
           <div class="senet-modal-head-inner">
-            <div class="senet-modal-head-icon">📄</div>
+            <div class="senet-modal-head-icon"><i class="fa-solid fa-file-lines" aria-hidden="true"></i></div>
             <div>
               <h2 id="senetModalTitle">Senet Yazdır</h2>
               <div class="senet-modal-sub" id="senetModalMusteriBilgi"></div>
@@ -1263,7 +1299,7 @@
           <div id="senetVadeAlanlari" class="senet-vade-list"></div>
           <div id="senetHataMesaji" class="senet-hata-mesaji"></div>
           <div class="senet-modal-footer">
-            <button type="button" class="btn primary senet-print-btn" id="senetYazdirBtn" style="display:none;">🖨️ Senetleri Oluştur ve Yazdır</button>
+            <button type="button" class="btn primary senet-print-btn" id="senetYazdirBtn" style="display:none;"><i class="fa-solid fa-print" aria-hidden="true"></i> Senetleri Oluştur ve Yazdır</button>
           </div>
         </div>
       </div>
@@ -1274,7 +1310,7 @@
     <div id="kpiGrid"></div>
 
     <div class="alert-banner" id="dikkatBanner" style="display:none;" role="button" tabindex="0" aria-haspopup="dialog">
-      <div class="alert-banner-icon">⚠️</div>
+      <div class="alert-banner-icon"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i></div>
       <div class="alert-banner-text"><strong id="dikkatBannerCount"></strong>dikkat gerektiren müşteri var — ortalama vadesi <span id="dikkatEsikBanner"></span> gün ve üzeri</div>
       <div class="alert-banner-cta">Görüntüle →</div>
     </div>
@@ -1422,7 +1458,7 @@
       <div class="panel" id="yuklemePanel" style="display:none;">
         <div class="panel-head yukleme-head">
           <div class="yukleme-head-left">
-            <div class="yukleme-head-badge">📦</div>
+            <div class="yukleme-head-badge"><i class="fa-solid fa-box" aria-hidden="true"></i></div>
             <div>
               <h2 id="yuklemeTitle">ST Tahsilat/Litre</h2>
               <div class="yukleme-head-chips" id="yuklemeSubTitle"></div>
@@ -1430,8 +1466,8 @@
           </div>
           <div class="toolbar">
             <select class="filter-select" id="yuklemeTarihSelect"></select>
-            <button class="btn yukleme-head-btn" id="yuklemeYenileBtn" type="button">🔄 Arşivi Yenile</button>
-            <button class="btn small yukleme-head-btn" id="yuklemeArsivTemizleBtn" type="button" title="ST Tahsilat/Litre için biriktirilen tüm günlerin arşivini siler (şifre gerektirir)">🔒 Arşivi Temizle</button>
+            <button class="btn yukleme-head-btn" id="yuklemeYenileBtn" type="button"><i class="fa-solid fa-arrow-rotate-right" aria-hidden="true"></i> Arşivi Yenile</button>
+            <button class="btn small yukleme-head-btn" id="yuklemeArsivTemizleBtn" type="button" title="ST Tahsilat/Litre için biriktirilen tüm günlerin arşivini siler (şifre gerektirir)"><i class="fa-solid fa-lock" aria-hidden="true"></i> Arşivi Temizle</button>
           </div>
         </div>
         <div class="panel-body">
@@ -1603,9 +1639,9 @@
                 <input type="text" id="faturaKontrolSearchInput" placeholder="Müşteri adı veya kodu ara…" aria-label="Müşteri adı veya kodu ara" />
                 <button type="button" id="faturaKontrolSearchClearBtn" class="search-clear-btn" title="Aramayı temizle" aria-label="Aramayı temizle" style="display:none;">✕</button>
               </div>
-              <button type="button" class="btn small" id="faturaKontrolArsivYenileBtn" title="Buluttaki arşivi yeniden çeker">🔄 Yenile</button>
-              <button type="button" class="btn small" id="faturaKontrolArsivSikistirBtn" title="Tahsilat/Fatura için aynı takvim gününe ait daha eski/yinelenen yükleme kayıtlarını (gölge kayıtları) siler. Sipariş için ise Satış Belge No bazlı temizliği (Red/İptal/Teslim Edilemedi olan siparişlerin TÜM kayıtlarını ve aynı gün mükerrer kayıtlarını) arşivin tamamı üzerinde yeniden çalıştırır. Bakiye geçmişine (Trend Analizi) dokunmaz.">🧹 Arşivi Temizle</button>
-              <button type="button" class="btn small" id="faturaKontrolArsivTemizleBtn" title="Fatura Kontrol için biriktirilen tüm günlerin arşivini siler (şifre gerektirir)">🔒 Arşivi Temizle</button>
+              <button type="button" class="btn small" id="faturaKontrolArsivYenileBtn" title="Buluttaki arşivi yeniden çeker"><i class="fa-solid fa-arrow-rotate-right" aria-hidden="true"></i> Yenile</button>
+              <button type="button" class="btn small" id="faturaKontrolArsivSikistirBtn" title="Tahsilat/Fatura için aynı takvim gününe ait daha eski/yinelenen yükleme kayıtlarını (gölge kayıtları) siler. Sipariş için ise Satış Belge No bazlı temizliği (Red/İptal/Teslim Edilemedi olan siparişlerin TÜM kayıtlarını ve aynı gün mükerrer kayıtlarını) arşivin tamamı üzerinde yeniden çalıştırır. Bakiye geçmişine (Trend Analizi) dokunmaz."><i class="fa-solid fa-eraser" aria-hidden="true"></i> Arşivi Temizle</button>
+              <button type="button" class="btn small" id="faturaKontrolArsivTemizleBtn" title="Fatura Kontrol için biriktirilen tüm günlerin arşivini siler (şifre gerektirir)"><i class="fa-solid fa-lock" aria-hidden="true"></i> Arşivi Temizle</button>
             </div>
           </div>
           <div class="as-of" id="faturaKontrolArsivBilgi"></div>
@@ -1688,15 +1724,15 @@
       <details class="info-box">
         <summary>ℹ️ Nasıl Yorumlanır?</summary>
         <div class="info-box-body">
-          <h4>📌 Bu Rapor Ne İşe Yarar?</h4>
+          <h4><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Bu Rapor Ne İşe Yarar?</h4>
           <p>SAPUI5 satış kalemi dışa aktarımından, temsilci ve saha satış müdürü (SSM) bazlı <b>Açık/Kapalı Kanal litre satışını</b> ve <b>FKNS (Fatura Kesilen Nokta Sayısı) oranını</b> gösterir.</p>
-          <h4>📊 Nasıl Yorumlanmalı?</h4>
+          <h4><i class="fa-solid fa-chart-column" aria-hidden="true"></i> Nasıl Yorumlanmalı?</h4>
           <ul>
             <li><b>FKNS Oranı:</b> Müşteri Master'daki Aktif noktalardan kaçına bu dönemde fatura kesildiğini gösterir (örn. 100 aktif noktadan 90'ına kesilmişse %90).</li>
             <li><b>A./K. Kanal Kalan:</b> hedefe ulaşmak için kalan litre miktarıdır (Hedef − Satış).</li>
             <li><b>Hedef Gerçekleşme:</b> temsilcinin/SSM'nin toplam litre hedefinin yüzde kaçını gerçekleştirdiğini gösterir.</li>
           </ul>
-          <p><b>Aksiyon:</b> FKNS oranı düşük temsilcilerde, kartı açarak faturası kesilmeyen aktif noktaları görüp takibe alın. Litre hedefleri elle girilip 🔒 şifre ile kaydedilir; tüm cihazlarda görünür.</p>
+          <p><b>Aksiyon:</b> FKNS oranı düşük temsilcilerde, kartı açarak faturası kesilmeyen aktif noktaları görüp takibe alın. Litre hedefleri elle girilip <i class="fa-solid fa-lock" aria-hidden="true"></i> şifre ile kaydedilir; tüm cihazlarda görünür.</p>
         </div>
       </details>
 
@@ -1706,8 +1742,8 @@
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
             <label for="sellOutAySelect" style="font-size:12.5px;font-weight:600;color:var(--ink-soft);">Dönem:</label>
             <select class="filter-select" id="sellOutAySelect"><option value="">Güncel (canlı)</option></select>
-            <button type="button" class="btn small" id="sellOutArsivleBtn" title="Şu anki güncel Sell Out verisini bu ayın adı altında kalıcı olarak arşivler">🗄️ Bu Ayı Arşivle</button>
-            <button type="button" class="btn small" id="sellOutYenileBtn" title="Buluttaki hedef litre verisini yeniden çeker">🔄 Yenile</button>
+            <button type="button" class="btn small" id="sellOutArsivleBtn" title="Şu anki güncel Sell Out verisini bu ayın adı altında kalıcı olarak arşivler"><i class="fa-solid fa-box-archive" aria-hidden="true"></i> Bu Ayı Arşivle</button>
+            <button type="button" class="btn small" id="sellOutYenileBtn" title="Buluttaki hedef litre verisini yeniden çeker"><i class="fa-solid fa-arrow-rotate-right" aria-hidden="true"></i> Yenile</button>
           </div>
         </div>
       </div>
@@ -1766,9 +1802,9 @@
       <details class="info-box">
         <summary>ℹ️ Nasıl Yorumlanır?</summary>
         <div class="info-box-body">
-          <h4>📌 Bu Rapor Ne İşe Yarar?</h4>
+          <h4><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Bu Rapor Ne İşe Yarar?</h4>
           <p>Her satış temsilcisinin, kendi müşterilerinden <b>ne kadar tahsilat yapabildiğini</b> gösterir. Kısaca "temsilci elindeki borcu ne kadar nakde çevirebiliyor?" sorusunun cevabıdır.</p>
-          <h4>📊 Nasıl Yorumlanmalı?</h4>
+          <h4><i class="fa-solid fa-chart-column" aria-hidden="true"></i> Nasıl Yorumlanmalı?</h4>
           <ul>
             <li><b>Tahsilat Oranı yüksekse (örn. %80+):</b> temsilci borcu iyi takip ediyor, performansı güçlü.</li>
             <li><b>Tahsilat Oranı düşükse:</b> müşteri borçları birikiyor olabilir; bu temsilcinin cari hesapları yakından izlenmelidir.</li>
@@ -1784,7 +1820,7 @@
           <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
             <label for="tvAySelect" style="font-size:12.5px;font-weight:600;color:var(--ink-soft);">Ay:</label>
             <select class="filter-select" id="tvAySelect"></select>
-            <button type="button" class="btn small" id="tvYenileBtn" title="Buluttaki arşivi yeniden çeker">🔄 Yenile</button>
+            <button type="button" class="btn small" id="tvYenileBtn" title="Buluttaki arşivi yeniden çeker"><i class="fa-solid fa-arrow-rotate-right" aria-hidden="true"></i> Yenile</button>
           </div>
           <div class="as-of" id="tvArsivBilgi" style="margin:0;"></div>
         </div>
@@ -1858,9 +1894,9 @@
       <details class="info-box">
         <summary>ℹ️ Nasıl Yorumlanır?</summary>
         <div class="info-box-body">
-          <h4>📌 Bu Rapor Ne İşe Yarar?</h4>
+          <h4><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Bu Rapor Ne İşe Yarar?</h4>
           <p><b>DSO (Days Sales Outstanding)</b>, alacakların ortalama olarak kaç günde tahsil edildiğini gösterir. Basitçe: "param genelde kaç gün sonra elime geçiyor?" sorusunun cevabıdır.</p>
-          <h4>📊 Nasıl Yorumlanmalı?</h4>
+          <h4><i class="fa-solid fa-chart-column" aria-hidden="true"></i> Nasıl Yorumlanmalı?</h4>
           <ul>
             <li><b>DSO düşüyorsa:</b> tahsilat hızlanıyor, nakit döngüsü iyileşiyor — olumlu gelişme.</li>
             <li><b>DSO yükseliyorsa:</b> müşteriler daha yavaş ödüyor, vadeler uzuyor — dikkat gerektirir.</li>
@@ -1872,7 +1908,7 @@
       <div class="panel" id="dsoTrendFiltrePanel">
         <div class="panel-body" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
           <div class="as-of" id="dsoTrendAsOf" style="margin:0;">Veri kaynağı: Fatura Kontrol arşivi (günlük müşteri anlık görüntüleri)</div>
-          <button type="button" class="btn small" id="dsoTrendYenileBtn" title="Buluttaki arşivi yeniden çeker">🔄 Yenile</button>
+          <button type="button" class="btn small" id="dsoTrendYenileBtn" title="Buluttaki arşivi yeniden çeker"><i class="fa-solid fa-arrow-rotate-right" aria-hidden="true"></i> Yenile</button>
         </div>
       </div>
       <div id="dsoTrendKpiGrid"></div>
@@ -1901,9 +1937,9 @@
       <details class="info-box">
         <summary>ℹ️ Nasıl Yorumlanır?</summary>
         <div class="info-box-body">
-          <h4>📌 Bu Rapor Ne İşe Yarar?</h4>
+          <h4><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Bu Rapor Ne İşe Yarar?</h4>
           <p>Önümüzdeki haftalarda <b>ne zaman ve ne kadar nakit girişi</b> beklendiğini tahmin eder — nakit planlaması ve ödeme takvimi için bir öngörü aracıdır.</p>
-          <h4>📊 Nasıl Yorumlanmalı?</h4>
+          <h4><i class="fa-solid fa-chart-column" aria-hidden="true"></i> Nasıl Yorumlanmalı?</h4>
           <ul>
             <li><b>Vadesi Gelen Bakiye:</b> o hafta vadesi dolacak toplam alacak tutarıdır.</li>
             <li><b>Ağırlıklı Beklenen Tahsilat:</b> geçmiş gerçekleşme oranına göre, o vadeden fiilen ne kadarının tahsil edilmesinin beklendiğidir — "kağıt üstündeki" değil, gerçekçi tahmindir.</li>
@@ -1939,9 +1975,9 @@
       <details class="info-box">
         <summary>ℹ️ Nasıl Yorumlanır?</summary>
         <div class="info-box-body">
-          <h4>📌 Bu Rapor Ne İşe Yarar?</h4>
+          <h4><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Bu Rapor Ne İşe Yarar?</h4>
           <p>Geciken alacaklardan <b>ne kadarının tahsil edilemeyebileceğini</b> (kayıp riskini) tahmin eder ve riskli müşterileri öne çıkarır.</p>
-          <h4>📊 Nasıl Yorumlanmalı?</h4>
+          <h4><i class="fa-solid fa-chart-column" aria-hidden="true"></i> Nasıl Yorumlanmalı?</h4>
           <ul>
             <li><b>Karşılık Oranı:</b> bir vade diliminin kaybedilme riski taşıdığı yüzdedir. Gecikme günü arttıkça bu oran otomatik olarak yükselir.</li>
             <li><b>Önerilen Karşılık:</b> o dilimdeki bakiye üzerinden ayrılması önerilen tahmini kayıp tutarıdır.</li>
@@ -2010,9 +2046,9 @@
       <details class="info-box">
         <summary>ℹ️ Nasıl Yorumlanır?</summary>
         <div class="info-box-body">
-          <h4>📌 Bu Rapor Ne İşe Yarar?</h4>
+          <h4><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Bu Rapor Ne İşe Yarar?</h4>
           <p>Her temsilcinin tahsilat performansını, <b>kendi portföyüne göre otomatik hesaplanan bir hedefle</b> karşılaştırır — temsilcileri adil şekilde kıyaslamayı sağlar.</p>
-          <h4>📊 Nasıl Yorumlanmalı?</h4>
+          <h4><i class="fa-solid fa-chart-column" aria-hidden="true"></i> Nasıl Yorumlanmalı?</h4>
           <ul>
             <li><b>Hedef:</b> elle girilmez; cari bakiye ve sipariş hacmi üzerinden otomatik hesaplanır ve portföy değiştikçe kendini güncelleştirir.</li>
             <li><b>Gerçekleşen ≥ Hedef:</b> temsilci beklenen performansı yakalamış veya aşmış demektir.</li>
@@ -2024,7 +2060,7 @@
       <div class="panel" id="karneFiltrePanel">
         <div class="panel-body" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
           <div class="as-of" id="karneAsOf" style="margin:0;">Veri kaynağı: Tahsilat + Kalemler + Bayi Hak Ediş (bu ay)</div>
-          <button type="button" class="btn small" id="karneYenileBtn" title="Buluttaki arşivi yeniden çeker">🔄 Yenile</button>
+          <button type="button" class="btn small" id="karneYenileBtn" title="Buluttaki arşivi yeniden çeker"><i class="fa-solid fa-arrow-rotate-right" aria-hidden="true"></i> Yenile</button>
         </div>
       </div>
       <div id="karneKpiGrid"></div>
@@ -2045,12 +2081,12 @@
       <details class="info-box">
         <summary>ℹ️ Nasıl Yorumlanır?</summary>
         <div class="info-box-body">
-          <h4>📌 Bu Rapor Ne İşe Yarar?</h4>
+          <h4><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Bu Rapor Ne İşe Yarar?</h4>
           <p>Diğer tüm finansal raporların <b>özetini tek ekranda</b> sunar — genel durumu hızlıca görmek isteyen yöneticiler için tasarlanmıştır.</p>
-          <h4>📊 Nasıl Yorumlanmalı?</h4>
+          <h4><i class="fa-solid fa-chart-column" aria-hidden="true"></i> Nasıl Yorumlanmalı?</h4>
           <ul>
             <li><b>Bakiye ve Tahsilat Trendi:</b> çizgi yukarı gidiyorsa borç birikiyor; tahsilat çizgisi yüksekse tahsilat performansı iyi demektir.</li>
-            <li><b>Öne Çıkanlar:</b> 🟢 iyileşme, 🟡 kötüleşme, ➖ durağan durum anlamına gelir.</li>
+            <li><b>Öne Çıkanlar:</b> <i class="fa-solid fa-circle" style="color:var(--success);font-size:9px;" aria-hidden="true"></i> iyileşme, <i class="fa-solid fa-circle" style="color:var(--warn);font-size:9px;" aria-hidden="true"></i> kötüleşme, <i class="fa-solid fa-minus" style="color:var(--ink-faint);font-size:11px;" aria-hidden="true"></i> durağan durum anlamına gelir.</li>
             <li><b>Aksiyon Gerektiren Konular:</b> öncelik sırasına göre harekete geçilmesi gereken riskli durumların listesidir.</li>
           </ul>
           <p><b>Aksiyon:</b> Kırmızı/sarı uyarı veren konuları öncelik sırasına göre ele alın; detaylı analiz için Finansal Analiz menüsündeki ilgili rapora (DSO Trendi, Şüpheli Alacak, Temsilci Karnesi vb.) geçin.</p>
@@ -2059,7 +2095,7 @@
       <div class="panel" id="yoFiltrePanel">
         <div class="panel-body" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
           <div class="as-of" id="yoAsOf" style="margin:0;"></div>
-          <button type="button" class="btn small" id="yoYenileBtn" title="Buluttaki arşivi yeniden çeker">🔄 Yenile</button>
+          <button type="button" class="btn small" id="yoYenileBtn" title="Buluttaki arşivi yeniden çeker"><i class="fa-solid fa-arrow-rotate-right" aria-hidden="true"></i> Yenile</button>
         </div>
       </div>
       <div id="yoKpiGrid"></div>
@@ -2091,11 +2127,11 @@
       <details class="info-box">
         <summary>ℹ️ Nasıl Yorumlanır?</summary>
         <div class="info-box-body">
-          <h4>📌 Bu Rapor Ne İşe Yarar?</h4>
+          <h4><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Bu Rapor Ne İşe Yarar?</h4>
           <p><b>CEI (Collection Effectiveness Index / Tahsilat Başarı Oranı)</b>, o dönemde <b>fiilen tahsil edilebilecek durumda olan (vadesi gelmiş)</b> alacağın ne kadarının gerçekten tahsil edildiğini gösterir. DSO'dan farkı budur: DSO alacağın ortalama kaç günde döndüğünü ölçer, CEI ise "tahsil edilmesi gereken paranın ne kadarını tahsil ettik?" sorusuna cevap verir.</p>
-          <h4>🧮 Vadesi Gelmiş / Vadesi Gelmemiş Nasıl Belirlenir?</h4>
+          <h4><i class="fa-solid fa-calculator" aria-hidden="true"></i> Vadesi Gelmiş / Vadesi Gelmemiş Nasıl Belirlenir?</h4>
           <p>Bu hesaplamada fatura üzerindeki <b>Net Vade Tarihi kriteri kullanılmaz</b>. Yerine, açık faturaların <b>Kalan Borç</b> ve <b>Faturadan Sonr. Gün</b> verisi baz alınır: bir faturanın Faturadan Sonr. Gün değeri <b>23 ve üzeri</b> ise o faturanın kalan borcu <b>"vadesi gelmiş"</b> sayılır; altındaysa <b>"vadesi gelmemiş"</b> kabul edilir. (Not: Genel Rapor'daki "Ort. Vade" göstergesi bu 23 günlük eşikten etkilenmez, o gösterge her zaman genel raporun kendi ortalama vade hesaplamasını kullanır.)</p>
-          <h4>📊 Nasıl Yorumlanmalı?</h4>
+          <h4><i class="fa-solid fa-chart-column" aria-hidden="true"></i> Nasıl Yorumlanmalı?</h4>
           <ul>
             <li><b>CEI %90 ve üzerindeyse:</b> tahsil edilebilecek alacağın büyük kısmı tahsil edilmiş — güçlü bir performans.</li>
             <li><b>CEI %70–%90 arasındaysa:</b> kabul edilebilir seviyede, ama takip sıkılaştırılabilir.</li>
@@ -2111,7 +2147,7 @@
           <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
             <label for="ceiAySelect" style="font-size:12.5px;font-weight:600;color:var(--ink-soft);">Ay:</label>
             <select class="filter-select" id="ceiAySelect"></select>
-            <button type="button" class="btn small" id="ceiYenileBtn" title="Buluttaki arşivi yeniden çeker">🔄 Yenile</button>
+            <button type="button" class="btn small" id="ceiYenileBtn" title="Buluttaki arşivi yeniden çeker"><i class="fa-solid fa-arrow-rotate-right" aria-hidden="true"></i> Yenile</button>
           </div>
           <div class="as-of" id="ceiArsivBilgi" style="margin:0;"></div>
         </div>
@@ -2162,7 +2198,7 @@
     <div class="modal-overlay" id="dikkatModalOverlay">
       <div class="modal modal--danger" id="dikkatModal" role="dialog" aria-modal="true" aria-labelledby="dikkatModalTitle">
         <div class="panel-head">
-          <div><h2 id="dikkatModalTitle">⚠️ Dikkat Gerektiren Müşteriler</h2><span class="count" id="dikkatCount"></span></div>
+          <div><h2 id="dikkatModalTitle"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Dikkat Gerektiren Müşteriler</h2><span class="count" id="dikkatCount"></span></div>
           <button class="modal-close" id="dikkatModalClose" type="button" aria-label="Kapat">✕</button>
         </div>
         <div class="modal-sub">Ortalama vadesi <span id="dikkatEsikModal"></span> gün ve üzeri olan noktalar</div>
@@ -2219,10 +2255,10 @@
           </div>
           <div class="modal-head-navy-pill-row" style="margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <div class="modal-head-navy-pill" id="faturaModalSub" style="margin-top:0;"></div>
-            <button type="button" class="modal-head-navy-analiz-btn" id="faturaModalAnalizBtn">📊 Analiz</button>
-            <button type="button" class="modal-head-navy-analiz-btn" id="faturaModalTahsilatTahminiBtn">📈 Tahsilat Tahmini</button>
-            <button type="button" class="modal-head-navy-analiz-btn" id="faturaModalCekSenetBtn" style="display:none;">📄 Çek/Senet</button>
-            <button type="button" class="modal-head-navy-analiz-btn" id="faturaModalHakedisBtn" style="display:none;">🏷️ Hakediş</button>
+            <button type="button" class="modal-head-navy-analiz-btn" id="faturaModalAnalizBtn"><i class="fa-solid fa-chart-column" aria-hidden="true"></i> Analiz</button>
+            <button type="button" class="modal-head-navy-analiz-btn" id="faturaModalTahsilatTahminiBtn"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Tahsilat Tahmini</button>
+            <button type="button" class="modal-head-navy-analiz-btn" id="faturaModalCekSenetBtn" style="display:none;"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Çek/Senet</button>
+            <button type="button" class="modal-head-navy-analiz-btn" id="faturaModalHakedisBtn" style="display:none;"><i class="fa-solid fa-award" aria-hidden="true"></i> Hakediş</button>
           </div>
           <button class="modal-close" id="faturaModalClose" type="button" aria-label="Kapat">✕</button>
         </div>
@@ -2661,7 +2697,7 @@ async function faturaArsivBaslangicYukle(){
 // Bir oturumda arşivin TAMAMI bir kez tam indirildiyse (uygulama açılışı, senkronize butonu ya da
 // bir sekmenin ilk kez açılışı), aynı oturumda başka bir sekmeye geçildiğinde artık aynı onlarca/
 // yüzlerce günlük veri tekrar tekrar indirilmez — state.faturaArsivCache zaten günceldir.
-// zorla=true verilirse (🔄 Yenile butonları, Senkronize Et), önbellek yok sayılır ve buluttan
+// zorla=true verilirse (<i class="fa-solid fa-arrow-rotate-right" aria-hidden="true"></i> Yenile butonları, Senkronize Et), önbellek yok sayılır ve buluttan
 // gerçekten tam bir tazeleme yapılır (başka bir cihazın eklediği güncel veriyi görmek için).
 let faturaArsivYuklendiMi = false;
 async function faturaArsivYenile(zorla){
@@ -2808,7 +2844,7 @@ async function faturaKontrolArsivineKaydetVeSenkronizeEt(report){
   // (İstenilen Tsl. Trh.) karşılık gelen arşiv gününe yazılır, sonra Satış Belge No bazlı global
   // temizlik uygulanır (bkz. siparisArsivGunlereDagitVeTemizle). Bu işlemin doğru çalışabilmesi
   // için mevcut yerel arşiv önbelleğini tazeliyoruz — tam garanti için (örn. başka bir cihazdan
-  // yapılmış değişiklikleri de yakalamak için) periyodik olarak "🧹 Gölge Kayıtları Temizle"
+  // yapılmış değişiklikleri de yakalamak için) periyodik olarak "<i class="fa-solid fa-eraser" aria-hidden="true"></i> Gölge Kayıtları Temizle"
   // butonuyla TAM bir arşiv taraması yapılması önerilir.
   await faturaArsivYenile();
   const eskiArsivTumu = state.faturaArsivCache || {}; // GERÇEK önceki durum — buluta PATCH farkı bunun üzerinden hesaplanır
@@ -3951,6 +3987,7 @@ const fileInput = document.getElementById('fileInput');
 const uploadError = document.getElementById('uploadError');
 const buildBtn = document.getElementById('buildBtn');
 const statusPill = document.getElementById('statusPill');
+const statusPillMsg = document.getElementById('statusPillMsg');
 const resetBtn = document.getElementById('resetBtn');
 const syncBtn = document.getElementById('syncBtn');
 
@@ -4036,7 +4073,7 @@ function updateChecklist(){
   const loadedCount = Object.values(state.files).filter(Boolean).length;
   buildBtn.disabled = !kalemlerLoaded;
   buildBtn.textContent = allLoaded ? 'Raporu Oluştur' : (kalemlerLoaded ? 'Eksik dosyalarla devam et' : 'Raporu Oluştur');
-  statusPill.textContent = allLoaded ? (total+'/'+total+' dosya hazır') : (loadedCount + '/' + total + ' dosya yüklendi');
+  statusPillMsg.textContent = allLoaded ? (total+'/'+total+' dosya hazır') : (loadedCount + '/' + total + ' dosya yüklendi');
   if(allLoaded) statusPill.classList.add('ok');
 }
 
@@ -4060,19 +4097,19 @@ buildBtn.addEventListener('click', async ()=>{
     await yuklemeRaporuOlusturVeArsivle();
     document.getElementById('storageNote').style.display = saved ? 'block' : 'none';
     if(saved){
-      statusPill.textContent = 'Rapor oluşturuldu ve cihaza kaydedildi';
+      statusPillMsg.textContent = 'Rapor oluşturuldu ve cihaza kaydedildi';
       statusPill.classList.add('ok');
     }
     if(cloudEnabled()){
       syncBtn.style.display = 'inline-block';
-      statusPill.textContent = 'Rapor oluşturuldu, buluta yükleniyor…';
+      statusPillMsg.textContent = 'Rapor oluşturuldu, buluta yükleniyor…';
       saveReportToCloud(state.report).then(res=>{
         if(res.ok){
-          statusPill.textContent = 'Rapor buluta yüklendi — diğer cihazlarda da görünecek';
+          statusPillMsg.textContent = 'Rapor buluta yüklendi — diğer cihazlarda da görünecek';
           statusPill.classList.add('ok');
-          document.getElementById('storageNoteText').textContent = '☁️ Bu rapor buluta yüklendi; aynı bağlantıyı kullanan diğer cihazlar sayfayı açtığında (veya "Diğer Cihazdan Güncelle" ile) otomatik görecek.';
+          document.getElementById('storageNoteMsg').textContent = 'Bu rapor buluta yüklendi; aynı bağlantıyı kullanan diğer cihazlar sayfayı açtığında (veya "Diğer Cihazdan Güncelle" ile) otomatik görecek.';
         }else{
-          statusPill.textContent = 'Rapor cihaza kaydedildi (bulut yüklemesi başarısız)';
+          statusPillMsg.textContent = 'Rapor cihaza kaydedildi (bulut yüklemesi başarısız)';
           statusPill.classList.remove('ok');
         }
       });
@@ -4106,10 +4143,10 @@ syncBtn.addEventListener('click', async ()=>{
     await saveReportToStorage(cloudReport);
     canliGunlerleGuncelle(cloudReport);
     renderReport(cloudReport);
-    statusPill.textContent = 'Buluttan güncellendi (' + fmtDate(cloudReport.asOf) + ')';
+    statusPillMsg.textContent = 'Buluttan güncellendi (' + fmtDate(cloudReport.asOf) + ')';
     statusPill.classList.add('ok');
   }else{
-    statusPill.textContent = 'Buluttan veri alınamadı, mevcut rapor gösteriliyor';
+    statusPillMsg.textContent = 'Buluttan veri alınamadı, mevcut rapor gösteriliyor';
   }
 });
 
@@ -4131,7 +4168,7 @@ async function resetAll(){
   });
   buildBtn.disabled = true;
   buildBtn.textContent = 'Raporu Oluştur';
-  statusPill.textContent = 'Veri bekleniyor';
+  statusPillMsg.textContent = 'Veri bekleniyor';
   statusPill.classList.remove('ok');
   document.getElementById('uploadCard').style.display='block';
   document.getElementById('reportSection').style.display='none';
@@ -4187,7 +4224,7 @@ async function uygulamayiBaslat(){
   await sellOutYenile();
   await sellOutArsivYenile();
   if(cloudEnabled()){
-    statusPill.textContent = 'Bulut verisi kontrol ediliyor…';
+    statusPillMsg.textContent = 'Bulut verisi kontrol ediliyor…';
     const cloudReport = await loadReportFromCloud();
     if(cloudReport && cloudReport.musteriler && cloudReport.musteriler.length){
       report = cloudReport; source = 'cloud';
@@ -4215,14 +4252,14 @@ async function uygulamayiBaslat(){
     document.getElementById('storageNote').style.display='block';
     if(cloudEnabled()){
       syncBtn.style.display='inline-block';
-      document.getElementById('storageNoteText').textContent = source==='cloud'
-        ? '☁️ Bu rapor buluttan alındı; tüm cihazlarda ortak görünür. Güncellemek için "Diğer Cihazdan Güncelle"ye basın.'
-        : '💾 Buluta henüz erişilemedi, cihazda kayıtlı son rapor gösteriliyor.';
+      document.getElementById('storageNoteMsg').textContent = source==='cloud'
+        ? 'Bu rapor buluttan alındı; tüm cihazlarda ortak görünür. Güncellemek için "Diğer Cihazdan Güncelle"ye basın.'
+        : 'Buluta henüz erişilemedi, cihazda kayıtlı son rapor gösteriliyor.';
     }
-    statusPill.textContent = (source==='cloud' ? 'Buluttan güncel rapor açıldı (' : 'Cihazda kayıtlı rapor açıldı (') + fmtDate(report.asOf) + ')';
+    statusPillMsg.textContent = (source==='cloud' ? 'Buluttan güncel rapor açıldı (' : 'Cihazda kayıtlı rapor açıldı (') + fmtDate(report.asOf) + ')';
     statusPill.classList.add('ok');
   }else if(cloudEnabled()){
-    statusPill.textContent = 'Veri bekleniyor';
+    statusPillMsg.textContent = 'Veri bekleniyor';
   }
 }
 window.addEventListener('DOMContentLoaded', async ()=>{
@@ -5102,7 +5139,7 @@ function renderTicariStokTable(report, resetSayfa=true){
   const toplamLt = rows.reduce((a,r)=>a+r.depodaKalanLt,0);
   document.getElementById('ticariStokToplamBanner').innerHTML = `
     <div>
-      <div class="stok-toplam-banner-label"><span>📦</span><span>Toplam Litre</span></div>
+      <div class="stok-toplam-banner-label"><span><i class="fa-solid fa-box" aria-hidden="true"></i></span><span>Toplam Litre</span></div>
       <div class="stok-toplam-banner-val">${LT(toplamLt)}</div>
     </div>
     <span class="stok-toplam-banner-pill">${gruplar.length.toLocaleString('tr-TR')} müşteri</span>`;
@@ -5380,14 +5417,14 @@ function renderKpiHeroRow(items, elId){
   // dökümler ana "sub" metnine gömülüp 10px gri yazı içinde kayboluyordu; artık kendi rengi ve daha
   // okunaklı boyutuyla ayrı bir satırda öne çıkıyor.
   const rowHTML = `<div class="kpi-row-grid">` + rest.map(it=>`
-    <div class="kpi-row-card${it.chips?' has-chips':''}">
+    <div class="kpi-row-card${it.chips?' has-chips':''}${it.cls?` cls-${it.cls}`:''}">
       <div class="kpi-row-top-line">
-        <div class="kpi-row-icon"${it.ring?' style="background:none;padding:0;"':''}>${it.ring ? fknsRingSvg(it.oran) : (it.icon||'•')}</div>
-        <div class="kpi-row-text">
-          <div class="kpi-row-lbl">${it.label}</div>
-          <div class="kpi-row-val"${it.valueColor?` style="color:${it.valueColor}"`:''}>${it.display!==undefined ? it.display : TL(it.value)}${it.trend ? `<span class="trend-arrow" style="color:${it.trend.color};">${it.trend.arrow}</span>` : ''}</div>
-          ${it.sub ? `<div class="kpi-row-extra">${it.sub}</div>` : ''}
-        </div>
+        <span class="kpi-row-icon">${it.icon||''}</span>
+        <span class="kpi-row-lbl">${it.label}</span>
+      </div>
+      <div class="kpi-row-text">
+        <div class="kpi-row-val"${it.valueColor?` style="color:${it.valueColor}"`:''}>${it.display!==undefined ? it.display : TL(it.value)}${it.trend ? `<span class="trend-arrow" style="color:${it.trend.color};">${it.trend.arrow}</span>` : ''}</div>
+        ${it.sub ? `<div class="kpi-row-extra">${it.sub}</div>` : ''}
       </div>
       ${it.chips ? `<div class="kpi-row-chips">` + it.chips.map(c=>`
         <div class="kpi-row-chip" style="background:${c.bg};color:${c.renk};">
@@ -5400,11 +5437,11 @@ function renderKpiHeroRow(items, elId){
 
 function renderOzet(ozet){
   const items = [
-    {label:'Toplam Kalan Borç', icon:'💰', value:ozet.toplamKalanBorc, sub:ozet.musteriSayisi.toLocaleString('tr-TR')+' Müşteri'},
-    {label:'Açık Sipariş', icon:'📦', value:ozet.toplamSiparis, sub:'Sevkiyat Bekleyen'},
-    {label:'Sevki Ertelenen', icon:'⏳', value:ozet.toplamEmanet, sub:'Emanet Sipariş'},
-    {label:'Alınan Tahsilat', icon:'✅', value:ozet.toplamTahsilat, sub:'Son Dönem'},
-    {label:'Ort. Vade', icon:'📅', value:null, display: ozet.ortalamaVade!=null ? ozet.ortalamaVade+' gün' : '—', sub:ozet.siparisliMusteriSayisi.toLocaleString('tr-TR')+' Sipariş Girilen Müşteri'},
+    {label:'Toplam Kalan Borç', icon:'<i class="fa-solid fa-coins" aria-hidden="true"></i>', value:ozet.toplamKalanBorc, sub:ozet.musteriSayisi.toLocaleString('tr-TR')+' Müşteri'},
+    {label:'Açık Sipariş', icon:'<i class="fa-solid fa-box" aria-hidden="true"></i>', cls:'neutral', value:ozet.toplamSiparis, sub:'Sevkiyat Bekleyen'},
+    {label:'Sevki Ertelenen', icon:'<i class="fa-solid fa-hourglass-half" aria-hidden="true"></i>', cls:'warn', value:ozet.toplamEmanet, sub:'Emanet Sipariş'},
+    {label:'Alınan Tahsilat', icon:'<i class="fa-solid fa-circle-check" aria-hidden="true"></i>', cls:'success', value:ozet.toplamTahsilat, sub:'Son Dönem'},
+    {label:'Ort. Vade', icon:'<i class="fa-solid fa-calendar" aria-hidden="true"></i>', cls:'accent', value:null, display: ozet.ortalamaVade!=null ? ozet.ortalamaVade+' gün' : '—', sub:ozet.siparisliMusteriSayisi.toLocaleString('tr-TR')+' Sipariş Girilen Müşteri'},
   ];
   renderKpiHeroRow(items, 'ozetGrid');
 }
@@ -5416,12 +5453,12 @@ function renderKPIs(kpi){
   const tahsilatOraniPayda = (kpi.toplamTahsilat||0) + (kpi.toplamBakiye||0);
   const tahsilatOrani = tahsilatOraniPayda>0 ? (kpi.toplamTahsilat/tahsilatOraniPayda*100) : null;
   const items = [
-    {label:'Toplam Kalan Borç', icon:'💰', value:kpi.toplamBakiye, sub:kpi.musteriSayisi.toLocaleString('tr-TR')+' Müşteri'},
-    {label:'Ort. Vade', icon:'📅', value:null, display: kpi.ortalamaVade!=null ? kpi.ortalamaVade+' gün' : '—', sub:kpi.musteriSayisi.toLocaleString('tr-TR')+' Müşteri'},
-    {label:'Toplam Risk', icon:'⚠️', value:kpi.toplamRisk, sub:'Kalan Borç + Sipariş + Çek/Senet'},
-    {label:'Çek / Senet Riski', icon:'🧾', value:kpi.toplamCekSenet, sub:'Vadesi Gelmemiş'},
-    {label:'Alınan Tahsilat', icon:'✅', value:kpi.toplamTahsilat, sub: kpi.tahsilatEslesmeyenToplam>0 ? (TL(kpi.tahsilatEslesmeyenToplam)+' Bakiyesi Kapalı Müşteriden') : 'Son Dönem'},
-    {label:'Tahsilat Oranı', ring:true, oran:tahsilatOrani, value:null, display: fmtYuzde(tahsilatOrani), sub:'Tahsilat / (Tahsilat + Kalan Borç)'},
+    {label:'Toplam Kalan Borç', icon:'<i class="fa-solid fa-coins" aria-hidden="true"></i>', value:kpi.toplamBakiye, sub:kpi.musteriSayisi.toLocaleString('tr-TR')+' Müşteri'},
+    {label:'Ort. Vade', icon:'<i class="fa-solid fa-calendar" aria-hidden="true"></i>', cls:'neutral', value:null, display: kpi.ortalamaVade!=null ? kpi.ortalamaVade+' gün' : '—', sub:kpi.musteriSayisi.toLocaleString('tr-TR')+' Müşteri'},
+    {label:'Toplam Risk', icon:'<i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>', cls:'warn', value:kpi.toplamRisk, sub:'Kalan Borç + Sipariş + Çek/Senet'},
+    {label:'Çek / Senet Riski', icon:'<i class="fa-solid fa-file-lines" aria-hidden="true"></i>', cls:'danger', value:kpi.toplamCekSenet, sub:'Vadesi Gelmemiş'},
+    {label:'Alınan Tahsilat', icon:'<i class="fa-solid fa-circle-check" aria-hidden="true"></i>', cls:'success', value:kpi.toplamTahsilat, sub: kpi.tahsilatEslesmeyenToplam>0 ? (TL(kpi.tahsilatEslesmeyenToplam)+' Bakiyesi Kapalı Müşteriden') : 'Son Dönem'},
+    {label:'Tahsilat Oranı', icon:'<i class="fa-solid fa-bullseye" aria-hidden="true"></i>', cls:'accent', value:null, display: fmtYuzde(tahsilatOrani), sub:'Tahsilat / (Tahsilat + Kalan Borç)'},
   ];
   renderKpiHeroRow(items, 'kpiGrid');
 }
@@ -5655,7 +5692,7 @@ async function tahsilatTahminiModalAc(musteriKod, musteriAdi){
       <button id="ttEkleBtn" aria-label="Ekle" style="width:38px;border:none;border-left:1px solid var(--line);background:var(--accent-soft);color:var(--accent-deep);display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:0;font-size:16px;cursor:pointer;">+</button>
     </div>
     <div id="ttNot" style="font-size:11px;color:var(--ink-faint);margin-top:8px;display:none;"></div>
-    <button type="button" id="ttSifirlaBtn" class="btn small" style="margin-top:8px;display:none;">↺ Temel hesaba dön</button>
+    <button type="button" id="ttSifirlaBtn" class="btn small" style="margin-top:8px;display:none;"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Temel hesaba dön</button>
   `;
 
   const sonucAlani = document.getElementById('ttSonucAlani');
@@ -5737,11 +5774,11 @@ async function analizModalAc(musteriKod, musteriAdi){
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--ink-soft);">FATURA · AYLIK ORTALAMA</div>
-        <div style="font-family:'Space Grotesk';font-size:28px;font-weight:700;color:var(--ink);margin-top:4px;">${TL(ozet.aylikFatura)}</div>
+        <div style="font-family:var(--font-figures);font-size:28px;font-weight:700;color:var(--ink);margin-top:4px;">${TL(ozet.aylikFatura)}</div>
       </div>
       <div style="text-align:right;">
         <div style="font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--ink-soft);">LİTRE</div>
-        <div style="font-family:'Space Grotesk';font-size:19px;font-weight:700;color:var(--ink-soft);margin-top:4px;">${ozet.aylikLitre!=null?Math.round(ozet.aylikLitre).toLocaleString('tr-TR')+' Lt':'—'}</div>
+        <div style="font-family:var(--font-figures);font-size:19px;font-weight:700;color:var(--ink-soft);margin-top:4px;">${ozet.aylikLitre!=null?Math.round(ozet.aylikLitre).toLocaleString('tr-TR')+' Lt':'—'}</div>
       </div>
     </div>
 
@@ -5749,7 +5786,7 @@ async function analizModalAc(musteriKod, musteriAdi){
 
     <div style="font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--ink-soft);margin-bottom:9px;">TAHSİLAT · AYLIK ORTALAMA</div>
     <div style="display:flex;align-items:baseline;justify-content:space-between;">
-      <div style="font-family:'Space Grotesk';font-size:22px;font-weight:700;color:var(--ink);">${TL(ozet.aylikTahsilat)}</div>
+      <div style="font-family:var(--font-figures);font-size:22px;font-weight:700;color:var(--ink);">${TL(ozet.aylikTahsilat)}</div>
       ${ozet.aylikTahsilat>0 ? `<div style="font-size:11px;color:var(--ink-soft);">%${normalYuzde.toFixed(1).replace('.',',')} normal</div>` : ''}
     </div>
     ${ozet.aylikTahsilat>0 ? `
@@ -5766,7 +5803,7 @@ async function analizModalAc(musteriKod, musteriAdi){
 
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
       <div style="display:flex;align-items:center;gap:6px;">
-        <span style="font-size:14px;">⚡</span>
+        <span style="font-size:14px;"><i class="fa-solid fa-bolt" aria-hidden="true"></i></span>
         <span style="font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--accent);">VERİMLİLİK</span>
       </div>
       ${ozet.geriDonusGun!=null ? `<span class="htk-badge-pill" style="background:${geriDonusRenk.soft};color:${geriDonusRenk.renk};">
@@ -5930,7 +5967,7 @@ function renderMusteriTable(report, resetSayfa=true){
         <div style="min-width:0;">
           <div class="htk-musteri-row">
             <span class="htk-musteri">${escapeHtml(m.musteriAdi)}</span>
-            ${isRiskliMusteri(m)?'<span class="badge dikkat" title="Ortalama vade '+VADE_RISK_ESIGI+' gün ve üzeri">⚠️ Dikkat</span>':''}${hakedisRozeti(m.musteri, hakedisKodlari)}
+            ${isRiskliMusteri(m)?'<span class="badge dikkat" title="Ortalama vade '+VADE_RISK_ESIGI+' gün ve üzeri"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Dikkat</span>':''}${hakedisRozeti(m.musteri, hakedisKodlari)}
           </div>
           <div class="htk-temsilci">${HTK_USER_ICON}${escapeHtml(m.temsilci)}</div>
         </div>
@@ -5949,7 +5986,7 @@ function renderMusteriTable(report, resetSayfa=true){
       <div class="htk-alt">
         <span class="htk-ceksenet">Çek/Senet: ${TL(m.cekSenet||0)}</span>
         <div class="htk-alt-actions">
-          <button type="button" class="btn small senet-yazdir-btn" data-musteri="${escapeHtml(m.musteri)}" data-musteri-adi="${escapeHtml(m.musteriAdi)}" data-tutar="${m.siparisTutari||0}" data-emanet="${m.emanetSiparis||0}" data-kalan-borc="${m.kalanBorc||0}">📄 Senet</button>
+          <button type="button" class="btn small senet-yazdir-btn" data-musteri="${escapeHtml(m.musteri)}" data-musteri-adi="${escapeHtml(m.musteriAdi)}" data-tutar="${m.siparisTutari||0}" data-emanet="${m.emanetSiparis||0}" data-kalan-borc="${m.kalanBorc||0}"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Senet</button>
           <button type="button" class="nokta-detay-btn primary fatura-detay-btn" data-musteri-kod="${escapeHtml(m.musteri)}" data-musteri-adi="${escapeHtml(m.musteriAdi)}">Detay ↗</button>
         </div>
       </div>
@@ -6227,7 +6264,7 @@ document.getElementById('senetYazdirBtn').addEventListener('click', ()=>{
 function renderMusteriDetail(m, showSenetBtn){
   let html = `<div class="cust-expanded-head">
     <span class="cust-expanded-risk">Toplam Risk: <b>${TL(m.toplamRisk)}</b></span>
-    ${showSenetBtn ? `<button type="button" class="btn small senet-yazdir-btn" data-musteri="${escapeHtml(m.musteri)}" data-musteri-adi="${escapeHtml(m.musteriAdi)}" data-tutar="${m.siparisTutari||0}" data-emanet="${m.emanetSiparis||0}" data-kalan-borc="${m.kalanBorc||0}">📄 Senet Yazdır</button>` : ''}
+    ${showSenetBtn ? `<button type="button" class="btn small senet-yazdir-btn" data-musteri="${escapeHtml(m.musteri)}" data-musteri-adi="${escapeHtml(m.musteriAdi)}" data-tutar="${m.siparisTutari||0}" data-emanet="${m.emanetSiparis||0}" data-kalan-borc="${m.kalanBorc||0}"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Senet Yazdır</button>` : ''}
   </div>`;
   // Tahsilat kaynak şeffaflığı: gösterilen "Alınan Tahsilat" tutarının ne kadarının normal (nakit)
   // tahsilat, ne kadarının Bozuk İade Faturası / Depozito Tahsilatı kredisi olduğunu gösterir.
@@ -6372,7 +6409,7 @@ function renderSevkMusteriTable(report, resetSayfa=true){
         <div style="min-width:0;">
           <div class="htk-musteri-row">
             <span class="htk-musteri">${escapeHtml(m.musteriAdi)}</span>
-            ${isRiskliMusteri(m)?'<span class="badge dikkat" title="Ortalama vade '+VADE_RISK_ESIGI+' gün ve üzeri">⚠️ Dikkat</span>':''}${bakiyesizEtiket}${hakedisRozeti(m.musteri, hakedisKodlari)}
+            ${isRiskliMusteri(m)?'<span class="badge dikkat" title="Ortalama vade '+VADE_RISK_ESIGI+' gün ve üzeri"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Dikkat</span>':''}${bakiyesizEtiket}${hakedisRozeti(m.musteri, hakedisKodlari)}
           </div>
           <div class="htk-temsilci">${HTK_USER_ICON}${escapeHtml(m.temsilci)}</div>
         </div>
@@ -6391,7 +6428,7 @@ function renderSevkMusteriTable(report, resetSayfa=true){
       <div class="htk-alt">
         <span class="htk-ceksenet">Çek/Senet: ${TL(m.cekSenet||0)}</span>
         <div class="htk-alt-actions">
-          <button type="button" class="btn small senet-yazdir-btn" data-musteri="${escapeHtml(m.musteri)}" data-musteri-adi="${escapeHtml(m.musteriAdi)}" data-tutar="${m.siparisTutari||0}" data-emanet="${m.emanetSiparis||0}" data-kalan-borc="${m.kalanBorc||0}">📄 Senet</button>
+          <button type="button" class="btn small senet-yazdir-btn" data-musteri="${escapeHtml(m.musteri)}" data-musteri-adi="${escapeHtml(m.musteriAdi)}" data-tutar="${m.siparisTutari||0}" data-emanet="${m.emanetSiparis||0}" data-kalan-borc="${m.kalanBorc||0}"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Senet</button>
           <button type="button" class="nokta-detay-btn primary fatura-detay-btn" data-musteri-kod="${escapeHtml(m.musteri)}" data-musteri-adi="${escapeHtml(m.musteriAdi)}">Detay ↗</button>
         </div>
       </div>
@@ -6568,7 +6605,7 @@ async function renderFaturaKontrolTable(report, resetSayfa=true){
         <div style="min-width:0;">
           <div class="htk-musteri-row">
             <span class="htk-musteri">${escapeHtml(m.musteriAdi)}</span>
-            ${isRiskliMusteri(m)?'<span class="badge dikkat" title="Ortalama vade '+VADE_RISK_ESIGI+' gün ve üzeri">⚠️ Dikkat</span>':''}
+            ${isRiskliMusteri(m)?'<span class="badge dikkat" title="Ortalama vade '+VADE_RISK_ESIGI+' gün ve üzeri"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Dikkat</span>':''}
           </div>
           <div class="htk-temsilci">${HTK_USER_ICON}${escapeHtml(m.temsilci)}</div>
         </div>
@@ -6586,7 +6623,7 @@ async function renderFaturaKontrolTable(report, resetSayfa=true){
       <div class="htk-alt">
         <span class="htk-ceksenet">Çek/Senet: ${TL(m.cekSenet||0)}</span>
         <div class="htk-alt-actions">
-          <button type="button" class="btn small senet-yazdir-btn" data-musteri="${escapeHtml(m.musteri)}" data-musteri-adi="${escapeHtml(m.musteriAdi)}" data-tutar="${m.siparisTutari||0}" data-emanet="${m.emanetSiparis||0}" data-kalan-borc="${m.kalanBorc||0}">📄 Senet</button>
+          <button type="button" class="btn small senet-yazdir-btn" data-musteri="${escapeHtml(m.musteri)}" data-musteri-adi="${escapeHtml(m.musteriAdi)}" data-tutar="${m.siparisTutari||0}" data-emanet="${m.emanetSiparis||0}" data-kalan-borc="${m.kalanBorc||0}"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Senet</button>
           <button type="button" class="nokta-detay-btn primary fatura-detay-btn" data-musteri-kod="${escapeHtml(m.musteri)}" data-musteri-adi="${escapeHtml(m.musteriAdi)}">Detay ↗</button>
         </div>
       </div>
@@ -6622,7 +6659,7 @@ async function renderFaturaKontrolArsivBilgi(){
   // Oluştur"a basılırsa yazılır — bugün henüz basılmadıysa kullanıcıyı bilgilendir (bkz.
   // renderTemsilciKarnesiView/Trend Analiz'deki aynı sınırlamayla ilgili notlar).
   const bugunVarMi = !!(arsiv[bugunKeyBilgi] && arsiv[bugunKeyBilgi].musteriSnapshot && arsiv[bugunKeyBilgi].musteriSnapshot.length);
-  const bugunUyarisi = bugunVarMi ? '' : ' ⚠️ Bugün için henüz "Raporu Oluştur"a basılmadı — Kalan Borç/Vade/Risk trend grafiğinde bugünün verisi eksik kalacak.';
+  const bugunUyarisi = bugunVarMi ? '' : ' <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Bugün için henüz "Raporu Oluştur"a basılmadı — Kalan Borç/Vade/Risk trend grafiğinde bugünün verisi eksik kalacak.';
   el.textContent = `Buluttaki arşivde veri var (${fmtDate(new Date(birlesik.ilkGun))} – ${fmtDate(new Date(birlesik.sonGun))}) · ${birlesik.siparisArsiv.length.toLocaleString('tr-TR')} sipariş, ${birlesik.tahsilatArsiv.length.toLocaleString('tr-TR')} tahsilat, ${birlesik.faturaArsiv.length.toLocaleString('tr-TR')} fatura kaydı. ☁️` + bugunUyarisi;
 }
 
@@ -7188,7 +7225,7 @@ function renderYuklemeToplamOzet(report){
         <div class="yukleme-toplam-label">Genel Toplam</div>
         <div class="yukleme-toplam-val">${YUKLEME_TL2(genelToplam)}</div>
       </div>
-      <div class="yukleme-toplam-lt-chip">📦 ${YUKLEME_LT2(g.litre)} Lt sevkiyat</div>
+      <div class="yukleme-toplam-lt-chip"><i class="fa-solid fa-box" aria-hidden="true"></i> ${YUKLEME_LT2(g.litre)} Lt sevkiyat</div>
     </div>
     <div class="yukleme-toplam-bar">${barHTML}</div>
     <div class="yukleme-toplam-legend">${legendHTML}</div>
@@ -7256,8 +7293,8 @@ function renderYuklemeTable(report){
   document.getElementById('yuklemePanel').style.display = 'block';
   document.getElementById('yuklemeTitle').textContent = 'ST Tahsilat/Litre — ' + sevkiyatBaslik;
   document.getElementById('yuklemeSubTitle').innerHTML =
-    `<span class="chip">📅 Tahsilat: ${escapeHtml(fmtDate(report.tahsilatTarihi))}</span>` +
-    `<span class="chip">👥 ${(report.temsilciler||[]).length.toLocaleString('tr-TR')} temsilci</span>`;
+    `<span class="chip"><i class="fa-solid fa-calendar" aria-hidden="true"></i> Tahsilat: ${escapeHtml(fmtDate(report.tahsilatTarihi))}</span>` +
+    `<span class="chip"><i class="fa-solid fa-users" aria-hidden="true"></i> ${(report.temsilciler||[]).length.toLocaleString('tr-TR')} temsilci</span>`;
 }
 
 function yuklemeArsivReviver(key, value){
@@ -7826,7 +7863,7 @@ function faturaKesilmeyenModalRenderList(temsilciKey){
   const r = state.sellOutTemsilciMap && state.sellOutTemsilciMap.get(temsilciKey);
   const list = document.getElementById('faturaKesilmeyenModalList');
   if(!r || !r.faturaKesilmeyenListe.length){
-    list.innerHTML = `<div class="fkns-empty">Tüm aktif noktalara fatura kesilmiş 🎉</div>`;
+    list.innerHTML = `<div class="fkns-empty">Tüm aktif noktalara fatura kesilmiş <i class="fa-solid fa-champagne-glasses" aria-hidden="true"></i></div>`;
     return;
   }
   const noktaSort = state.sellOutNoktaSort.get(temsilciKey) || {key:'adi', dir:1};
@@ -7957,7 +7994,7 @@ function gunKeyEkle(gunKey, deltaGun){
 }
 
 // Ay dropdown'u ve "kaç gün arşivlenmiş" bilgisi için yalnızca gün ANAHTARLARI (shallow=true ile,
-// birkaç KB) bir kez çekilip oturum boyunca önbellekte tutulur; zorla=true (🔄 Yenile) verilirse
+// birkaç KB) bir kez çekilip oturum boyunca önbellekte tutulur; zorla=true (<i class="fa-solid fa-arrow-rotate-right" aria-hidden="true"></i> Yenile) verilirse
 // yeniden indirilir.
 let tvGunAnahtarlariOnbellek = null;
 async function tvGunAnahtarlariniGetir(zorla){
@@ -8184,12 +8221,12 @@ function renderTahsilatVerimlilikKPI(rep){
         ? (fmtDate(new Date(rep.baslangicGunu))+' Kaydına Göre · Yaklaşık (Önceki Ay Verisi Yok, Negatif = Borç Azaldı)')
         : 'Ay Başına Göre (Negatif = Borç Azaldı)');
   const items = [
-    {label:'Toplam Alınan Tahsilat', icon:'💰', value:rep.genel.toplamTahsilat, sub:rep.genel.tahsilatYapilanMusteri.toLocaleString('tr-TR')+' Müşteriden'},
-    {label:'Kalan Borç (Ay Sonu)', icon:'🏦', value:rep.genel.toplamKalanBorc, sub:rep.genel.musteriSayisi.toLocaleString('tr-TR')+' Müşteri'},
-    {label:'Net Cari Değişim (Ay İçi)', icon:'🔁', value:null, display:cariDisplay, sub:cariSub, valueColor:cariRenk},
-    {label:'Genel Tahsilat Oranı', icon:'📈', value:null, display:fmtYuzde(rep.genel.tahsilatOrani), sub:'Nakit Tahsilat / (Nakit Tahsilat + Ay Sonu Kalan Borç)'},
-    {label:'En Verimli Temsilci', icon:'🏆', value:null, display: rep.enVerimli ? rep.enVerimli.temsilci : '—', sub: rep.enVerimli ? (fmtYuzde(rep.enVerimli.tahsilatOrani)+' Oran') : ''},
-    {label:'Tahsilatsız Müşteri', icon:'❗', value:null, display:(rep.genel.musteriSayisi-rep.genel.tahsilatYapilanMusteri).toLocaleString('tr-TR'), sub:'Bu Ay Tahsilat Yapılmayan'},
+    {label:'Toplam Alınan Tahsilat', icon:'<i class="fa-solid fa-coins" aria-hidden="true"></i>', value:rep.genel.toplamTahsilat, sub:rep.genel.tahsilatYapilanMusteri.toLocaleString('tr-TR')+' Müşteriden'},
+    {label:'Kalan Borç (Ay Sonu)', icon:'<i class="fa-solid fa-building-columns" aria-hidden="true"></i>', cls:'neutral', value:rep.genel.toplamKalanBorc, sub:rep.genel.musteriSayisi.toLocaleString('tr-TR')+' Müşteri'},
+    {label:'Net Cari Değişim (Ay İçi)', icon:'<i class="fa-solid fa-repeat" aria-hidden="true"></i>', cls:'accent', value:null, display:cariDisplay, sub:cariSub, valueColor:cariRenk},
+    {label:'Genel Tahsilat Oranı', icon:'<i class="fa-solid fa-chart-line" aria-hidden="true"></i>', cls:'success', value:null, display:fmtYuzde(rep.genel.tahsilatOrani), sub:'Nakit Tahsilat / (Nakit Tahsilat + Ay Sonu Kalan Borç)'},
+    {label:'En Verimli Temsilci', icon:'<i class="fa-solid fa-trophy" aria-hidden="true"></i>', cls:'accent', value:null, display: rep.enVerimli ? rep.enVerimli.temsilci : '—', sub: rep.enVerimli ? (fmtYuzde(rep.enVerimli.tahsilatOrani)+' Oran') : ''},
+    {label:'Tahsilatsız Müşteri', icon:'<i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>', cls:'danger', value:null, display:(rep.genel.musteriSayisi-rep.genel.tahsilatYapilanMusteri).toLocaleString('tr-TR'), sub:'Bu Ay Tahsilat Yapılmayan'},
   ];
   renderKpiHeroRow(items, 'tvKpiGrid');
 }
@@ -8505,11 +8542,11 @@ async function renderDsoTrendView(report, zorla){
     : {arrow:'— durağan', color:'var(--ink-faint)'});
   const yon = dso.degisim>0.5 ? 'Bozulma eğiliminde' : (dso.degisim<-0.5 ? 'İyileşme eğiliminde' : 'Durağan');
   const items = [
-    {label:'Güncel DSO', icon:'📉', value:null, display:Math.round(dso.guncel.dso)+' gün', sub:yon, trend:trendYon},
-    {label:'Arşiv Ortalaması', icon:'📈', value:null, display:Math.round(dso.ortalama)+' gün'},
-    {label:'En İyi Gün', icon:'🏅', value:null, display:Math.round(dso.enIyi.dso)+' gün', sub:fmtDate(new Date(dso.enIyi.gunKey+'T00:00:00'))},
-    {label:'En Kötü Gün', icon:'🚩', value:null, display:Math.round(dso.enKotu.dso)+' gün', sub:fmtDate(new Date(dso.enKotu.gunKey+'T00:00:00'))},
-    {label:'DSO\'yu En Çok Yükselten', icon:'👥', value:null, display:dso.katkilar.length.toLocaleString('tr-TR')+' müşteri'},
+    {label:'Güncel DSO', icon:'<i class="fa-solid fa-arrow-trend-down" aria-hidden="true"></i>', value:null, display:Math.round(dso.guncel.dso)+' gün', sub:yon, trend:trendYon},
+    {label:'Arşiv Ortalaması', icon:'<i class="fa-solid fa-chart-line" aria-hidden="true"></i>', cls:'neutral', value:null, display:Math.round(dso.ortalama)+' gün'},
+    {label:'En İyi Gün', icon:'<i class="fa-solid fa-medal" aria-hidden="true"></i>', cls:'success', value:null, display:Math.round(dso.enIyi.dso)+' gün', sub:fmtDate(new Date(dso.enIyi.gunKey+'T00:00:00'))},
+    {label:'En Kötü Gün', icon:'<i class="fa-solid fa-flag" aria-hidden="true"></i>', cls:'danger', value:null, display:Math.round(dso.enKotu.dso)+' gün', sub:fmtDate(new Date(dso.enKotu.gunKey+'T00:00:00'))},
+    {label:'DSO\'yu En Çok Yükselten', icon:'<i class="fa-solid fa-users" aria-hidden="true"></i>', cls:'warn', value:null, display:dso.katkilar.length.toLocaleString('tr-TR')+' müşteri'},
   ];
   renderKpiHeroRow(items, 'dsoTrendKpiGrid');
   document.getElementById('dsoTrendChartSub').textContent = 'Arşiv Geneli';
@@ -8587,10 +8624,10 @@ async function renderNakitAkisView(report){
     + (veri.oranVarMi ? ' + son aylardaki ortalama tahsilat gerçekleşme oranı (%'+Math.round(oran*100)+')' : ' — geçmiş tahsilat oranı hesaplanamadı, sadece vade bazlı bakiye gösteriliyor');
 
   const items = [
-    {label:'Önümüzdeki 6 Hafta — Vadesi Gelen', icon:'📅', value:veri.toplamVadesiGelen},
-    {label:'Ağırlıklı Beklenen Tahsilat', icon:'⬆️', value:veri.oranVarMi?veri.toplamBeklenen:0, display:veri.oranVarMi?undefined:'—'},
-    {label:'Vadesi Çoktan Geçmiş', icon:'⏰', value:veri.vadesiGecmis, sub:'Ayrıca Takip Gerekir, Tahmine Dahil Değil'},
-    {label:'Gerçekleşme Oranı (Geçmiş Ort.)', icon:'🎯', value:null, display:veri.oranVarMi?('%'+Math.round(veri.oran*100)):'—'},
+    {label:'Önümüzdeki 6 Hafta — Vadesi Gelen', icon:'<i class="fa-solid fa-calendar" aria-hidden="true"></i>', value:veri.toplamVadesiGelen},
+    {label:'Ağırlıklı Beklenen Tahsilat', icon:'<i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i>', cls:'success', value:veri.oranVarMi?veri.toplamBeklenen:0, display:veri.oranVarMi?undefined:'—'},
+    {label:'Vadesi Çoktan Geçmiş', icon:'<i class="fa-solid fa-bell" aria-hidden="true"></i>', cls:'danger', value:veri.vadesiGecmis, sub:'Ayrıca Takip Gerekir, Tahmine Dahil Değil'},
+    {label:'Gerçekleşme Oranı (Geçmiş Ort.)', icon:'<i class="fa-solid fa-bullseye" aria-hidden="true"></i>', cls:'accent', value:null, display:veri.oranVarMi?('%'+Math.round(veri.oran*100)):'—'},
   ];
   renderKpiHeroRow(items, 'nakitAkisKpiGrid');
 
@@ -8688,9 +8725,9 @@ function renderSupheliAlacakView(report){
   const veri = computeSupheliAlacak(report);
   const en90Plus = veri.satirlar[veri.satirlar.length-1];
   const items = [
-    {label:'Toplam Önerilen Karşılık', icon:'⚠️', value:veri.toplamKarsilik, sub: veri.toplamBakiye>0 ? ('Toplam Bakiyenin %'+(veri.toplamKarsilik/veri.toplamBakiye*100).toFixed(1)+"'i") : ''},
-    {label:'90+ Gün Geciken Müşteri', icon:'🚩', value:null, display:veri.hukuki.length.toLocaleString('tr-TR')},
-    {label:'90+ Gün Geciken Bakiye', icon:'🏦', value: en90Plus ? en90Plus.bakiye : 0},
+    {label:'Toplam Önerilen Karşılık', icon:'<i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>', cls:'warn', value:veri.toplamKarsilik, sub: veri.toplamBakiye>0 ? ('Toplam Bakiyenin %'+(veri.toplamKarsilik/veri.toplamBakiye*100).toFixed(1)+"'i") : ''},
+    {label:'90+ Gün Geciken Müşteri', icon:'<i class="fa-solid fa-flag" aria-hidden="true"></i>', cls:'danger', value:null, display:veri.hukuki.length.toLocaleString('tr-TR')},
+    {label:'90+ Gün Geciken Bakiye', icon:'<i class="fa-solid fa-building-columns" aria-hidden="true"></i>', cls:'neutral', value: en90Plus ? en90Plus.bakiye : 0},
   ];
   renderKpiHeroRow(items, 'supheliAlacakKpiGrid');
 
@@ -8875,10 +8912,10 @@ async function renderTemsilciKarnesiView(report, zorla){
   const vadeliRows = karne.rows.filter(r=>r.ortVade!=null);
   const ortVadeEkip = vadeliRows.length ? Math.round(vadeliRows.reduce((a,r)=>a+r.ortVade,0)/vadeliRows.length) : null;
   const items = [
-    {label:'Aktif Temsilci', icon:'👥', value:null, display:karne.rows.length.toLocaleString('tr-TR')},
-    {label:'Hedefi Tutturan', icon:'🎯', value:null, display:hedefiTutturan+' / '+karne.rows.length},
-    {label:'Genel Tahsilat Oranı', icon:'💹', value:null, display:fmtYuzde(karne.genel.tahsilatOrani)},
-    {label:'Ort. Vade (Ekip)', icon:'⏱️', value:null, display: ortVadeEkip!=null ? ortVadeEkip+' gün' : '—'},
+    {label:'Aktif Temsilci', icon:'<i class="fa-solid fa-users" aria-hidden="true"></i>', value:null, display:karne.rows.length.toLocaleString('tr-TR')},
+    {label:'Hedefi Tutturan', icon:'<i class="fa-solid fa-bullseye" aria-hidden="true"></i>', cls:'success', value:null, display:hedefiTutturan+' / '+karne.rows.length},
+    {label:'Genel Tahsilat Oranı', icon:'<i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i>', cls:'accent', value:null, display:fmtYuzde(karne.genel.tahsilatOrani)},
+    {label:'Ort. Vade (Ekip)', icon:'<i class="fa-solid fa-clock" aria-hidden="true"></i>', cls:'neutral', value:null, display: ortVadeEkip!=null ? ortVadeEkip+' gün' : '—'},
   ];
   renderKpiHeroRow(items, 'karneKpiGrid');
 
@@ -8930,7 +8967,7 @@ function karneRiskliModalRenderList(temsilciKey){
   const r = state.karneTemsilciMap && state.karneTemsilciMap.get(temsilciKey);
   const list = document.getElementById('karneRiskliModalList');
   if(!r || !(r.riskliMusteriListe||[]).length){
-    list.innerHTML = `<div class="fkns-empty">Riskli müşteri yok 🎉</div>`;
+    list.innerHTML = `<div class="fkns-empty">Riskli müşteri yok <i class="fa-solid fa-champagne-glasses" aria-hidden="true"></i></div>`;
     return;
   }
   const riskliSort = state.karneRiskliSort.get(temsilciKey) || {key:'ortVade', dir:-1};
@@ -9060,17 +9097,17 @@ async function computeYonetimOzeti(report, zorla){
 function computeYonetimInsights(ozet, karne){
   const insights = [];
   if(ozet.dsoDegisim!=null){
-    if(ozet.dsoDegisim<=-0.5) insights.push('🟢 DSO son 1 haftada '+Math.abs(ozet.dsoDegisim).toFixed(1)+' gün iyileşti');
-    else if(ozet.dsoDegisim>=0.5) insights.push('🟡 DSO son 1 haftada '+ozet.dsoDegisim.toFixed(1)+' gün arttı');
-    else insights.push('➖ DSO son 1 haftada durağan seyretti');
+    if(ozet.dsoDegisim<=-0.5) insights.push('<i class="fa-solid fa-circle" style="color:var(--success);font-size:9px;" aria-hidden="true"></i> DSO son 1 haftada '+Math.abs(ozet.dsoDegisim).toFixed(1)+' gün iyileşti');
+    else if(ozet.dsoDegisim>=0.5) insights.push('<i class="fa-solid fa-circle" style="color:var(--warn);font-size:9px;" aria-hidden="true"></i> DSO son 1 haftada '+ozet.dsoDegisim.toFixed(1)+' gün arttı');
+    else insights.push('<i class="fa-solid fa-minus" style="color:var(--ink-faint);font-size:11px;" aria-hidden="true"></i> DSO son 1 haftada durağan seyretti');
   }
-  if(ozet.dikkatSayisi>0) insights.push('🔴 '+ozet.dikkatSayisi.toLocaleString('tr-TR')+' müşteri 90+ gün gecikmede');
-  insights.push('💰 Bu hafta '+TL(ozet.haftalikTahsilat)+' tahsilat yapıldı');
-  if(ozet.haftalikLitre>0) insights.push('📦 Bu hafta '+Math.round(ozet.haftalikLitre).toLocaleString('tr-TR')+' Lt sevkiyat gerçekleşti');
-  if(ozet.haftalikHakedis>0) insights.push('🏷️ Bu hafta '+TL(ozet.haftalikHakedis)+' bayi hakediş tahakkuk etti');
+  if(ozet.dikkatSayisi>0) insights.push('<i class="fa-solid fa-circle" style="color:var(--danger);font-size:9px;" aria-hidden="true"></i> '+ozet.dikkatSayisi.toLocaleString('tr-TR')+' müşteri 90+ gün gecikmede');
+  insights.push('<i class="fa-solid fa-coins" aria-hidden="true"></i> Bu hafta '+TL(ozet.haftalikTahsilat)+' tahsilat yapıldı');
+  if(ozet.haftalikLitre>0) insights.push('<i class="fa-solid fa-box" aria-hidden="true"></i> Bu hafta '+Math.round(ozet.haftalikLitre).toLocaleString('tr-TR')+' Lt sevkiyat gerçekleşti');
+  if(ozet.haftalikHakedis>0) insights.push('<i class="fa-solid fa-award" aria-hidden="true"></i> Bu hafta '+TL(ozet.haftalikHakedis)+' bayi hakediş tahakkuk etti');
   if(karne && karne.rows && karne.rows.length){
     const enIyi = karne.rows[0];
-    if(enIyi && enIyi.gerceklesme!=null) insights.push('🏆 En yüksek tahsilat gerçekleşmesi: '+enIyi.temsilci+' ('+fmtYuzde(enIyi.gerceklesme)+')');
+    if(enIyi && enIyi.gerceklesme!=null) insights.push('<i class="fa-solid fa-trophy" aria-hidden="true"></i> En yüksek tahsilat gerçekleşmesi: '+enIyi.temsilci+' ('+fmtYuzde(enIyi.gerceklesme)+')');
   }
   return insights;
 }
@@ -9083,10 +9120,10 @@ async function renderYonetimOzetiView(report, zorla){
   document.getElementById('yoAsOf').textContent = 'Otomatik oluşturulan özet · '+fmtDate(new Date())+' itibarıyla, son 7 gün';
 
   const items = [
-    {label:'Toplam Açık Bakiye', icon:'💼', value:ozet.toplamBakiye},
-    {label:'Haftalık Tahsilat', icon:'💵', value:ozet.haftalikTahsilat},
-    {label:'Haftalık Sevkiyat', icon:'📦', value:null, display:Math.round(ozet.haftalikLitre).toLocaleString('tr-TR')+' Lt'},
-    {label:'Dikkat Gerektiren Müşteri', icon:'⚠️', value:null, display:ozet.dikkatSayisi.toLocaleString('tr-TR'), sub:'90+ gün ortalama vade'},
+    {label:'Toplam Açık Bakiye', icon:'<i class="fa-solid fa-briefcase" aria-hidden="true"></i>', value:ozet.toplamBakiye},
+    {label:'Haftalık Tahsilat', icon:'<i class="fa-solid fa-money-bill" aria-hidden="true"></i>', cls:'success', value:ozet.haftalikTahsilat},
+    {label:'Haftalık Sevkiyat', icon:'<i class="fa-solid fa-box" aria-hidden="true"></i>', cls:'neutral', value:null, display:Math.round(ozet.haftalikLitre).toLocaleString('tr-TR')+' Lt'},
+    {label:'Dikkat Gerektiren Müşteri', icon:'<i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>', cls:'warn', value:null, display:ozet.dikkatSayisi.toLocaleString('tr-TR'), sub:'90+ gün ortalama vade'},
   ];
   renderKpiHeroRow(items, 'yoKpiGrid');
 
@@ -9203,11 +9240,11 @@ async function recomputeAndRenderCei(report, zorla){
   const trend = await computeCeiTrend(report, 12, false);
 
   const items = [
-    {label:'Tahsilat Başarı Oranı (CEI)', icon:'🧮', value:null, display:fmtYuzde(ay.cei), sub: ay.baslangicYaklasik?'Yaklaşık (Ay Başı Verisi Yok)':(fmtDate(new Date(ayKey+'-01'))+' Ayı')},
-    {label:'Dönem Başı Bakiye', icon:'📥', value:ay.donemBasiBakiye},
-    {label:'Dönem İçi Satış', icon:'🧾', value:ay.donemIciSatis},
-    {label:'Dönem İçi Tahsilat', icon:'💵', value:ay.tahsilat},
-    {label:'Dönem Sonu Bakiye', icon:'📤', value:ay.donemSonuBakiye},
+    {label:'Tahsilat Başarı Oranı (CEI)', icon:'<i class="fa-solid fa-calculator" aria-hidden="true"></i>', cls:'accent', value:null, display:fmtYuzde(ay.cei), sub: ay.baslangicYaklasik?'Yaklaşık (Ay Başı Verisi Yok)':(fmtDate(new Date(ayKey+'-01'))+' Ayı')},
+    {label:'Dönem Başı Bakiye', icon:'<i class="fa-solid fa-arrow-down" aria-hidden="true"></i>', cls:'neutral', value:ay.donemBasiBakiye},
+    {label:'Dönem İçi Satış', icon:'<i class="fa-solid fa-file-invoice" aria-hidden="true"></i>', value:ay.donemIciSatis},
+    {label:'Dönem İçi Tahsilat', icon:'<i class="fa-solid fa-money-bill" aria-hidden="true"></i>', cls:'success', value:ay.tahsilat},
+    {label:'Dönem Sonu Bakiye', icon:'<i class="fa-solid fa-arrow-up" aria-hidden="true"></i>', cls:'warn', value:ay.donemSonuBakiye},
   ];
   renderKpiHeroRow(items, 'ceiKpiGrid');
 
@@ -9512,7 +9549,7 @@ async function sellOutRaporuOlustur(){
 // SELL OUT RAPORU — AYLIK ARŞİV
 // ============================================================================
 // Sell Out raporunun kendisi (SELLOUT_REPORT_CLOUD_PATH) her yüklemede TEK bir yolun üzerine
-// yazıldığı için geriye dönük veri tutmuyordu. Bu bölüm, kullanıcının "🗄️ Bu Ayı Arşivle" butonuna
+// yazıldığı için geriye dönük veri tutmuyordu. Bu bölüm, kullanıcının "<i class="fa-solid fa-box-archive" aria-hidden="true"></i> Bu Ayı Arşivle" butonuna
 // elle basmasıyla, O ANKİ (hedef overlay uygulanmış) rapor anlık görüntüsünü ayrı bir yola,
 // ayKey (YYYY-MM) altında KALICI olarak kaydeder. Otomatik/periyodik bir arşivleme YOKTUR —
 // kullanıcı ayın sonunda, o ayın son verisiyken elle "Arşivle"ye basmalıdır. Daha sonra "Dönem"
@@ -9751,7 +9788,7 @@ async function renderSellOutView(){
 
   const durumNotu = report.durumVarMi ? '' : " · Müşteri Master'da Durum kolonu bulunamadı, tüm noktalar aktif kabul edildi";
   if(isArsivGoruntuleme){
-    document.getElementById('sellOutAsOf').textContent = '📦 Arşiv: '+fmtDate(new Date(seciliAy+'-01'))+' ayının ('+fmtDate(new Date(report.arsivZamani))+' tarihinde arşivlenmiş) verisi gösteriliyor · '+report.belgeSayisi.toLocaleString('tr-TR')+' satış belgesi'+durumNotu;
+    document.getElementById('sellOutAsOf').textContent = '<i class="fa-solid fa-box" aria-hidden="true"></i> Arşiv: '+fmtDate(new Date(seciliAy+'-01'))+' ayının ('+fmtDate(new Date(report.arsivZamani))+' tarihinde arşivlenmiş) verisi gösteriliyor · '+report.belgeSayisi.toLocaleString('tr-TR')+' satış belgesi'+durumNotu;
   }else{
     document.getElementById('sellOutAsOf').textContent = 'Veri kaynağı: SAPUI5 dışa aktarımı · '+report.belgeSayisi.toLocaleString('tr-TR')+' satış belgesi · '+fmtDate(new Date())+' itibarıyla'+durumNotu;
   }
@@ -9760,7 +9797,7 @@ async function renderSellOutView(){
   if(report.blokajAdet>0){
     const oran = report.toplamNet>0 ? (report.blokajTutar/report.toplamNet*100) : 0;
     alertEl.innerHTML = `<div class="alert-banner">
-      <div class="alert-banner-icon">⚠️</div>
+      <div class="alert-banner-icon"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i></div>
       <div class="alert-banner-text"><strong>${report.blokajAdet.toLocaleString('tr-TR')} kalem faturalama blokajlı</strong>— ${TL(report.blokajTutar)} tutarında muhasebeleşmeyi bekliyor, toplam cironun %${oran.toFixed(1).replace('.',',')}'i.</div>
     </div>`;
   }else{
@@ -9777,11 +9814,11 @@ async function renderSellOutView(){
   const genelGerceklesmeOraniHero = toplamHedefGenelHero>0 ? ((toplamAcikLitreGenel+toplamKapaliLitreGenel)/toplamHedefGenelHero*100) : null;
 
   const items = [
-    {label:'Gerçekleşme Oranı', icon:'🎯', value:null, display: genelGerceklesmeOraniHero!=null?fmtYuzde(genelGerceklesmeOraniHero):'—', sub: `<span style="display:flex;flex-direction:column;align-items:flex-end;gap:1px;"><span style="font-size:9.5px;font-weight:700;letter-spacing:.04em;opacity:.8;">Toplam Litre</span><span style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:800;line-height:1.15;">${Math.round(report.toplamLitre).toLocaleString('tr-TR')} L</span></span>`},
-    {label:'Toplam Açık Kanal LT', icon:'🛢️', value:null, display: LT(toplamAcikLitreGenel)},
-    {label:'Toplam Kapalı Kanal LT', icon:'📦', value:null, display: LT(toplamKapaliLitreGenel)},
-    {label:'Açık Kanal Kalan Litre', icon:'🏪', value:null, display: LT(acikKalanGenel)},
-    {label:'Kapalı Kanal Kalan Litre', icon:'👥', value:null, display: LT(kapaliKalanGenel)},
+    {label:'Gerçekleşme Oranı', icon:'<i class="fa-solid fa-bullseye" aria-hidden="true"></i>', value:null, display: genelGerceklesmeOraniHero!=null?fmtYuzde(genelGerceklesmeOraniHero):'—', sub: `<span style="display:flex;flex-direction:column;align-items:flex-end;gap:1px;"><span style="font-size:9.5px;font-weight:700;letter-spacing:.04em;opacity:.8;">Toplam Litre</span><span style="font-family:var(--font-figures);font-size:19px;font-weight:800;line-height:1.15;">${Math.round(report.toplamLitre).toLocaleString('tr-TR')} L</span></span>`},
+    {label:'Toplam Açık Kanal LT', icon:'<i class="fa-solid fa-box" aria-hidden="true"></i>', cls:'neutral', value:null, display: LT(toplamAcikLitreGenel)},
+    {label:'Toplam Kapalı Kanal LT', icon:'<i class="fa-solid fa-box" aria-hidden="true"></i>', cls:'accent', value:null, display: LT(toplamKapaliLitreGenel)},
+    {label:'Açık Kanal Kalan Litre', icon:'<i class="fa-solid fa-store" aria-hidden="true"></i>', cls:'warn', value:null, display: LT(acikKalanGenel)},
+    {label:'Kapalı Kanal Kalan Litre', icon:'<i class="fa-solid fa-users" aria-hidden="true"></i>', cls:'warn', value:null, display: LT(kapaliKalanGenel)},
   ];
   renderKpiHeroRow(items, 'sellOutKpiGrid');
 
@@ -9837,7 +9874,7 @@ async function renderSellOutView(){
       ${isArsivGoruntuleme ? '' : `<div class="hedef-edit-row">
         <div class="hedef-field"><label>Açık Hedef (L)</label><input type="number" min="0" step="100" class="sellout-hedef-input" data-temsilci-key="${escapeHtml(r.key)}" data-kanal="acik" value="${r.acikHedef||0}"></div>
         <div class="hedef-field"><label>Kapalı Hedef (L)</label><input type="number" min="0" step="100" class="sellout-hedef-input" data-temsilci-key="${escapeHtml(r.key)}" data-kanal="kapali" value="${r.kapaliHedef||0}"></div>
-        <button type="button" class="hedef-kaydet-btn" data-temsilci-key="${escapeHtml(r.key)}" data-temsilci-ad="${escapeHtml(r.temsilci)}">🔒 Kaydet</button>
+        <button type="button" class="hedef-kaydet-btn" data-temsilci-key="${escapeHtml(r.key)}" data-temsilci-ad="${escapeHtml(r.temsilci)}"><i class="fa-solid fa-lock" aria-hidden="true"></i> Kaydet</button>
       </div>`}
 
       <div class="htk-alt" style="margin-top:11px;padding-top:11px;border-top:1px dashed var(--line);">
