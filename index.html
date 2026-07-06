@@ -2,13 +2,17 @@
 <html lang="tr" translate="no">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="google" content="notranslate" />
+<meta name="color-scheme" content="light" />
+<meta name="theme-color" content="#13233F" />
+<meta name="format-detection" content="telephone=no" />
 <title>Keşan Bayi Takip Paneli</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,700&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -32,6 +36,8 @@
     --navy-soft:#E3E8F2;
     --radius:10px;
     --shadow: 0 1px 2px rgba(19,34,63,0.05), 0 8px 24px -12px rgba(19,34,63,0.14);
+    /* Sayfanın yatay iç boşluğu — topbar'ın kenara taşması (bleed) da bununla eşleşir. */
+    --page-pad: clamp(20px, 1.8vw, 36px);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -45,6 +51,11 @@
     text-rendering:optimizeSpeed;
   }
   button,a,.tab-btn,.check-item,input,select,textarea{-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+  /* Klavye kullanıcıları için görünür, tutarlı odak halkası. Fare/dokunmada görünmez (focus-visible). */
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px;}
+  button:focus-visible,a:focus-visible,.tab-btn:focus-visible,[role="button"]:focus-visible,summary:focus-visible,th[role]:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  /* Arka plan kaydırma kilidi — herhangi bir modal açıkken sayfa arkada kaymaz. */
+  body.modal-open{overflow:hidden;}
   @media(prefers-reduced-motion:reduce){
     *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;scroll-behavior:auto !important;}
   }
@@ -52,13 +63,18 @@
     font-family:'Space Grotesk',system-ui,sans-serif;
     letter-spacing:-0.01em;
   }
-  #app{max-width:1320px;margin:0 auto;padding:0 24px 80px;}
+  /* #app her zaman ekranın kullanılabilir genişliğini kaplar (width:100%); max-width yalnızca
+     çok geniş (ultra-wide/5K) ekranlarda satırların okunamayacak kadar uzamasını önleyen bir
+     üst sınırdır — 2560px'e kadar olan tüm yaygın çözünürlüklerde sayfa neredeyse tam genişlikte
+     görünür, daha büyük ekranlarda ise ortalanıp kenarlarda nefes payı bırakır. */
+  #app{width:100%;max-width:2400px;margin:0 auto;padding:0 var(--page-pad) 80px;}
 
   .topbar{
     display:flex;align-items:center;justify-content:space-between;
     flex-wrap:wrap;gap:14px;
     position:sticky;top:0;z-index:40;
-    margin:0 -24px 24px;padding:18px 24px;
+    margin:0 calc(-1 * var(--page-pad)) 24px;
+    padding:calc(18px + env(safe-area-inset-top)) var(--page-pad) 18px;
     background:linear-gradient(135deg,var(--navy) 0%, var(--accent) 100%);
     box-shadow:0 6px 18px -8px rgba(15,27,51,0.35);
     contain:layout style;
@@ -79,7 +95,9 @@
     font-size:12px;letter-spacing:.06em;white-space:nowrap;
   }
   .scroll-top-btn{
-    position:fixed;right:22px;bottom:26px;z-index:60;
+    position:fixed;z-index:60;
+    right:calc(22px + env(safe-area-inset-right));
+    bottom:calc(26px + env(safe-area-inset-bottom));
     width:46px;height:46px;border-radius:50%;
     background:var(--navy);color:#fff;border:none;
     box-shadow:0 8px 20px -6px rgba(19,34,63,0.45);
@@ -409,6 +427,16 @@
     background:var(--surface);border-radius:14px;box-shadow:0 24px 60px -12px rgba(24,34,51,0.35);
     width:100%;max-width:920px;max-height:86vh;display:flex;flex-direction:column;overflow:hidden;
     border:1px solid var(--line);
+  }
+  /* Tüm popup'lar masaüstünde %20 daha geniş VE daha büyük görünsün istendi.
+     zoom, kutunun kendisini (genişlik/yükseklik) ve İÇİNDEKİ HER ŞEYİ (yazı, boşluk,
+     rozetler, ikonlar) tek bir orantıyla büyüttüğü için; her modal ve alt öğesindeki
+     onlarca font-size/padding değerini tek tek değiştirmek yerine tek satırlık, tutarlı
+     bir çözüm. max-height değeri vh (gerçek ekran yüksekliğine göre) olduğundan taşan
+     içerik olursa modal-body zaten kendi içinde kayar (overflow-y:auto).
+     Mobilde (≤760px) uygulanmaz — orada modaller zaten tam genişlik alt-sheet. */
+  @media(min-width:761px){
+    .modal{zoom:1.2;}
   }
   .modal .panel-head{background:linear-gradient(180deg,var(--surface),#FBFCFE);position:relative;padding-right:52px;}
   .modal .panel-head h2{color:var(--ink);}
@@ -745,7 +773,7 @@
 
   @media(max-width:760px){
     #app{padding:0 12px 60px;}
-    .topbar{margin:0 -12px 18px;padding:12px 12px;top:0;}
+    .topbar{margin:0 -12px 18px;padding:calc(12px + env(safe-area-inset-top)) 12px 12px;top:0;}
     .brand{gap:10px;}
     .brand-mark{width:38px;height:38px;font-size:15px;border-radius:9px;}
     .brand h1{font-size:16.5px;}
@@ -760,17 +788,30 @@
     .dropzone .dz-sub{font-size:11.5px;}
     .file-checklist{grid-template-columns:1fr;margin-top:16px;}
 
-    .tabbar{top:64px;padding:5px;border-radius:11px;}
+    .tabbar{top:calc(64px + env(safe-area-inset-top));padding:5px;border-radius:11px;}
     .tab-btn{white-space:nowrap;padding:11px 14px;font-size:13px;flex-shrink:0;min-height:40px;}
 
     .panel-head{padding:14px 14px;}
     .panel-body{padding:14px 14px 16px;}
     .panel-head h2{font-size:14px;}
 
+    /* Modaller mobilde alttan açılan bir "sheet" gibi: ekranın alt kenarına yaslanır,
+       daha fazla dikey alan kullanır ve güvenli alanı (safe-area) hesaba katar. */
+    .modal-overlay{padding:0;align-items:flex-end;}
+    .modal{
+      max-width:none !important;width:100%;max-height:92dvh;
+      border-radius:18px 18px 0 0;border-bottom:none;
+      padding-bottom:env(safe-area-inset-bottom);
+    }
+    .modal-body{overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+
     .toolbar{width:100%;flex-direction:column;align-items:stretch;}
     .toolbar > *{width:100%;}
-    .search-box input{width:100%;box-sizing:border-box;}
-    select.filter-select, input.filter-input{width:100%;box-sizing:border-box;}
+    /* iOS Safari, 16px'ten küçük yazı tipli bir girdiye odaklanınca sayfayı otomatik yakınlaştırır.
+       Mobilde tüm form alanlarını 16px yaparak bu istenmeyen zoom'u engelliyoruz. */
+    .search-box input,select.filter-select,input.filter-input{width:100%;box-sizing:border-box;font-size:16px;}
+    .search-box input{padding-top:10px;padding-bottom:10px;}
+    .search-box svg{top:12px;}
 
     table{font-size:12px;}
     thead th{padding:8px 9px;font-size:10px;}
@@ -4751,7 +4792,7 @@ document.addEventListener('click', (e)=>{
   });
 });
 window.addEventListener('resize', ()=>{ TAB_DROPDOWNS.forEach(d=>{ if(d.menu.classList.contains('open')) openDropdown(d); }); });
-document.querySelector('.tabbar')?.addEventListener('scroll', ()=>closeAllDropdowns());
+document.querySelector('.tabbar')?.addEventListener('scroll', ()=>closeAllDropdowns(), {passive:true});
 
 document.querySelectorAll('.tab-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -5405,49 +5446,6 @@ function cssEscapeYerel(s){
   return (typeof CSS !== 'undefined' && CSS.escape) ? CSS.escape(s) : s.replace(/["\\]/g, '\\$&');
 }
 
-// scrollIntoView({block:'nearest'}) kartın alt kenarını ekranın en dibine SIFIR boşlukla
-// yapıştırıyordu: kart "tam" görünüyor gibi dursa da altında hiç nefes payı kalmıyor, bir alttaki
-// satırdan/karttan hiçbir ipucu görünmüyor ve kaydırma "yetersiz kalmış" gibi hissettiriyordu.
-// Aşağıdaki fonksiyon, sabit (sticky) üstteki topbar+tabbar yüksekliğini hesaba katarak kartın
-// üstünün başlığın arkasında kalmamasını, ALTINDA ise rahat bir boşluk (bir sonraki içeriğin
-// önizlemesi) kalacak şekilde biraz DAHA FAZLA kaydırılmasını sağlar.
-function scrollAcilanKartaGetir(selector){
-  requestAnimationFrame(()=>{
-    requestAnimationFrame(()=>{
-      const el = (typeof selector === 'string') ? document.querySelector(selector) : selector;
-      if(!el) return;
-
-      const topbarEl = document.querySelector('.topbar');
-      const tabbarEl = document.querySelector('.tabbar');
-      const sabitBaslikYuksekligi =
-        (topbarEl ? topbarEl.getBoundingClientRect().height : 0) +
-        (tabbarEl ? tabbarEl.getBoundingClientRect().height : 0);
-
-      const viewportH = window.innerHeight;
-      const rect = el.getBoundingClientRect();
-
-      const ustBosluk = sabitBaslikYuksekligi + 16;                 // başlığın altında bırakılacak pay
-      const altBosluk = Math.max(60, Math.min(220, viewportH * 0.22)); // kartın altında bırakılacak "nefes payı"
-
-      let delta = 0;
-      if(rect.top < ustBosluk){
-        // Kartın üstü sabit başlığın arkasında kalmış: yukarı doğru düzelt.
-        delta = rect.top - ustBosluk;
-      } else if(rect.bottom > viewportH - altBosluk){
-        // Kartın altı ekranın dibine yapışmış — eski "yetersiz kaydırma" hissi tam olarak buydu.
-        // Altta nefes payı kalacak şekilde biraz DAHA FAZLA aşağı kaydır.
-        delta = rect.bottom - (viewportH - altBosluk);
-        // Ama bu ek kaydırma kartın üstünü başlığın arkasına ittirmesin; kart viewport'tan uzun
-        // ise en azından başlangıcı (üst kısmı) görünür kalsın.
-        const yeniUst = rect.top - delta;
-        if(yeniUst < ustBosluk) delta = rect.top - ustBosluk;
-      }
-
-      if(Math.abs(delta) > 1) window.scrollBy({top: delta, behavior:'smooth'});
-    });
-  });
-}
-
 function debounce(fn, delay){
   let timer = null;
   return function(...args){
@@ -5801,9 +5799,6 @@ document.getElementById('faturaModalHakedisBtn').addEventListener('click', ()=>{
 });
 document.getElementById('dikkatModalOverlay').addEventListener('click', (e)=>{
   if(e.target.id === 'dikkatModalOverlay') closeDikkatModal();
-});
-document.addEventListener('keydown', (e)=>{
-  if(e.key === 'Escape' && document.getElementById('dikkatModalOverlay').classList.contains('open')) closeDikkatModal();
 });
 
 function renderDikkatPanel(report){
@@ -9991,6 +9986,109 @@ document.querySelectorAll('th[data-key]').forEach(th=>{
     else if(dirText==='▼') th.setAttribute('aria-sort','descending');
   });
 });
+
+/* ===================================================================
+   Merkezi Modal Yönetimi
+   Uygulamadaki tüm popup'lar .modal-overlay + .open desenini kullanıyor.
+   Önceden yalnızca "Dikkat" modalinde ESC ve kaydırma kilidi vardı;
+   burada aynı davranışı TÜM modallere tek noktadan kazandırıyoruz:
+     • ESC → en üstteki (nested dahil) açık modali kapatır
+     • Herhangi bir modal açıkken arka plan (body) kaymaz
+     • Modal açılınca odak içine taşınır, kapanınca öncekine döner
+     • Tab tuşu odağı modal içinde döngüye sokar (focus trap)
+   =================================================================== */
+(function(){
+  var KAPAT = {
+    dikkatModalOverlay:            typeof closeDikkatModal==='function'            ? closeDikkatModal            : null,
+    faturaModalOverlay:           typeof faturaModalKapat==='function'            ? faturaModalKapat            : null,
+    cekSenetModalOverlay:         typeof cekSenetModalKapat==='function'          ? cekSenetModalKapat          : null,
+    tahsilatTahminiModalOverlay:  typeof tahsilatTahminiModalKapat==='function'   ? tahsilatTahminiModalKapat   : null,
+    analizModalOverlay:           typeof analizModalKapat==='function'            ? analizModalKapat            : null,
+    stokModalOverlay:             typeof stokModalKapat==='function'              ? stokModalKapat              : null,
+    senetModalOverlay:            typeof senetModalKapat==='function'             ? senetModalKapat             : null,
+    hakedisModalOverlay:          typeof hakedisModalKapat==='function'           ? hakedisModalKapat           : null,
+    faturaKesilmeyenModalOverlay: typeof faturaKesilmeyenModalKapat==='function'  ? faturaKesilmeyenModalKapat  : null,
+    karneRiskliModalOverlay:      typeof karneRiskliModalKapat==='function'       ? karneRiskliModalKapat       : null
+  };
+
+  function tumOverlayler(){ return Array.prototype.slice.call(document.querySelectorAll('.modal-overlay')); }
+  function acikOverlayler(){ return tumOverlayler().filter(function(o){ return o.classList.contains('open'); }); }
+  function zIndexOf(el){ var z = parseInt(getComputedStyle(el).zIndex,10); return isNaN(z)?0:z; }
+  function enUsttekiAcik(){
+    var acik = acikOverlayler();
+    if(!acik.length) return null;
+    acik.sort(function(a,b){
+      var dz = zIndexOf(a)-zIndexOf(b);
+      if(dz!==0) return dz;
+      return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
+    });
+    return acik[acik.length-1];
+  }
+  function overlayKapat(overlay){
+    if(!overlay) return;
+    var fn = KAPAT[overlay.id];
+    if(fn){ try{ fn(); }catch(e){ overlay.classList.remove('open'); } }
+    else { overlay.classList.remove('open'); }
+  }
+
+  function kaydirmaKilidiniGuncelle(){
+    document.body.classList.toggle('modal-open', acikOverlayler().length > 0);
+  }
+
+  var oncekiOdak = {};
+  function odaklanabilirler(kok){
+    return Array.prototype.slice.call(kok.querySelectorAll(
+      'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'
+    )).filter(function(el){ return el.offsetWidth>0 || el.offsetHeight>0 || el===document.activeElement; });
+  }
+  function modalAcildi(overlay){
+    oncekiOdak[overlay.id] = document.activeElement;
+    var hedef = overlay.querySelector('.modal-close') || odaklanabilirler(overlay)[0] || overlay;
+    requestAnimationFrame(function(){ try{ hedef.focus({preventScroll:true}); }catch(e){} });
+  }
+  function modalKapandi(overlay){
+    var geri = oncekiOdak[overlay.id];
+    delete oncekiOdak[overlay.id];
+    if(geri && document.contains(geri)){ try{ geri.focus({preventScroll:true}); }catch(e){} }
+  }
+
+  tumOverlayler().forEach(function(overlay){
+    var acikMiydi = overlay.classList.contains('open');
+    new MutationObserver(function(){
+      var acik = overlay.classList.contains('open');
+      if(acik === acikMiydi) return;
+      acikMiydi = acik;
+      kaydirmaKilidiniGuncelle();
+      if(acik) modalAcildi(overlay); else modalKapandi(overlay);
+    }).observe(overlay, {attributes:true, attributeFilter:['class']});
+  });
+  kaydirmaKilidiniGuncelle();
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      var ust = enUsttekiAcik();
+      if(ust){ e.preventDefault(); overlayKapat(ust); }
+      return;
+    }
+    if(e.key === 'Tab'){
+      var ustT = enUsttekiAcik();
+      if(!ustT) return;
+      var od = odaklanabilirler(ustT);
+      if(!od.length){ e.preventDefault(); return; }
+      var ilk = od[0], son = od[od.length-1], akt = document.activeElement;
+      if(e.shiftKey && (akt===ilk || !ustT.contains(akt))){ e.preventDefault(); son.focus(); }
+      else if(!e.shiftKey && (akt===son || !ustT.contains(akt))){ e.preventDefault(); ilk.focus(); }
+    }
+  });
+
+  // Arama girdilerinde mobil klavyenin otomatik düzeltme/büyütmesini kapat (kod ve isim aramaları için).
+  document.querySelectorAll('.search-box input').forEach(function(inp){
+    inp.setAttribute('autocomplete','off');
+    inp.setAttribute('autocorrect','off');
+    inp.setAttribute('autocapitalize','off');
+    inp.setAttribute('spellcheck','false');
+  });
+})();
 
 </script>
 <button type="button" id="scrollTopBtn" class="scroll-top-btn" title="Yukarı çık" aria-label="Sayfanın başına dön">↑</button>
