@@ -647,10 +647,12 @@ async function computeYonetimOzeti(report, zorla){
   const haftaOncesi = gunKeyEkle(bugunKey, -7);
 
   let haftalikTahsilat = 0;
-  (birlesikArsiv.tahsilatArsiv||[]).forEach(r=>{
+  // TAHSİLAT DÖKÜMÜ — YENİ TEK FORMAT (kullanıcı isteği): artık birlesikArsiv.tahsilatArsiv
+  // (Fatura Kontrol'ün eski, artık senkronize edilmeyen günlük snapshot arşivi) DEĞİL, kendi
+  // bağımsız kalıcı arşivi state.tahsilatArsivi (belge no bazlı) okunur.
+  tahsilatArsivindenAralikDiziyeCevir(state.tahsilatArsivi, gunKeyEkle(haftaOncesi,1), bugunKey).forEach(r=>{
     if(!r.belgeTarihi || !musteriTvIcinGecerliMi(r.musteri)) return;
-    const gk = dateKeyLocal(r.belgeTarihi);
-    if(gk && gk>haftaOncesi && gk<=bugunKey) haftalikTahsilat += r.tutar||0;
+    haftalikTahsilat += r.tutar||0;
   });
   let haftalikHakedis = 0;
   (birlesikArsiv.bayiHakedisArsiv||[]).forEach(r=>{
@@ -689,7 +691,7 @@ function computeYonetimInsights(ozet, karne){
   if(ozet.dikkatSayisi>0) insights.push({icon:'fa-triangle-exclamation', cls:'danger', text:ozet.dikkatSayisi.toLocaleString('tr-TR')+' müşteri 90+ gün gecikmede'});
   insights.push({icon:'fa-coins', cls:'success', text:'Bu hafta '+TL(ozet.haftalikTahsilat)+' tahsilat yapıldı'});
   if(ozet.haftalikLitre>0) insights.push({icon:'fa-box', cls:'neutral', text:'Bu hafta '+Math.round(ozet.haftalikLitre).toLocaleString('tr-TR')+' Lt sevkiyat gerçekleşti'});
-  if(ozet.haftalikHakedis>0) insights.push({icon:'fa-award', cls:'accent', text:'Bu hafta '+TL(ozet.haftalikHakedis)+' bayi hakediş tahakkuk etti'});
+  if(ozet.haftalikHakedis>0) insights.push({icon:'fa-award', cls:'accent', text:'Bu hafta '+TLKurus(ozet.haftalikHakedis)+' bayi hakediş tahakkuk etti'});
   if(karne && karne.rows && karne.rows.length){
     const enIyi = karne.rows[0];
     if(enIyi && enIyi.gerceklesme!=null) insights.push({icon:'fa-trophy', cls:'accent', text:'En yüksek tahsilat gerçekleşmesi: '+enIyi.temsilci+' ('+fmtYuzde(enIyi.gerceklesme)+')'});
@@ -787,7 +789,11 @@ async function computeCeiTrend(report, ayAdedi, zorla){
 
 async function populateCeiAySelect(){
   const gunler = Object.keys(state.faturaArsivCache||{}).sort();
-  const aylar = Array.from(new Set(gunler.map(g=>g.slice(0,7)))).sort();
+  // TEMMUZ 2026 ÖNCESİ AYLAR MANUEL OLARAK GİZLENİR (kullanıcı kararı) — bkz. tvMevcutAylar
+  // içindeki aynı notu (06-senet-ve-detay.js). Otomatik günlük snapshot mekanizması sadece
+  // bugünden itibaren çalıştığı için geçmiş aylarda hiçbir zaman "Kalan Borç" fotoğrafı olmayacak.
+  const CEI_MIN_AY_KEY = '2026-07';
+  const aylar = Array.from(new Set(gunler.map(g=>g.slice(0,7)))).filter(ay=> ay>=CEI_MIN_AY_KEY).sort();
   const sel = document.getElementById('ceiAySelect');
   const mevcutSecim = state.ceiAy;
   sel.innerHTML = aylar.map(a=>`<option value="${a}">${fmtDate(new Date(a+'-01'))}</option>`).join('');

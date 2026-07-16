@@ -12,7 +12,7 @@ function dwarn(...a){ if(DEBUG) console.warn(...a); }
 const KANAL_TESHIS = false;
 function ktlog(...a){ if(KANAL_TESHIS) console.log('%c[KANAL]', 'background:#13233F;color:#F3C969;padding:1px 5px;border-radius:3px;', ...a); }
 const state = {
-  files: { kalemler:null, siparis:null, tahsilat:null, cekSenet:null, ticariStok:null, fatura:null, bayiHakedis:null, yukleme:null, musteriMaster:null, ciroPrimi:null, donemselIskonto:null, sellOut:null, depozitoTahsilat:null, cariEkstre:null },
+  files: { kalemler:null, siparis:null, tahsilat:null, cekSenet:null, ticariStok:null, fatura:null, bayiHakedis:null, yukleme:null, musteriMaster:null, ciroPrimi:null, donemselIskonto:null, sellOut:null, cariEkstre:null },
   report: null,
   sort: { key:'kalanBorc', dir:-1 },
   sevkSort: { key:'toplamRisk', dir:-1 },
@@ -26,6 +26,18 @@ const state = {
   // çek hem senet için kullanılır) bu Set'e eklenir ve buildReport bir sonraki çalışmasında o
   // kaydı tahsilat sayar. idb ile cihaza kalıcı kaydedilir.
   cekSenetTahsilOnaylari: new Set(),
+  // ÇEK/SENET RİSKİ — KALICI ARŞİV (kullanıcı isteği): {[anahtar]: {no, musteriKod, musteriAdi,
+  // tahsilatTuru, tutar, vadeTarihi, belgeTarihi, durum:'risk'|'tahsilEdildi'}}. Tahsilat
+  // Dökümü'nden bağımsız, ayrı bir Grup B alanından yüklenir; buildReport bunu HİÇ SİLMEDEN okur
+  // (bkz. cekSenetArsiviniBirlestir). Uygulama açılışında buluttan/cihazdan geri yüklenir.
+  cekSenetArsivi: {},
+  // TAHSİLAT DÖKÜMÜ — YENİ TEK FORMAT, KALICI ARŞİV (kullanıcı isteği): {[belgeNo]: kayit}. Çek/
+  // senetle aynı mimari — buildReport bunu hiç silmeden okur (bkz. tahsilatArsivindenGunlukDiziyeCevir).
+  tahsilatArsivi: {},
+  // Son "Veri Güncelle" / "Raporu Oluştur" sonrasında tespit edilen, arşivde olup yeni yüklenen
+  // Çek/Senet Riski dosyasında YER ALMAYAN kayıtlar — kullanıcıya "Tahsil Edildi mi, İptal mi?"
+  // sorulacak liste (bkz. cekSenetEksikOnayModalAc). Her rapor oluşturmada yeniden hesaplanır.
+  cekSenetEksikKalanlar: [],
   faturaArsivCache: {},
   yuklemeReport: null,
   yuklemeSort: { key:'temsilci', dir:1 },
@@ -45,8 +57,10 @@ const state = {
   stokGunAcikRiskSatirlar: new Set(), // Ürün×temsilci risk detayı genişletilmiş satırların ürün kodları
   malzemelerStok: new Map(), // malzemeKodu -> anlık kullanılabilir stok miktarı (Malzemeler dosyasından)
   musteriMasterDurum: new Map(), // musteri kodu -> 'Aktif' | ham durum metni (Sell Out Raporu FKNS hesaplaması için)
+  musteriMasterKanal: new Map(), // musteri kodu -> 'Açık Kanal' | 'Kapalı Kanal' (Satış Kanalı Tanımı'ndan; Sell Out Raporu Açık/Kapalı Kanal FKNS ayrımı için — bkz. musteriMasterKanalSinifla)
   sellOutHedef: {}, // { [temsilciAdi]: {acik:Number, kapali:Number} } — buluta kayıtlı, şifreyle değiştirilebilir
   sellOutNoktaSort: new Map(), // temsilciKey -> {key:'adi'|'kod', dir:1|-1} — Fatura Kesilmeyen Aktif Noktalar listesi sıralaması
+  faturaKesilmeyenModalKanalFiltre: null, // 'acik'|'kapali'|null — Fatura Kesilmeyen modalı şu an hangi kanala filtrelenmiş açıldı (modal açıkken sort/yön değişikliklerinde filtreyi korumak için)
   karneRiskliSort: new Map(), // temsilciAdi -> {key:'adi'|'kod'|'ortVade', dir:1|-1} — Temsilci Karnesi kartındaki Riskli Müşteriler listesi sıralaması
   sellOutReport: null,
   sellOutSonGuncelleme: null, // Güncel Sell Out verisinin en son ne zaman hesaplandığının ISO zaman damgası (GVY panelinde "Son veri" için)
@@ -305,64 +319,6 @@ async function faturaArsivYenile(zorla){
 // Format A kayıtlarına dokunulmaz.
 //
 // Bu fonksiyon, bir yüklemenin (Format A veya Format B) arşive uygulanması SONUCUNDA tahsilat
-// günlerinin nasıl görüneceğini hesaplar (henüz kaydetmeden/senkronize etmeden). Hem gerçek kayıt
-// (faturaKontrolArsivineKaydetVeSenkronizeEt) hem de Genel Rapor/Sevk Raporu'ndaki "hangi günü
-// göstereyim" hesaplaması (bkz. buildReport) AYNI bu fonksiyonu kullanır; böylece ekranda gösterilen
-// gün ile arşive gerçekten yazılacak gün birbirinden asla sapmaz.
-//
-// mevcutArsivGunler: {gunKey: {tahsilatArsiv:[...], ...}} — arşivin (bu yüklemeden ÖNCEKİ) hali.
-// yeniTahsilatSatirlari: bu yüklemenin ürettiği tahsilat satırları ({musteri,belgeTarihi,tutar,formatKaynagi,gecerli}).
-// tahsilatFormatB: bu yüklemedeki tahsilat dosyası Format B mi.
-// bugunKey: bugünün gün anahtarı (Format A satırları her zaman SADECE bugünün altına yazılır).
-// Dönen: Map<gunKey, tahsilatArsiv satırları[]> — sadece tahsilat verisi olan günleri içerir.
-function tahsilatEfektifGunMapHesapla(mevcutArsivGunler, yeniTahsilatSatirlari, tahsilatFormatB, bugunKey){
-  const sonuc = new Map();
-  Object.keys(mevcutArsivGunler||{}).forEach(gunKey=>{
-    const satirlar = (mevcutArsivGunler[gunKey]||{}).tahsilatArsiv || [];
-    if(satirlar.length) sonuc.set(gunKey, satirlar.slice());
-  });
-
-  if(!tahsilatFormatB){
-    // Format A: eskiden olduğu gibi SADECE bugünün altına, bugünün ÖNCEKİ tahsilat içeriğinin
-    // tamamen yerine geçecek şekilde yazılır (bkz. faturaKontrolArsivineKaydetVeSenkronizeEt'teki
-    // bugununKaydiTaban mantığı — burada sadece gösterim hesaplaması için aynısı simüle edilir).
-    sonuc.set(bugunKey, (yeniTahsilatSatirlari||[]).slice());
-    return sonuc;
-  }
-
-  // Format B — Adım 1: KOŞULLU Format A temizliği. Artık TÜM günlerdeki Format A silinmiyor;
-  // sadece bu yüklemedeki satırların Belge Tarihi günlerine denk gelen günlerdeki Format A silinir.
-  const etkilenenGunler = new Set();
-  (yeniTahsilatSatirlari||[]).forEach(r=>{
-    if(!r || !r.belgeTarihi) return;
-    const gk = dateKeyLocal(new Date(r.belgeTarihi));
-    if(gk) etkilenenGunler.add(gk);
-  });
-  etkilenenGunler.forEach(gunKey=>{
-    const mevcut = sonuc.get(gunKey) || [];
-    const temiz = mevcut.filter(r=> r.formatKaynagi !== 'A');
-    if(temiz.length) sonuc.set(gunKey, temiz); else sonuc.delete(gunKey);
-  });
-
-  // Adım 2: Format B satırları kendi Belge Tarihi günlerine dağıtılır; veri gelen günlerin Format B
-  // kısmı TAMAMEN bu yüklemenin satırlarıyla değiştirilir (o günün Format A'sı varsa -yukarıdaki
-  // koşullu temizlikten sağ çıkmışsa- korunur), veri gelmeyen günlere dokunulmaz.
-  const gunBazliYeni = new Map();
-  (yeniTahsilatSatirlari||[]).forEach(r=>{
-    if(!r || !r.belgeTarihi) return;
-    const gk = dateKeyLocal(new Date(r.belgeTarihi));
-    if(!gk) return;
-    if(!gunBazliYeni.has(gk)) gunBazliYeni.set(gk, []);
-    gunBazliYeni.get(gk).push(r);
-  });
-  gunBazliYeni.forEach((satirlar, gunKey)=>{
-    const mevcutGun = sonuc.get(gunKey) || [];
-    const eskiFormatA = mevcutGun.filter(r=> r.formatKaynagi === 'A');
-    sonuc.set(gunKey, eskiFormatA.concat(satirlar));
-  });
-
-  return sonuc;
-}
 
 // Fatura Dökümü ve Bayi Hak Ediş İÇİN GENEL GÜN BAZLI DAĞITIM
 // ESKİ KURAL (artık geçerli değil): bu iki dosyanın TÜM satırları, kendi tarihleri ne olursa olsun,
@@ -393,9 +349,9 @@ function arsivGunlereDagitVeDegistir(mevcutArsivGunler, yeniSatirlar, tarihAlani
   return {arsiv: yeniArsiv, etkilenenGunSayisi: gunBazliYeni.size};
 }
 
-// Fatura Dökümü'ndeki "Bozuk İade Faturası" ve Depozito Tahsilatı dosyasındaki (Fatura Belge No'lu)
-// satırlarından türeyen tahsilat kredilerini (bkz. buildReport'taki bozukIadeTahsilat/depozitoTahsilat)
-// kendi tarihlerine göre ilgili arşiv gününün tahsilatArsiv'ine ekler. Tahsilat Format A/B
+// Fatura Dökümü'ndeki İade Grubu'ndan (Bozuk İade Faturası / Sağlam İade Faturası / Depozito İade
+// Faturası — bkz. buildReport'taki bozukIadeTahsilat) türeyen tahsilat kredilerini kendi
+// tarihlerine göre ilgili arşiv gününün tahsilatArsiv'ine ekler. Tahsilat Format A/B
 // mekanizmasından TAMAMEN BAĞIMSIZDIR — sadece o günün ÖNCEDEN eklenmiş, AYNI etikete sahip
 // satırlarını bu yüklemenin güncel haliyle değiştirir (mükerrer birikmeyi önlemek için), diğer TÜM
 // tahsilat kayıtlarına (Format A/B veya farklı etiketli krediler) dokunmaz.
@@ -431,31 +387,14 @@ async function faturaKontrolArsivineKaydetVeSenkronizeEt(report){
   await faturaArsivYenile();
   const eskiArsivTumu = state.faturaArsivCache || {}; // GERÇEK önceki durum — buluta PATCH farkı bunun üzerinden hesaplanır
 
-  // Bu yüklemede tahsilat dosyası Format B (nihai rapor) ise: önce SADECE bu yüklemedeki satırların
-  // Belge Tarihi günlerine denk gelen günlerdeki Format A kayıtları silinir (artık koşulsuz/TÜM
-  // günler silinmiyor), sonra Format B satırları KENDİ Belge Tarihi günlerine dağıtılır ve o günlerin
-  // Format B kısmı TAMAMEN bu yüklemenin verisiyle değiştirilir (bkz. tahsilatEfektifGunMapHesapla —
-  // Genel Rapor/Sevk Raporu'ndaki gösterim hesaplamasıyla AYNI fonksiyon). Tahsilat dosyası Format A
-  // ise (veya bu yüklemede tahsilat dosyası hiç yoksa), tahsilat eskisi gibi SADECE bugünün
-  // (bugunKey) altına yazılır.
+  // TAHSİLAT DÖKÜMÜ ARTIK BU FONKSİYONUN DIŞINDA YÖNETİLİYOR (kullanıcı isteği — eski Format A/B
+  // ayrımı tamamen kaldırıldı). Yeni tek-format tahsilat, kendi bağımsız kalıcı arşivinde
+  // (state.tahsilatArsivi, belge no bazlı) yaşıyor — bkz. tahsilatArsiviniBirlestir ve bunun
+  // raporuOlusturVeyaGuncelleAkisiniCalistir içinde buildReport'tan ÖNCE çağrılması (çek/senet
+  // arşiviyle birebir aynı desen). Bu fonksiyon (faturaKontrolArsivineKaydetVeSenkronizeEt) artık
+  // tahsilata hiç dokunmuyor — Fatura Kontrol'ün günlük musteriSnapshot arşivi ile tahsilatın
+  // kalıcı arşivi birbirinden TAMAMEN BAĞIMSIZ iki ayrı veri kaynağıdır.
   let calismaArsivi = eskiArsivTumu;
-  if(report.tahsilatFormatB){
-    const efektifGunMap = tahsilatEfektifGunMapHesapla(calismaArsivi, report.tahsilatArsiv || [], true, bugunKey);
-    const guncellenmisArsiv = Object.assign({}, calismaArsivi);
-    efektifGunMap.forEach((satirlar, gunKey)=>{
-      const mevcutGun = guncellenmisArsiv[gunKey] || {};
-      guncellenmisArsiv[gunKey] = Object.assign({}, mevcutGun, {tahsilatArsiv: satirlar});
-    });
-    // efektifGunMap'te artık yer almayan (Format A temizliğiyle tamamen boşalmış) günlerin
-    // tahsilatArsiv'i de boşaltılır.
-    Object.keys(calismaArsivi).forEach(gunKey=>{
-      const eskiSatirlar = (calismaArsivi[gunKey]||{}).tahsilatArsiv || [];
-      if(eskiSatirlar.length && !efektifGunMap.has(gunKey)){
-        guncellenmisArsiv[gunKey] = Object.assign({}, guncellenmisArsiv[gunKey], {tahsilatArsiv: []});
-      }
-    });
-    calismaArsivi = guncellenmisArsiv;
-  }
 
   const {arsiv: siparisIslenmisArsiv} = siparisArsivGunlereDagitVeTemizle(calismaArsivi, report.siparisArsiv || []);
 
@@ -467,46 +406,50 @@ async function faturaKontrolArsivineKaydetVeSenkronizeEt(report){
   const {arsiv: faturaIslenmisArsiv} = arsivGunlereDagitVeDegistir(siparisIslenmisArsiv, report.faturaArsiv || [], 'faturaTarihi', 'faturaArsiv');
   const {arsiv: hakedisIslenmisArsiv} = arsivGunlereDagitVeDegistir(faturaIslenmisArsiv, report.bayiHakedis || [], 'tahsilatTarihi', 'bayiHakedisArsiv');
 
-  // Fatura Dökümü'ndeki "Bozuk İade Faturası" ve Depozito Tahsilatı dosyasındaki (Fatura Belge
-  // No'lu) satırlarından türeyen tahsilat kredileri (bkz. buildReport'taki bozukIadeTahsilat/
-  // depozitoTahsilat), Tahsilat Format A/B mekanizmasından TAMAMEN BAĞIMSIZ olarak, kendi
-  // tarihlerine göre ilgili arşiv gününün tahsilatArsiv'ine eklenir/güncellenir — sadece o günün
-  // ÖNCEDEN eklenmiş AYNI etiketli satırları bu yüklemenin güncel haliyle değiştirilir, diğer tüm
-  // Format A/B tahsilat kayıtlarına dokunulmaz (bkz. tahsilatKredisiGunlereEkleVeDegistir).
+  // Fatura Dökümü'ndeki İade grubundan (Bozuk İade Faturası / Sağlam İade Faturası / Depozito İade
+  // Faturası — bkz. buildReport'taki bozukIadeTahsilat) türeyen tahsilat kredileri, Tahsilat Format
+  // A/B mekanizmasından TAMAMEN BAĞIMSIZ olarak, kendi tarihlerine göre ilgili arşiv gününün
+  // tahsilatArsiv'ine eklenir/güncellenir — sadece o günün ÖNCEDEN eklenmiş AYNI etiketli satırları
+  // bu yüklemenin güncel haliyle değiştirilir, diğer tüm Format A/B tahsilat kayıtlarına dokunulmaz
+  // (bkz. tahsilatKredisiGunlereEkleVeDegistir).
+  // NOT: Depozito Tahsilat dosyası (ayrı bir dosya/kaynak) SİSTEMDEN TAMAMEN KALDIRILDI (kullanıcı
+  // kararı) — Depozito İade artık yalnızca Fatura Dökümü'ndeki "Depozito İade Faturası" türünden,
+  // yukarıdaki bozukIadeTahsilat listesi üzerinden geliyor. Bu yüzden ayrı bir
+  // 'DepozitoTahsilat' etiketli ikinci dağıtım adımına gerek kalmadı.
   const {arsiv: bozukIadeIslenmisArsiv} = tahsilatKredisiGunlereEkleVeDegistir(hakedisIslenmisArsiv, report.bozukIadeTahsilat || [], 'FaturaIade');
-  const {arsiv: depozitoIslenmisArsiv} = tahsilatKredisiGunlereEkleVeDegistir(bozukIadeIslenmisArsiv, report.depozitoTahsilat || [], 'DepozitoTahsilat');
 
-  // ÖNEMLİ: Sipariş/Fatura/Bayi Hak Ediş/Bozuk İade/Depozito Tahsilat verileri BUGÜNÜN altına değil,
-  // kendi tarihlerine göre FARKLI arşiv günlerine dağıtılabiliyor (yukarıdaki dağıtım adımları).
-  // "Arşiv Verisi" panelindeki "Son güncelleme" göstergesi bu tipler için doğru çalışabilsin diye,
-  // kayitZamani SADECE bugünün kaydına değil, bu yüklemede GERÇEKTEN İÇERİĞİ DEĞİŞEN tüm günlere
-  // yazılır — böylece bir dosya bugün yüklense bile içindeki satırlar geçmiş bir tarihe (örn. Fatura
-  // Tarihi 3 gün önceyse) dağıtılmış olsa dahi, o günün kaydında da doğru "ne zaman yüklendi" bilgisi
-  // bulunur (bkz. gvyTipiIcinSonKayitZamani).
+  // ÖNEMLİ: Sipariş/Fatura/Bayi Hak Ediş/İade Grubu verileri BUGÜNÜN altına değil, kendi tarihlerine
+  // göre FARKLI arşiv günlerine dağıtılabiliyor (yukarıdaki dağıtım adımları). "Arşiv Verisi"
+  // panelindeki "Son güncelleme" göstergesi bu tipler için doğru çalışabilsin diye, kayitZamani
+  // SADECE bugünün kaydına değil, bu yüklemede GERÇEKTEN İÇERİĞİ DEĞİŞEN tüm günlere yazılır —
+  // böylece bir dosya bugün yüklense bile içindeki satırlar geçmiş bir tarihe (örn. Fatura Tarihi 3
+  // gün önceyse) dağıtılmış olsa dahi, o günün kaydında da doğru "ne zaman yüklendi" bilgisi bulunur
+  // (bkz. gvyTipiIcinSonKayitZamani).
   const simdiIso = new Date().toISOString();
-  const dagitimdaDegisenGunler = faturaKontrolArsivGunFarkiniBul(eskiArsivTumu, depozitoIslenmisArsiv);
-  const depozitoIslenmisArsivZamanDamgali = Object.assign({}, depozitoIslenmisArsiv);
+  const dagitimdaDegisenGunler = faturaKontrolArsivGunFarkiniBul(eskiArsivTumu, bozukIadeIslenmisArsiv);
+  const islenmisArsivZamanDamgali = Object.assign({}, bozukIadeIslenmisArsiv);
   Object.keys(dagitimdaDegisenGunler).forEach(gunKey=>{
     if(gunKey === bugunKey) return; // bugünün kaydına zaten aşağıda ayrıca yazılıyor
-    if(!depozitoIslenmisArsivZamanDamgali[gunKey]) return; // silinmiş (null) günlere dokunma
-    depozitoIslenmisArsivZamanDamgali[gunKey] = Object.assign({}, depozitoIslenmisArsivZamanDamgali[gunKey], {kayitZamani: simdiIso});
+    if(!islenmisArsivZamanDamgali[gunKey]) return; // silinmiş (null) günlere dokunma
+    islenmisArsivZamanDamgali[gunKey] = Object.assign({}, islenmisArsivZamanDamgali[gunKey], {kayitZamani: simdiIso});
   });
 
   // Müşteri Snapshot: bu SADECE bugünün altına yazılmaya devam eder — çünkü bu, Kalemler
   // dosyasının o ANKİ (rapor oluşturma anındaki) donmuş bakiye özetidir; geçmiş bir tarihe
   // dağıtılamaz (geçmişe dönük yeniden hesaplanamaz). Rapor oluşturmadığınız günler için bu alan
   // hâlâ boş kalır — bu, arşivin doğası gereği kaçınılmazdır.
-  const bugunGunOncesi = depozitoIslenmisArsivZamanDamgali[bugunKey] || {};
-  const bugununKaydiTaban = report.tahsilatFormatB
-    ? bugunGunOncesi
-    // Format A: SADECE bugünün 'A' etiketli kısmı bu yüklemenin yeni satırlarıyla değiştirilir;
-    // 'B', 'FaturaIade' (Bozuk İade kredisi) ve 'DepozitoTahsilat' etiketli kayıtlara dokunulmaz.
-    : Object.assign({}, bugunGunOncesi, {tahsilatArsiv: (bugunGunOncesi.tahsilatArsiv||[]).filter(r=>r.formatKaynagi!=='A').concat(report.tahsilatArsiv || [])});
+  const bugunGunOncesi = islenmisArsivZamanDamgali[bugunKey] || {};
+  // bugununKaydiTaban artık tahsilatArsiv alanına HİÇ DOKUNMUYOR (kullanıcı isteği — Format A/B
+  // ayrımı kalktı, tahsilat bu fonksiyondan tamamen bağımsız kendi kalıcı arşivinde yönetiliyor).
+  // 'FaturaIade' etiketli krediler zaten yukarıdaki dağıtım adımıyla (tahsilatKredisiGunlereEkleVeDegistir)
+  // bu günün tahsilatArsiv'ine ayrıca eklenmiş olabilir — onlara da dokunulmaz, bugunGunOncesi
+  // olduğu gibi taban alınır.
+  const bugununKaydiTaban = bugunGunOncesi;
   const bugununKaydi = Object.assign({}, bugununKaydiTaban, {
     musteriSnapshot: musteriSnapshotUzun,
     kayitZamani: simdiIso,
   });
-  const yeniArsivTumu = Object.assign({}, depozitoIslenmisArsivZamanDamgali, {[bugunKey]: bugununKaydi});
+  const yeniArsivTumu = Object.assign({}, islenmisArsivZamanDamgali, {[bugunKey]: bugununKaydi});
 
   // Yerel önbellek her durumda güncellenir; Trend/Tahsilat Verimliliği gibi ekranlar bugünün
   // verisini hemen görsün.
@@ -941,7 +884,7 @@ function ortakSifreDogrula(mesaj){
 }
 
 const CLOUD = {
-  dbUrl: 'https://test-82b8f-default-rtdb.europe-west1.firebasedatabase.app',
+  dbUrl: 'https://bayrampasa-3d357-default-rtdb.europe-west1.firebasedatabase.app',
   path: 'nokta_cari_rapor_v1',
 };
 // Yükleme sırası: debounce, 04-genel-bakis.js top-level kodunda kullanıldığı için çekirdekte tanımlanır.
@@ -982,3 +925,304 @@ function wireSearchClear(inputId, btnId, renderFn){
     input.focus();
   });
 }
+
+/* =====================================================================
+   ÇEK / SENET RİSKİ — KALICI ARŞİV (kullanıcı isteği)
+   Bu dosya artık Tahsilat Dökümü'nden BAĞIMSIZ, kendi Grup B alanından yüklenir ve KALICI olarak
+   arşivlenir. Kural (aynen kullanıcının tarif ettiği gibi):
+     • Yeni yüklemede AYNI Çek/Senet Numarası varsa → o kayıt GÜNCELLENİR (güncel hali kazanır).
+     • Yeni yüklemede OLMAYAN bir numara (eski arşivde varken) → SİLİNMEZ, "eksik" olarak işaretlenir
+       ve kullanıcıya sorulur (bkz. cekSenetArsivEksikleriBul / rapor oluşturma akışındaki tetikleyici).
+     • Kullanıcı bir eksik kayıt için "Tahsil Edildi" derse → durum='tahsilEdildi' olur, finansal/trend
+       hesaplarında TAHSİLAT olarak sayılır, risk olmaktan çıkar, kalıcı arşivde SİLİNMEDEN durur.
+     • Kullanıcı "İptal" derse → kayıt arşivden KALICI OLARAK SİLİNİR. İptal her zaman (tahsil
+       edilmemiş HERHANGİ bir kayıt için) uygulanabilir; yalnızca zaten "tahsilEdildi" olan bir kayıt
+       İptal edilemez (kullanıcı kuralı — tahsil edilmiş kayıt üzerinde geri dönüş yok).
+   Arşiv, {[cekSenetNo]: kayit} şeklinde bir obje (Map değil — JSON/Firebase uyumlu düz obje) olarak
+   saklanır; cekSenetNo tanımlı olmayan (boş) satırlar için sırayla üretilen "no-satırIndex" anahtarı
+   kullanılır (yine de benzersiz olması ve kaybolmaması için).
+   ===================================================================== */
+const CEK_SENET_ARSIV_CLOUD_PATH = CLOUD.path + '_cekSenetArsivi';
+const CEK_SENET_ARSIV_LOCAL_KEY = 'noktaCariTakip_cekSenetArsivi_v1';
+
+function cekSenetKayitAnahtari(no, satirIndex){
+  const n = String(no==null?'':no).trim();
+  return n ? ('no:'+n) : ('satir:'+satirIndex);
+}
+
+// Yeni yüklenen ham satırları {anahtar: kayit} haline getirir (henüz mevcut arşivle birleştirmez).
+function cekSenetSatirlariniNormalizeEt(rows){
+  const sonuc = {};
+  (rows||[]).forEach((r,i)=>{
+    const musteriKod = String(r['Müşteri Kodu']||'').trim();
+    if(!musteriKod) return;
+    const no = r['Çek/Senet Numarası'];
+    const anahtar = cekSenetKayitAnahtari(no, i);
+    const odemeTipiHam = String(r['Ödeme Tipi']||'').trim();
+    const odemeTipi = odemeTipiHam.toLocaleLowerCase('tr-TR');
+    const tahsilatTuru = odemeTipi.includes('çek') ? 'Cek' : (odemeTipi.includes('senet') ? 'Senet' : 'Diger');
+    const vadeTarihi = excelDateToJSArti1Gun(r['Net Vade Tarihi']);
+    const belgeTarihi = excelDateToJSArti1Gun(r['Belge Tarihi']);
+    sonuc[anahtar] = {
+      no: no!=null ? String(no).trim() : '',
+      musteriKod, musteriAdi: String(r['Müşteri Adı']||'').trim(),
+      tahsilatTuru, odemeTipiHam,
+      tutar: Math.abs(Number(r['Tutar'])||0),
+      vadeTarihi: vadeTarihi ? vadeTarihi.toISOString() : null,
+      belgeTarihi: belgeTarihi ? belgeTarihi.toISOString() : null,
+      durum: 'risk', // 'risk' | 'tahsilEdildi'
+      sonGorulduguYukleme: dateKeyLocal(turkiyeBugun()),
+    };
+  });
+  return sonuc;
+}
+
+// Mevcut kalıcı arşiv ile yeni yüklemeyi birleştirir. DÖNÜŞ: {arsiv, eksikKalanlar}
+//   arsiv: güncellenmiş {anahtar: kayit} objesi (henüz kaydedilmedi — çağıran taraf kaydeder)
+//   eksikKalanlar: eski arşivde olup yeni yüklemede YER ALMAYAN, henüz 'tahsilEdildi' olmayan kayıtlar
+function cekSenetArsiviniBirlestir(mevcutArsiv, yeniRows){
+  const yeni = cekSenetSatirlariniNormalizeEt(yeniRows);
+  const arsiv = Object.assign({}, mevcutArsiv||{});
+  const eksikKalanlar = [];
+  // 1) Yeni gelenler: ekle veya güncelle (durum 'tahsilEdildi' ise bile, aynı no tekrar geldiğinde
+  //    ham veriler güncellenir ama durum korunur — kullanıcı onayını kaybetmeyelim).
+  Object.keys(yeni).forEach(anahtar=>{
+    const eski = arsiv[anahtar];
+    const yeniKayit = yeni[anahtar];
+    if(eski) yeniKayit.durum = eski.durum; // önceki karar (risk/tahsilEdildi) korunur
+    arsiv[anahtar] = yeniKayit;
+  });
+  // 2) Eski arşivde olup bu yüklemede gelmeyenler: silinmez, 'eksik' listesine düşer (zaten
+  //    tahsilEdildi olanlar tekrar sorulmasın — onlar için karar zaten verilmiş).
+  Object.keys(arsiv).forEach(anahtar=>{
+    if(yeni[anahtar]) return; // bu yüklemede geldi, eksik değil
+    const kayit = arsiv[anahtar];
+    if(kayit.durum === 'tahsilEdildi') return; // karar verilmiş, tekrar sorma
+    eksikKalanlar.push(Object.assign({anahtar}, kayit));
+  });
+  return {arsiv, eksikKalanlar};
+}
+
+async function cekSenetArsiviniKaydet(arsiv){
+  const ok = await idbSet(CEK_SENET_ARSIV_LOCAL_KEY, arsiv);
+  if(!ok) console.error('Çek/Senet arşivi cihaza kaydedilemedi.');
+  if(!cloudEnabled()) return;
+  try{
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${CEK_SENET_ARSIV_CLOUD_PATH}.json${await authQuery()}`, {
+      method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(arsiv),
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const simdi = Date.now();
+    await cloudMetaYazUzaktan(CEK_SENET_ARSIV_CLOUD_PATH, simdi);
+    await cloudMetaZamaniKaydet(CEK_SENET_ARSIV_CLOUD_PATH, simdi);
+  }catch(err){ console.error('Çek/Senet arşivi buluta kaydedilemedi:', err); }
+}
+
+async function cekSenetArsiviniOku(){
+  if(cloudEnabled()){
+    try{
+      const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${CEK_SENET_ARSIV_CLOUD_PATH}.json${await authQuery()}`);
+      if(res.ok){ const text = await res.text(); if(text && text!=='null') return JSON.parse(text); }
+    }catch(err){ console.error('Çek/Senet arşivi buluttan okunamadı:', err); }
+  }
+  try{ return (await idbGet(CEK_SENET_ARSIV_LOCAL_KEY)) || {}; }catch(_){ return {}; }
+}
+
+/* =====================================================================
+   TAHSİLAT DÖKÜMÜ — YENİ TEK FORMAT, KALICI ARŞİV (kullanıcı isteği)
+   Eski Format A (geçici/Ön Kayıt) + Format B (kalıcı/nihai) ayrımı TAMAMEN KALDIRILDI. Artık tek
+   bir dosya formatı var (kolonlar: Belge Numarası, Belge Türü, Belge Tipi, Müşteri, Tarih, Ödeme
+   Tipi, Tutar, Ters Kayıt Belge Numarası, Satış Temsilcisi, Banka). Kurallar:
+     • Belge Tipi (Ön Kayıt/Gerçek Kayıt) artık hiçbir ayrım yapmaz — hepsi tahsilat sayılır.
+     • Çek/Senet satırları (Ödeme Tipi='Alınan Çek'/'Alınan Senet') es geçilir — o veri artık ayrı
+       "Çek/Senet Riski" modülünden yönetiliyor.
+     • Belge Türü sınıflandırması: 'Müşteri Tahsilat' → normal tahsilat; 'Hizmet Alış Fatura' →
+       Hakediş tahsilatı; 'Ödeme' → müşteri faturası/tahsilatı (işaretine göre iki yönlü);
+       'Virman' → aynı Belge Numarası altında bir müşteride pozitif (o günün tahsilatından
+       DÜŞÜLÜR), diğerinde negatif (o günün tahsilatına EKLENİR).
+     • Ters Kayıt Belge Numarası dolu bir satır geldiğinde: satırın kendisi VE arşivde/dosya
+       içinde o numaraya sahip kayıt, ikisi de silinir/es geçilir (bir işlem + iptali = yok
+       sayılır). Bu kontrol HER yüklemede hem dosya içinde hem dosya-arşiv arasında tekrarlanır.
+     • Kayıtlar Belge Numarası bazlı KALICI arşivde saklanır — çek/senet arşiviyle birebir aynı
+       mimari: aynı belge no gelirse günceller, yeni no eklenir, ters kayıt eşleşirse ikisi de
+       silinir. Bu YIL BOYUNCA TEK SEFERDE toplu yüklenen bir dosyanın (binlerce satır, karışık
+       tarihli) her satırı kendi Tarih gününe doğru dağıtılabilsin, sonraki KISMİ (ör. son hafta)
+       yüklemeler diğer günlere/aylara DOKUNMASIN diye bilinçli olarak böyle tasarlandı.
+   Arşiv yapısı: {[belgeNo]: {belgeNo, musteriKod, musteriAdi, tarih(ISO), tutar, tahsilatKategori,
+   odemeEtiketi, satisTemsilcisi, tersKayitNo}} — düz obje (Map değil, JSON/Firebase uyumlu).
+   ===================================================================== */
+const TAHSILAT_ARSIV_CLOUD_PATH = CLOUD.path + '_tahsilatArsivi';
+const TAHSILAT_ARSIV_LOCAL_KEY = 'noktaCariTakip_tahsilatArsivi_v1';
+
+// Banka adından Kredi Kartı alt-etiketini üretir (SADECE Ödeme Tipi='Kredi Kartı' satırlarında
+// kullanılır) — buildYuklemeRaporu'ndaki yuklemeOdemeEtiketi ile BİREBİR AYNI kural (kullanıcı:
+// "sıfırlandırılma kodları var onları kopyalayabilirsin").
+function tahsilatBankaAltEtiketi(odemeTipi, banka){
+  const ot = String(odemeTipi||'').trim();
+  if(ot !== 'Kredi Kartı') return ot || 'Diğer';
+  const b = String(banka||'').trim();
+  if(!b) return 'Kredi Kartı';
+  if(/ziraat/i.test(b) || /yapı\s*ve\s*kredi/i.test(b) || /yapı\s*kredi/i.test(b)) return 'Kredi Kartı (SÜPÜRME)';
+  let kisa = b.replace(/Türkiye Cumhuriyeti/gi,'').replace(/^Türkiye\s+/i,'').trim();
+  kisa = kisa.replace(/Bankası\s*A\.Ş\.?/i,'Bankası').trim();
+  return kisa ? `Kredi Kartı (${kisa})` : 'Kredi Kartı';
+}
+
+// Ham Excel satırlarını {belgeNo: kayit} haline getirir. Çek/Senet satırları elenir. Her satıra
+// Belge Türü'ne göre tahsilatKategori ve işaretli tutar (isaretliTutar) atanır — Virman/Ödeme'nin
+// iki yönlü davranışı burada, KAYNAKTA çözülür ki sonraki toplama kodu tek tip işaretli tutarı
+// basitçe toplasın yeter.
+function tahsilatSatirlariniNormalizeEt(rows){
+  const sonuc = {};
+  (rows||[]).forEach(r=>{
+    const musteriKod = String(r['Müşteri']||'').trim();
+    if(!musteriKod || !musteriGecerliMi(musteriKod)) return;
+    const odemeTipiHam = String(r['Ödeme Tipi']||'').trim();
+    // ÇEK/SENET ES GEÇİLİR (kullanıcı kuralı) — bu veri artık ayrı Çek/Senet Riski modülünde.
+    if(odemeTipiHam === 'Alınan Çek' || odemeTipiHam === 'Alınan Senet') return;
+    const belgeNo = String(r['Belge Numarası']||'').trim();
+    if(!belgeNo) return; // belge no'suz satır güvenilir şekilde yönetilemez, atlanır
+    const belgeTuru = String(r['Belge Türü']||'').trim();
+    const tarih = excelDateToJSArti1Gun(r['Tarih']);
+    if(!tarih) return;
+    const hamTutar = Number(r['Tutar'])||0;
+    // TAHSİLAT KATEGORİSİ ve İŞARETLİ TUTAR (kullanıcı kuralları):
+    //   Müşteri Tahsilat → normal tahsilat; SAP'ta negatif gelir (borç azaltır) → tahsilat ARTIŞI
+    //     olarak saymak için işaret ÇEVRİLİR (-tutar → pozitif tahsilat).
+    //   Hizmet Alış Fatura → Hakediş tahsilatı; aynı işaret çevirme mantığı.
+    //   Ödeme / Virman → İKİ YÖNLÜ: dosyadaki ham işaret AYNEN korunur (pozitif → o günün
+    //     tahsilatından DÜŞÜLÜR, negatif → EKLENİR). Yani bu ikisinde işaret ÇEVRİLMEZ, tam
+    //     tersine ham SAP işareti zaten doğru yönü taşıdığı için olduğu gibi eksi işaretlenir:
+    //     isaretliTutar = -hamTutar (pozitif ham → negatif katkı = azalma; negatif ham → pozitif
+    //     katkı = artış) — bu, Müşteri Tahsilat'ın "negatifi pozitife çevir" kuralıyla AYNI
+    //     formüldür (isaretliTutar = -hamTutar), yani tek bir formül dört kategoriye de uyar.
+    let tahsilatKategori;
+    if(belgeTuru === 'Müşteri Tahsilat') tahsilatKategori = 'Normal';
+    else if(belgeTuru === 'Hizmet Alış Fatura') tahsilatKategori = 'Hakedis';
+    else if(belgeTuru === 'Ödeme') tahsilatKategori = 'Odeme';
+    else if(belgeTuru === 'Virman') tahsilatKategori = 'Virman';
+    else return; // tanımadığımız/beklenmeyen bir Belge Türü — güvenli tarafta kalıp atla
+    const isaretliTutar = -hamTutar;
+    const odemeEtiketi = tahsilatBankaAltEtiketi(odemeTipiHam, r['Banka']);
+    const belgeTipi = String(r['Belge Tipi']||'').trim();
+    sonuc[belgeNo] = {
+      belgeNo, musteriKod, musteriAdi: String(r['Müşteri Adı']||'').trim(),
+      tarih: tarih.toISOString(), tutar: isaretliTutar, tahsilatKategori, odemeEtiketi, belgeTipi,
+      satisTemsilcisi: r['Satış Temsilcisi'] || null,
+      tersKayitNo: String(r['Ters Kayıt Belge Numarası']||'').trim() || null,
+    };
+  });
+  return sonuc;
+}
+
+// Mevcut kalıcı arşivi yeni yüklemeyle birleştirir. TERS KAYIT KURALI (kullanıcı, netleştirilmiş
+// hali): Ters Kayıt Belge Numarası DOLU olan HER satır, hedefini (dosyada veya arşivde) bulsun ya
+// da bulmasın, KENDİSİ HİÇ ARŞİVE ALINMAZ (bu satır zaten bir iptal/ters işlem kaydı, tek başına
+// anlamlı bir tahsilat değildir). AYRICA, eğer işaret ettiği belge no dosyada veya ARŞİVDE
+// bulunuyorsa, o hedef kayıt da silinir (orijinal işlem + iptali = ikisi de yok sayılır). Bu
+// kontrol dosya-içi VE dosya-arşiv arası olmak üzere iki aşamada, HER yüklemede yeniden yapılır.
+function tahsilatArsiviniBirlestir(mevcutArsiv, yeniRows){
+  let yeni = tahsilatSatirlariniNormalizeEt(yeniRows);
+  const arsiv = Object.assign({}, mevcutArsiv||{});
+
+  // Bu yüklemedeki tüm ters-kayıt hedef no'larını topla (kaynak satırın kendisi ne olursa olsun).
+  const tersKayitHedefleri = new Set();
+  Object.values(yeni).forEach(r=>{ if(r.tersKayitNo) tersKayitHedefleri.add(r.tersKayitNo); });
+
+  // AŞAMA 1 — Ters kayıt İŞARETİ taşıyan HER satır bu yüklemeden düşer (hedefi bulunsun/bulunmasın).
+  Object.keys(yeni).forEach(no=>{ if(yeni[no] && yeni[no].tersKayitNo) delete yeni[no]; });
+
+  // AŞAMA 2 — Hedeflenen belge no'lar hem YENİ yüklemeden hem ARŞİVDEN silinir (dosya-içi VE
+  // dosya-arşiv arası eşleşme tek döngüde ele alınır).
+  tersKayitHedefleri.forEach(hedefNo=>{
+    delete yeni[hedefNo];
+    delete arsiv[hedefNo];
+  });
+
+  // AŞAMA 3 — Arşivde DAHA ÖNCEDEN duran bir ters-kayıt-hedefi ilişkisi de simetrik kontrol edilir:
+  // arşivdeki bir kaydın kendisi ters kayıt işaretliyse (normalde hiç arşive girmemeliydi ama
+  // geçmiş bir veri tutarsızlığına karşı güvenlik amaçlı) veya arşivdeki bir kaydın hedeflediği
+  // belge no bu yüklemede yeni gelmişse, ikisi de temizlenir.
+  Object.keys(arsiv).forEach(no=>{
+    const eskiKayit = arsiv[no];
+    if(!eskiKayit) return;
+    if(eskiKayit.tersKayitNo){ delete arsiv[no]; delete yeni[eskiKayit.tersKayitNo]; return; }
+  });
+
+  // AŞAMA 3.5 — ÖN KAYIT YAŞAM DÖNGÜSÜ (kullanıcı kuralı, istisnasız): "Ön Kayıt" statüsünde
+  // arşive giren bir belge, AYNI belge no ile "Gerçek Kayıt" gelirse doğal olarak üzerine yazılır
+  // (bkz. Aşama 4). Ama bu yükleme, arşivde duran bir Ön Kayıt'ı GÜNCELLEMİYORSA bile (yani o
+  // belge no bu dosyada hiç yoksa), arşivdeki o Ön Kayıt YİNE DE SİLİNİR — bir dosya yüklemesi
+  // "bir sonraki yükleme" sayılır ve Ön Kayıt'lar bir yüklemeden fazla hayatta kalamaz. Bu,
+  // kullanıcının bilerek kabul ettiği bir davranıştır (Gerçek Kayıt hiç gelmese bile veri o günün
+  // tahsilatından düşer) — Format A'nın eski "geçici" doğasının doğal sonucu.
+  Object.keys(arsiv).forEach(no=>{
+    const eskiKayit = arsiv[no];
+    if(eskiKayit && eskiKayit.belgeTipi === 'Ön Kayıt') delete arsiv[no];
+  });
+
+  // AŞAMA 4 — Sağ kalan yeni kayıtlar arşive eklenir/günceller (aynı belge no tekrar gelirse günceller).
+  Object.assign(arsiv, yeni);
+  return arsiv;
+}
+
+async function tahsilatArsiviniKaydet(arsiv){
+  const ok = await idbSet(TAHSILAT_ARSIV_LOCAL_KEY, arsiv);
+  if(!ok) console.error('Tahsilat arşivi cihaza kaydedilemedi.');
+  if(!cloudEnabled()) return;
+  try{
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${TAHSILAT_ARSIV_CLOUD_PATH}.json${await authQuery()}`, {
+      method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(arsiv),
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const simdi = Date.now();
+    await cloudMetaYazUzaktan(TAHSILAT_ARSIV_CLOUD_PATH, simdi);
+    await cloudMetaZamaniKaydet(TAHSILAT_ARSIV_CLOUD_PATH, simdi);
+  }catch(err){ console.error('Tahsilat arşivi buluta kaydedilemedi:', err); }
+}
+
+async function tahsilatArsiviniOku(){
+  if(cloudEnabled()){
+    try{
+      const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${TAHSILAT_ARSIV_CLOUD_PATH}.json${await authQuery()}`);
+      if(res.ok){ const text = await res.text(); if(text && text!=='null') return JSON.parse(text); }
+    }catch(err){ console.error('Tahsilat arşivi buluttan okunamadı:', err); }
+  }
+  try{ return (await idbGet(TAHSILAT_ARSIV_LOCAL_KEY)) || {}; }catch(_){ return {}; }
+}
+
+// Kalıcı tahsilat arşivinden, GÜNÜN gösterimi için gerekli türetilmiş yapıları üretir: müşteri
+// bazlı günlük tahsilat toplamı (bugunKey gününe ait) ve Genel Rapor/Sevk KPI'sının okuduğu
+// tahsilatArsiv dizisi formatı (buildReport'un geri kalanının beklediği {musteri,belgeTarihi,
+// tutar,formatKaynagi,gecerli,tahsilatTuru} şekli — geriye dönük uyumluluk için bu şekle çevrilir).
+function tahsilatArsivindenGunlukDiziyeCevir(arsiv, gunKey){
+  return Object.values(arsiv||{})
+    .filter(r=> r && r.tarih && dateKeyLocal(new Date(r.tarih))===gunKey)
+    .map(r=>({
+      musteri: r.musteriKod, belgeTarihi: new Date(r.tarih), tutar: r.tutar,
+      // formatKaynagi artık A/B değil — Hakediş ayrı işlenebilsin diye kategori adı taşınır
+      // (mevcut FaturaIade kredi etiketiyle ÇAKIŞMAZ, farklı isim).
+      formatKaynagi: r.tahsilatKategori==='Hakedis' ? 'TahsilatHakedis' : null,
+      gecerli: true, tahsilatTuru: r.odemeEtiketi, satisTemsilcisi: r.satisTemsilcisi,
+    }));
+}
+
+// Kalıcı tahsilat arşivinden, VERİLEN TARİH ARALIĞINA (dahil-dahil, YYYY-MM-DD gün anahtarları)
+// denk gelen TÜM kayıtları aynı dizi formatına çevirir. Yönetim Özeti (haftalık tahsilat) ve
+// Tahsilat Verimliliği (aylık tahsilat) gibi çok günlü toplamlar bunu kullanır — tek güne özel
+// tahsilatArsivindenGunlukDiziyeCevir'in aksine, burada tüm arşiv bir kerede taranır.
+function tahsilatArsivindenAralikDiziyeCevir(arsiv, ilkGunKey, sonGunKey){
+  return Object.values(arsiv||{})
+    .filter(r=>{
+      if(!r || !r.tarih) return false;
+      const gk = dateKeyLocal(new Date(r.tarih));
+      return gk && (!ilkGunKey || gk>=ilkGunKey) && (!sonGunKey || gk<=sonGunKey);
+    })
+    .map(r=>({
+      musteri: r.musteriKod, belgeTarihi: new Date(r.tarih), tutar: r.tutar,
+      formatKaynagi: r.tahsilatKategori==='Hakedis' ? 'TahsilatHakedis' : null,
+      gecerli: true, tahsilatTuru: r.odemeEtiketi, satisTemsilcisi: r.satisTemsilcisi,
+    }));
+}
+
+

@@ -3,7 +3,7 @@
 // hepsi atlanır). Uygulama YALNIZCA cihazdaki (IndexedDB) veriyle çalışır — giriş ekranı istemez,
 // doğrudan açılır. Test bittiğinde bu satırı `false` yapmak (veya bu bloğu silmek) bulutu geri
 // getirir; başka HİÇBİR yerde değişiklik gerekmez.
-// GÜNCELLEME: Yeni Firebase projesiyle (test-82b8f) bulut testine geçilecek — bulut AÇIK.
+// GÜNCELLEME: Yeni Firebase projesiyle (kesan-bayi) canlı buluta geçildi — bulut AÇIK.
 const BULUTSUZ_TEST = false;
 function cloudEnabled(){ if(BULUTSUZ_TEST) return false; return !!(CLOUD.dbUrl && CLOUD.dbUrl.trim()); }
 
@@ -129,14 +129,14 @@ async function cloudVeriVerimliYukle(veriTuru, loadCloudDataFn, loadLocalDataFn)
 }
 
 const FIREBASE_CONFIG = {
-  apiKey: 'AIzaSyCfHJE6Pcqx92NFgV_1JnB7i6RPGGgQKQg',
-  authDomain: 'test-82b8f.firebaseapp.com',
+  apiKey: 'AIzaSyCFZzzbL7NqJ_OmY1_sUqC7CrM_VUkD1U0',
+  authDomain: 'bayrampasa-3d357.firebaseapp.com',
   databaseURL: CLOUD.dbUrl,
-  projectId: 'test-82b8f',
-  storageBucket: 'test-82b8f.firebasestorage.app',
-  messagingSenderId: '59490268572',
-  appId: '1:59490268572:web:a451913a8b70f7671f8459',
-  measurementId: 'G-F7EEVZ8R28',
+  projectId: 'bayrampasa-3d357',
+  storageBucket: 'bayrampasa-3d357.firebasestorage.app',
+  messagingSenderId: '965287599513',
+  appId: '1:965287599513:web:951cece4edc78bcc8a8708',
+  measurementId: 'G-W2R9LDQ847',
 };
 
 let authAktif = false;
@@ -208,7 +208,14 @@ function girisEkraniGizle(){
   document.getElementById('authGate').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   document.getElementById('authLogoutBtn').style.display = 'inline-block';
-  uygulamayiBaslat();
+  // ERTELEME DÜZELTMESİ: uygulamayiBaslat, 03-veri-yukleme-ve-senkron.js'de tanımlıdır — bu dosya
+  // (02) henüz o script yüklenmeden ÖNCE (defer sırasına göre) top-level'da çalışabilir/çağrılabilir.
+  // Doğrudan çağrı "uygulamayiBaslat is not defined" ile patlıyordu (BULUTSUZ_TEST kapalıyken bile,
+  // kullanıcı fiilen giriş yaptığında). window.addEventListener('load') tüm script'ler ve DOM
+  // tamamen hazır olduktan sonra çalışır — bu, tarayıcı sekmesi tamamen yüklendiğinde (image/css
+  // dahil her şey biter) tetiklenen en son olay olduğundan güvenli bir erteleme noktasıdır.
+  if(document.readyState === 'complete') uygulamayiBaslat();
+  else window.addEventListener('load', ()=> uygulamayiBaslat(), {once:true});
 }
 
 if(authAktif){
@@ -222,7 +229,9 @@ if(authAktif){
   document.getElementById('authGate').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   // Auth atlandığında uygulamayı doğrudan başlat (girisEkraniGizle normalde bunu yapardı).
-  uygulamayiBaslat();
+  // Aynı erteleme düzeltmesi burada da gereklidir — bkz. girisEkraniGizle'deki not.
+  if(document.readyState === 'complete') uygulamayiBaslat();
+  else window.addEventListener('load', ()=> uygulamayiBaslat(), {once:true});
 }
 
 const KULLANICI_KODU_UZANTISI = '@kullanici.noktacari';
@@ -322,6 +331,10 @@ const MUSTERI_MASTER_DETAY_LOCAL_KEY = 'noktaCariTakip_musteriMasterDetay_v1';
 // dosyasındaki nokta durumu (Aktif/Pasif) — temsilci haritasıyla birlikte ama AYRI kaydedilir.
 const MUSTERI_MASTER_DURUM_CLOUD_PATH = CLOUD.path + '_musteriMasterDurum';
 const MUSTERI_MASTER_DURUM_LOCAL_KEY = 'noktaCariTakip_musteriMasterDurum_v1';
+// Açık Kanal / Kapalı Kanal FKNS ayrımı için, Müşteri Master dosyasındaki "Satış Kanalı Tanımı"
+// kolonu — temsilci/durum haritalarıyla birlikte ama AYRI kaydedilir (aynı desen).
+const MUSTERI_MASTER_KANAL_CLOUD_PATH = CLOUD.path + '_musteriMasterKanal';
+const MUSTERI_MASTER_KANAL_LOCAL_KEY = 'noktaCariTakip_musteriMasterKanal_v1';
 
 function buildMusteriMasterMap(rows){
   const map = new Map();
@@ -389,6 +402,33 @@ function buildMusteriMasterDurumMap(rows, headers){
     const ham = String(r[kolon]||'').trim();
     const normalize = ham.toLocaleUpperCase('tr-TR');
     map.set(musteri, normalize === 'AKTİF' || normalize === 'AKTIF' ? 'Aktif' : (ham || 'Pasif'));
+  });
+  return map;
+}
+// Açık Kanal / Kapalı Kanal FKNS ayrımı için Müşteri Master'daki "Satış Kanalı Tanımı" kolonu —
+// aynı ham değer kümesi Sell Out dosyasındaki "Müşteri Kanalı Tnm." ile birebir örtüşüyor (Standart
+// Açık/Standart Kapalı/Otel/Horeca/Ekomini), bu yüzden aynı eşleme (sellOutKanalSinifla'nın temel
+// KAPALI_KANAL_DEGERLERI/ACIK_KANAL_DEGERLERI kümeleri, bkz. 08-kanal-raporlari.js) burada da
+// kullanılır. "Key Account" gibi bu kümelerin dışında kalan değerler kasıtlı olarak null döner —
+// bu müşteriler ne Açık ne Kapalı Kanal FKNS paydasına dahil edilmez, sadece Toplam FKNS'ye girer
+// (kullanıcı kararı).
+function musteriMasterKanalSinifla(satisKanaliTanimiRaw){
+  const v = String(satisKanaliTanimiRaw||'').trim();
+  // KAPALI_KANAL_DEGERLERI / ACIK_KANAL_DEGERLERI, js/08-kanal-raporlari.js içinde tanımlıdır
+  // (Sell Out dosyasındaki aynı isimli sınıflandırma için); bu fonksiyon sadece kullanıcı bir
+  // yükleme/rapor işlemi tetiklediğinde (tüm script dosyaları çoktan yüklenmiş haldeyken) çağrıldığı
+  // için script sırası burada sorun yaratmaz.
+  if(KAPALI_KANAL_DEGERLERI.has(v)) return 'Kapalı Kanal';
+  if(ACIK_KANAL_DEGERLERI.has(v)) return 'Açık Kanal';
+  return null;
+}
+function buildMusteriMasterKanalMap(rows){
+  const map = new Map();
+  (rows||[]).forEach(r=>{
+    const musteri = String(r['Müşteri']||'').trim();
+    if(!musteri) return;
+    const kanal = musteriMasterKanalSinifla(r['Satış Kanalı Tanımı']);
+    if(kanal) map.set(musteri, kanal);
   });
   return map;
 }
@@ -615,7 +655,7 @@ const GRUP_A_TEKIL_DOSYA_TANIMLARI = {
   // devam eder, hiçbir zaman silinmez/üzerine yazılmaz. Buradaki tek-slot kayıt SADECE
   // "buildReport()'un çalışabilmesi için gereken EN GÜNCEL HAM Kalemler verisi"ni saklar.
   kalemler: { cloudPath: CLOUD.path + '_kalemlerDosya', localKey: 'noktaCariTakip_kalemlerDosya_v1' },
-  // GRUP B (Sipariş/Tahsilat/Fatura/Depozito/Bayi Hakediş/Yükleme): Bu dosyalar da artık kalıcı
+  // GRUP B (Sipariş/Tahsilat/Fatura/Bayi Hakediş/Yükleme): Bu dosyalar da artık kalıcı
   // tek-slot arşivinde tutulur. Önceden yalnızca bellekteydi (state.files); sayfa yenilenip yeni
   // Kalemler yüklenince buildReport bunları bulamayıp müşteri kartlarından SİLİYORDU. Artık EN SON
   // yüklenen hali (tarih fark etmeksizin — toplu/çok-günlü dosyalar dahil, olduğu gibi) kalıcı
@@ -627,7 +667,6 @@ const GRUP_A_TEKIL_DOSYA_TANIMLARI = {
   siparis: { cloudPath: CLOUD.path + '_siparisDosya', localKey: 'noktaCariTakip_siparisDosya_v1' },
   tahsilat: { cloudPath: CLOUD.path + '_tahsilatDosya', localKey: 'noktaCariTakip_tahsilatDosya_v1' },
   fatura: { cloudPath: CLOUD.path + '_faturaDosya', localKey: 'noktaCariTakip_faturaDosya_v1' },
-  depozitoTahsilat: { cloudPath: CLOUD.path + '_depozitoTahsilatDosya', localKey: 'noktaCariTakip_depozitoTahsilatDosya_v1' },
   bayiHakedis: { cloudPath: CLOUD.path + '_bayiHakedisHamDosya', localKey: 'noktaCariTakip_bayiHakedisHamDosya_v1' },
   yukleme: { cloudPath: CLOUD.path + '_yuklemeDosya', localKey: 'noktaCariTakip_yuklemeDosya_v1' },
   cariEkstre: { cloudPath: CLOUD.path + '_cariEkstreDosya', localKey: 'noktaCariTakip_cariEkstreDosya_v1' },
@@ -700,11 +739,15 @@ async function grupATekilDosyaBuluttanOku(tip){
 
 // Ticari Stok/Çek-Senet/Ciro Primi/Dönemsel İskonto için: bugün yeniden seçilmemişse, ne kadar eski
 // olursa olsun en son bilinen hal sorgusuz kullanılır (bu dosyalar "her gün yüklenmesi gerekmez").
-// Kalemler için ise bu, KASITLI OLARAK farklıdır — bkz. KALEMLER_BUGUN_ZORUNLU aşağıda.
-const GRUP_A_TARIH_KISITLAMASI_OLMAYANLAR = new Set(['ticariStok','ciroPrimi','donemselIskonto',
+// KALEMLER ARTIK BU LİSTEYE DAHİL (kullanıcı kararı — büyük mimari değişiklik): "Kalemleri
+// yüklemediği hiçbir gün veri yüklemesi yapamamalı" kuralı KALDIRILDI. Artık kart oluşturma
+// Müşteri Master'a, bakiye Cari Ekstre'ye bağlı; Kalemler yalnızca (varsa) açık fatura detayı
+// ekler ve diğer Grup A/B dosyaları gibi en son yüklenen hali kalıcı kalıp güne bakılmaksızın
+// kullanılmaya devam eder (bkz. buildReport'taki yeni kart oluşturma mantığı).
+const GRUP_A_TARIH_KISITLAMASI_OLMAYANLAR = new Set(['ticariStok','ciroPrimi','donemselIskonto','kalemler',
   // Grup B de tarih kısıtlaması OLMADAN saklanır: en son yüklenen (çok-günlü/toplu dosyalar dahil)
-  // tarih fark etmeksizin geri yüklenir. Yalnızca Kalemler bugüne-özeldir.
-  'siparis','tahsilat','fatura','depozitoTahsilat','bayiHakedis','yukleme','cariEkstre']);
+  // tarih fark etmeksizin geri yüklenir. Yalnızca Kalemler bugüne-özeldi (artık değil).
+  'siparis','tahsilat','fatura','bayiHakedis','yukleme','cariEkstre']);
 
 // Bu dosyaların hepsini paralel olarak yükler; her biri için o gün ekranda yeni bir dosya SEÇİLMİŞSE
 // (state.files[tip] doluysa) o veri KULLANILIR ve aynı zamanda yeni "son bilinen hal" olarak kaydedilir;
@@ -712,31 +755,26 @@ const GRUP_A_TARIH_KISITLAMASI_OLMAYANLAR = new Set(['ticariStok','ciroPrimi','d
 // beklediği {data, headers} şekliyle) yerleştirilir — böylece buildReport çağrısı her zaman aynı arayüzü
 // görür, dosyanın "bugün mü yüklendi yoksa önceki gün mü kaldı" farkını bilmesine gerek kalmaz.
 //
-// KALEMLER_BUGUN_ZORUNLU: Kalemler diğer 4 dosyadan farklı olarak HER GÜN en az bir kez yüklenmiş
-// olmalıdır (kullanıcı isteği: "Kalemleri yüklemediği hiçbir gün veri yüklemesi yapamamalı" — örn.
-// bugün Kalemler yüklendi, yarın unutulup sadece Sipariş yüklenirse bu ENGELLENMELİ). Bu yüzden
-// Kalemler için geri yüklenen tek-slot kaydının tarihi BUGÜNE ait değilse, state.files.kalemler
-// KASITLI OLARAK DOLDURULMAZ (null bırakılır) — ardından raporuOlusturVeyaGuncelleAkisiniCalistir
-// içindeki güvenlik kontrolü bunu yakalayıp net bir hata verir. Aynı GÜN içinde Kalemler bir kez
-// yüklendikten sonra ise (tek-slot kaydının tarihi bugüne aitse) o gün boyunca sınırsız sayıda Grup B
-// güncellemesi yapılabilir, Kalemler'in tekrar seçilmesine gerek kalmaz.
-// "Bugün Kalemler yüklendi mi?" durumunu güvenilir biçimde belirler ve state.bugunKalemlerHazir'a
-// yazar. İki kaynağa bakar: (1) bu oturumda bellekteki state.files.kalemler, (2) tek-slot Kalemler
-// arşivindeki kaydın TARİHİ bugüne aitse. Böylece kullanıcı Kalemler'i yükleyip rapor oluşturduktan
-// sonra (state.files bellekte boşalsa bile) Grup B/C panelleri "Kalemler yok" sanmaz.
+// KALEMLER_BUGUN_ZORUNLU KALDIRILDI (kullanıcı kararı — büyük mimari değişiklik): Kalemler artık
+// diğer Grup A/B dosyaları gibi davranır — en son yüklenen hali, günü ne olursa olsun, yeni bir
+// dosya seçilene kadar kalıcı kullanılır. Kart oluşturma artık Müşteri Master'a, bakiye Cari
+// Ekstre'ye bağlı olduğundan Kalemler'in "her gün zorunlu" olması gerekmiyor — Kalemler yalnızca
+// (varsa) açık fatura detayı ekleyen opsiyonel bir kaynak. "Kalemler yüklendi mi?" durumunu
+// güvenilir biçimde belirler ve state.bugunKalemlerHazir'a yazar (isim tarihsel nedenlerle
+// korunmuştur, artık "bugüne özel" değil "herhangi bir zamanda yüklendi mi" anlamına gelir). İki
+// kaynağa bakar: (1) bu oturumda bellekteki state.files.kalemler, (2) tek-slot Kalemler arşivinde
+// (tarihi ne olursa olsun) bir kayıt var mı.
 async function bugunKalemlerDurumTazele(){
   // 1) Bellekte bu oturumda yüklü mü?
   if(state.files && state.files.kalemler && state.files.kalemler.data && state.files.kalemler.data.length){
     state.bugunKalemlerHazir = true;
     return true;
   }
-  // 2) Tek-slot arşivinde BUGÜNE ait bir Kalemler kaydı var mı?
+  // 2) Tek-slot arşivinde bir Kalemler kaydı var mı (tarihi ne olursa olsun)?
   try{
-    const bugunKey = dateKeyLocal(new Date());
     let kayit = cloudEnabled() ? await grupATekilDosyaBuluttanOku('kalemler') : null;
     if(!kayit) kayit = await grupATekilDosyaYerelOku('kalemler');
-    const kayitGunKey = (kayit && kayit.tarih) ? dateKeyLocal(new Date(kayit.tarih)) : null;
-    const varMi = !!(kayit && kayit.data && kayit.data.length && kayitGunKey === bugunKey);
+    const varMi = !!(kayit && kayit.data && kayit.data.length);
     state.bugunKalemlerHazir = varMi;
     return varMi;
   }catch(_){
@@ -802,13 +840,48 @@ async function loadMusteriMasterDurumFromLocal(){
   }catch(err){ console.error(err); return null; }
 }
 
+async function saveMusteriMasterKanalToCloud(obj){
+  if(!cloudEnabled()) return {ok:false, reason:'not-configured'};
+  try{
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_KANAL_CLOUD_PATH}.json${await authQuery()}`, {
+      method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(obj),
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const simdi = Date.now();
+    await cloudMetaYazUzaktan(MUSTERI_MASTER_KANAL_CLOUD_PATH, simdi);
+    await cloudMetaZamaniKaydet(MUSTERI_MASTER_KANAL_CLOUD_PATH, simdi);
+    return {ok:true};
+  }catch(err){ console.error('Müşteri Master Kanal buluta kaydedilemedi:', err); return {ok:false, reason:err.message}; }
+}
+async function loadMusteriMasterKanalFromCloud(){
+  if(!cloudEnabled()) return null;
+  try{
+    const res = await cloudFetch(`${CLOUD.dbUrl.replace(/\/$/,'')}/${MUSTERI_MASTER_KANAL_CLOUD_PATH}.json${await authQuery()}`);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const text = await res.text();
+    if(!text || text==='null') return null;
+    return JSON.parse(text);
+  }catch(err){ console.error('Müşteri Master Kanal buluttan okunamadı:', err); return null; }
+}
+async function saveMusteriMasterKanalToLocal(obj){
+  const ok = await idbSet(MUSTERI_MASTER_KANAL_LOCAL_KEY, obj);
+  if(!ok) console.error('Müşteri Master Kanal cihaza kaydedilemedi.');
+}
+async function loadMusteriMasterKanalFromLocal(){
+  try{
+    await idbMigrateFromLocalStorageOnce(MUSTERI_MASTER_KANAL_LOCAL_KEY);
+    return await idbGet(MUSTERI_MASTER_KANAL_LOCAL_KEY);
+  }catch(err){ console.error(err); return null; }
+}
+
 async function musteriMasterYenile(){
-  // Aşağıdaki üç veri (Master/Detay/Durum) birbirinden bağımsız — üçü de aynı anda kontrol
+  // Aşağıdaki dört veri (Master/Detay/Durum/Kanal) birbirinden bağımsız — hepsi aynı anda kontrol
   // edilip indirilir (bkz. uygulamayiBaslat'taki Promise.all açıklaması, aynı mantık).
-  const [masterSonuc, detaySonuc, durumSonuc] = await Promise.all([
+  const [masterSonuc, detaySonuc, durumSonuc, kanalSonuc] = await Promise.all([
     cloudEnabled() ? cloudVeriVerimliYukle(MUSTERI_MASTER_CLOUD_PATH, loadMusteriMasterFromCloud, loadMusteriMasterFromLocal) : Promise.resolve(null),
     cloudEnabled() ? cloudVeriVerimliYukle(MUSTERI_MASTER_DETAY_CLOUD_PATH, loadMusteriMasterDetayFromCloud, loadMusteriMasterDetayFromLocal) : Promise.resolve(null),
     cloudEnabled() ? cloudVeriVerimliYukle(MUSTERI_MASTER_DURUM_CLOUD_PATH, loadMusteriMasterDurumFromCloud, loadMusteriMasterDurumFromLocal) : Promise.resolve(null),
+    cloudEnabled() ? cloudVeriVerimliYukle(MUSTERI_MASTER_KANAL_CLOUD_PATH, loadMusteriMasterKanalFromCloud, loadMusteriMasterKanalFromLocal) : Promise.resolve(null),
   ]);
 
   let obj = masterSonuc ? masterSonuc.data : null;
@@ -822,6 +895,10 @@ async function musteriMasterYenile(){
   let durumObj = durumSonuc ? durumSonuc.data : null;
   if(!durumObj) durumObj = await loadMusteriMasterDurumFromLocal();
   state.musteriMasterDurum = musteriMasterObjToMap(durumObj);
+
+  let kanalObj = kanalSonuc ? kanalSonuc.data : null;
+  if(!kanalObj) kanalObj = await loadMusteriMasterKanalFromLocal();
+  state.musteriMasterKanal = musteriMasterObjToMap(kanalObj);
 
   return state.musteriMasterMap;
 }
@@ -857,6 +934,15 @@ async function musteriMasterKaydet(rows, headers){
   if(cloudEnabled()){
     const sonuc = await saveMusteriMasterDurumToCloud(durumObj);
     if(!sonuc.ok) hatalar.push('Müşteri Master Durum buluta kaydedilemedi: '+(sonuc.reason||'bilinmeyen hata'));
+  }
+
+  const kanalMap = buildMusteriMasterKanalMap(rows);
+  state.musteriMasterKanal = kanalMap;
+  const kanalObj = musteriMasterMapToObj(kanalMap);
+  await saveMusteriMasterKanalToLocal(kanalObj);
+  if(cloudEnabled()){
+    const sonuc = await saveMusteriMasterKanalToCloud(kanalObj);
+    if(!sonuc.ok) hatalar.push('Müşteri Master Kanal buluta kaydedilemedi: '+(sonuc.reason||'bilinmeyen hata'));
   }
 
   if(hatalar.length) console.error('musteriMasterKaydet: bazı veriler buluta yazılamadı:', hatalar);
@@ -1081,13 +1167,22 @@ function getSahaMuduru(temsilci){
 }
 
 const TL = n => (Math.round(n||0)).toLocaleString('tr-TR') + ' ₺';
+// Kuruşu kuruşuna TL biçimlendirme — SADECE Bayi Hakediş ekranında kullanılır (kullanıcı kararı:
+// hakediş tutarları TL()'nin yaptığı gibi tam sayıya yuvarlanmasın, kuruş hassasiyeti korunsun).
+// AKILLI ONDALIK (kullanıcı isteği): tutarın küsuratı VARSA (örn. 285,50) o küsurat gösterilir;
+// küsuratı YOKSA (örn. 285,00 yerine) gereksiz ",00" eklenmeden düz tam sayı (285) gösterilir —
+// maximumFractionDigits:2 ile minimumFractionDigits:0 birlikte kullanılarak toLocaleString'in
+// kendisi anlamsız sıfırları otomatik olarak basmaz. Uygulamanın geri kalanındaki tüm diğer
+// tutarlar (KPI'lar, müşteri kartları, diğer tablolar) TL() ile tam sayıya yuvarlanmaya devam
+// eder — bu bilinçli bir istisna, genel bir değişiklik değil.
+const TLKurus = n => (Number(n)||0).toLocaleString('tr-TR', {minimumFractionDigits:0, maximumFractionDigits:2}) + ' ₺';
 const NUM = n => (Math.round(n||0)).toLocaleString('tr-TR');
 const MK = n => NUM(n) + ' Mk.';
 const LT = n => NUM(n) + ' Lt.';
 const fmtDate = d => d instanceof Date && !isNaN(d) ? d.toLocaleDateString('tr-TR') : '—';
-// EFES gibi dahili/şirket-içi kayıtlar gerçek bir cari değildir — Fatura Dökümü, Depozito
-// Tahsilatı, Tahsilat Dökümü, Sipariş Dökümü ve Bayi Hak Ediş dosyalarındaki İLGİLİ satırlar bu
-// fonksiyonla TUTARLI şekilde filtrelenir (tek bir yerde tanımlı, her dosya döngüsünde aynı kural).
+// EFES gibi dahili/şirket-içi kayıtlar gerçek bir cari değildir — Fatura Dökümü, Tahsilat Dökümü,
+// Sipariş Dökümü ve Bayi Hak Ediş dosyalarındaki İLGİLİ satırlar bu fonksiyonla TUTARLI şekilde
+// filtrelenir (tek bir yerde tanımlı, her dosya döngüsünde aynı kural).
 const GECERSIZ_MUSTERI_KODLARI = new Set(['EFES']);
 function musteriGecerliMi(musteriNo){
   const kod = String(musteriNo||'').trim().toUpperCase();
@@ -1126,9 +1221,11 @@ function enYakinGunKey(gunListesi, hedefGunKey){
 const SIGNATURES = {
   kalemler: [['Kalan Borç','Faturadan Sonr.Gün','Borç/alacak']],
   siparis: [['Sipariş Toplam Tutar','Teslimat Durumu']],
+  // YENİ TAHSİLAT FORMATI (kullanıcı isteği — eski Format A/B ayrımı tamamen kaldırıldı, tek dosya
+  // tipine indirgendi): Belge Numarası + Ters Kayıt Belge Numarası kombinasyonu bu dosyaya özgüdür,
+  // başka hiçbir dosyada birlikte bulunmaz.
   tahsilat: [
-    ['Belge Tipi','Tahsilat Alan','Ödeme Tipi'],
-    ['Belge Tutarı','Çek/Senet Durumu','Müşt. Kodu'],
+    ['Belge Numarası','Ters Kayıt Belge Numarası','Tarih'],
   ],
   cekSenet: [['Esas Borçlu','Çek/Senet Numarası']],
   ticariStok: [['Depoda Kalan Mk.','Depoda Kalan Lt.','Malzeme Kodu']],
@@ -1139,12 +1236,16 @@ const SIGNATURES = {
   ciroPrimi: [['Grup Tanım','Efpa Payı Tutar','Net Tutar']],
   donemselIskonto: [['Nokta Kodu','Hakediş Tutar','Perid']],
   sellOut: [['Müşteri Kanalı Tnm.','Açık/Otel Tnm.','Hacim Segmenti Tnm.']],
-  depozitoTahsilat: [['Fatura Belge No','Sipariş Net Tutar','İstenilen Sevk Tarihi']],
   // Cari Hesap Ekstre Özet: müşteri bazlı gerçek cari bakiye (Borç/Alacak/Bakiye). "Müşteri Ünvan"
   // + "Bakiye" kombinasyonu bu dosyaya özgüdür — başka hiçbir dosyada birlikte bulunmaz.
   cariEkstre: [['Müşteri Ünvan','Bakiye','Müşteri Ad']],
+  // NOT: "depozitoTahsilat" tipi (Depozito Tahsilat dosyası) SİSTEMDEN TAMAMEN KALDIRILDI (kullanıcı
+  // kararı) — Depozito İade artık yalnızca Fatura Dökümü'ndeki "Depozito İade Faturası" türünden
+  // geliyor (bkz. buildReport'taki İade Grubu mantığı). Bu satır kasıtlı olarak silindi ki eskiden bu
+  // sütun imzasına uyan bir dosya yanlışlıkla yüklenirse artık HİÇBİR tipe eşleşmesin (detectType
+  // "tanınmayan dosya" uyarısı versin) — sessizce yok sayılan bir "hayalet" tip olarak kalmasın.
 };
-const LABELS = { kalemler:'Kalemler (Fatura / Bakiye)', siparis:'Sipariş Dökümü', tahsilat:'Tahsilat Dökümü', cekSenet:'Çek / Senet Riski', ticariStok:'Ticari Stok', fatura:'Fatura Dökümü', bayiHakedis:'Bayi Hak Ediş', yukleme:'Yükleme Raporu', musteriMaster:'Müşteri Master', ciroPrimi:'Ciro Primi', donemselIskonto:'Dönemsel İskonto', sellOut:'Sell Out Raporu', depozitoTahsilat:'Depozito Tahsilatı', cariEkstre:'Cari Hesap Ekstre' };
+const LABELS = { kalemler:'Kalemler (Fatura / Bakiye)', siparis:'Sipariş Dökümü', tahsilat:'Tahsilat Dökümü', cekSenet:'Çek / Senet Riski', ticariStok:'Ticari Stok', fatura:'Fatura Dökümü', bayiHakedis:'Bayi Hak Ediş', yukleme:'Yükleme Raporu', musteriMaster:'Müşteri Master', ciroPrimi:'Ciro Primi', donemselIskonto:'Dönemsel İskonto', sellOut:'Sell Out Raporu', cariEkstre:'Cari Hesap Ekstre' };
 
 // "Vadesi gelmiş" fatura eşiği (TEK KAYNAK): bir faturanın "Faturadan Sonr. Gün" değeri bu eşik
 // ve üstündeyse kalan borcu "vadesi gelmiş" sayılır; altındaysa "vadesi gelmemiş" kabul edilir.
@@ -1155,7 +1256,7 @@ const VADE_ESIGI_GUN = 23;
 // ("Günlük Veri Yükle" — bkz. #gvyPanel) yükleniyor. Aynı state.files yapısı ve aynı
 // handleFiles/detectType mekanizması kullanılır — sadece dosya SEÇİMİNİN yapıldığı arayüz
 // ayrı bir yere taşınmıştır; buildReport ve arşivleme mantığına dokunulmamıştır.
-const GVY_DOSYA_TIPLERI = ['siparis','tahsilat','fatura','depozitoTahsilat','bayiHakedis','yukleme','cariEkstre'];
+const GVY_DOSYA_TIPLERI = ['siparis','tahsilat','fatura','bayiHakedis','yukleme','cariEkstre','cekSenet'];
 // Grup C ("Günlük Veri Yükle"): gün içinde sürekli güncellenebilen, son yüklenen hali kalıcı
 // tek-slot arşivde saklanan dosyalar. Bunlar GRUP_A_TEKIL_DOSYA_TANIMLARI'nda zaten kayıtlı
 // (aynı kalıcı mekanizmayı kullanır) ve GRUP_A_TARIH_KISITLAMASI_OLMAYANLAR üyesidir — yani
@@ -1237,6 +1338,10 @@ const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('fileInput');
 const uploadError = document.getElementById('uploadError');
 const buildBtn = document.getElementById('buildBtn');
+// Ana Veri sekmesindeki (Veri Yükle panelindeki) ikinci "Raporu Oluştur" butonu — dropzone'daki
+// buildBtn ile AYNI akışı tetikler, aynı disabled/textContent durumunu senkron gösterir (bkz.
+// updateUploadUI ve raporuOlusturVeyaGuncelleAkisiniCalistir).
+const gvyAnaBuildBtn = document.getElementById('gvyAnaBuildBtn');
 const statusPill = document.getElementById('statusPill');
 const statusPillMsg = document.getElementById('statusPillMsg');
 const resetBtn = document.getElementById('resetBtn');
@@ -1422,7 +1527,7 @@ function handleFiles(fileList){
 function updateChecklist(){
   Object.keys(state.files).forEach(type=>{
     const item = document.querySelector('.check-item[data-type="'+type+'"]');
-    // Grup B dosyaları (Sipariş/Tahsilat/Fatura/Depozito Tahsilat/Bayi Hak Ediş) artık ana ekran
+    // Grup B dosyaları (Sipariş/Tahsilat/Fatura/Bayi Hak Ediş) artık ana ekran
     // checklist'inde DEĞİL, üst panelde "Günlük Veri Yükle" panelinde gösteriliyor — bu tipler için
     // ana ekranda karşılık gelen bir .check-item elementi yok, o yüzden burada güvenle atlanır.
     if(!item) return;
@@ -1444,24 +1549,37 @@ function updateChecklist(){
       item.classList.remove('done');
     }
   });
-  // Ana ekran (Grup A) artık YALNIZCA Kalemler (zorunlu) + Müşteri Master (opsiyonel) gösterir.
-  // Sayaç bu iki dosyaya göre hesaplanır — Grup B (Sipariş/Tahsilat/… üst panel "Arşiv Verisi")
-  // ve Grup C (Çek/Senet/Stok/Ciro/İskonto üst panel "Günlük Veri") ile kanal dosyaları buraya
-  // dahil edilmez. Ana ekranda tek zorunlu dosya Kalemler'dir; Müşteri Master opsiyoneldir.
+  // Ana Veri sekmesindeki (Veri Yükle panelindeki) Kalemler/Müşteri Master özet metinlerini de
+  // aynı state.files verisiyle senkron tutar — dropzone'daki checklist ile AYNI bilgiyi gösterir.
+  const gvyAnaKalemlerSub = document.getElementById('gvyAnaKalemlerSub');
+  if(gvyAnaKalemlerSub){
+    const info = state.files.kalemler;
+    gvyAnaKalemlerSub.textContent = info ? (info.name + ' · ' + info.data.length.toLocaleString('tr-TR') + ' satır') : 'Dosya seçilmedi';
+  }
+  const gvyAnaMasterSub = document.getElementById('gvyAnaMasterSub');
+  if(gvyAnaMasterSub){
+    const info = state.files.musteriMaster;
+    gvyAnaMasterSub.textContent = info ? (info.name + ' · ' + info.data.length.toLocaleString('tr-TR') + ' satır') : 'Dosya seçilmedi';
+  }
+  // Ana ekran (Grup A): Kalemler + Müşteri Master gösterir. KALEMLER ARTIK ZORUNLU DEĞİL (kullanıcı
+  // kararı — büyük mimari değişiklik, bkz. GRUP_A_TARIH_KISITLAMASI_OLMAYANLAR ve
+  // raporuOlusturVeyaGuncelleAkisiniCalistir'deki kaldırılan güvenlik kontrolü notu). Bu ekranın
+  // GÖRSEL yeniden düzenlemesi (yeni "Ana Veri" sekmesi: Kalemler + Müşteri Master + Cari Ekstre)
+  // ayrı bir adımda yapılacak — burada yalnızca FONKSİYONEL kısıt (buton kilidi) kaldırılıyor.
   const anaEkranTipleri = ['kalemler','musteriMaster'];
   const kalemlerLoaded = Boolean(state.files.kalemler);
   const total = anaEkranTipleri.length;
   const loadedCount = anaEkranTipleri.filter(t=> Boolean(state.files[t])).length;
   const allLoaded = loadedCount === total;
-  buildBtn.disabled = !kalemlerLoaded;
-  // Kalemler zorunlu, Müşteri Master opsiyonel: Kalemler yüklüyse rapor oluşturulabilir. Buton
-  // metni kullanıcıyı yanıltmasın — Müşteri Master eksikse "opsiyonel" olduğu için engel yok.
+  // KİLİT KALDIRILDI: Rapor artık Kalemler olmadan da (Müşteri Master + Cari Ekstre ile) oluşabilir.
+  buildBtn.disabled = false;
   buildBtn.textContent = 'Raporu Oluştur';
+  if(gvyAnaBuildBtn){ gvyAnaBuildBtn.disabled = false; gvyAnaBuildBtn.textContent = 'Raporu Oluştur'; }
   statusPillMsg.textContent = allLoaded
     ? (total+'/'+total+' dosya hazır')
     : (kalemlerLoaded
         ? (loadedCount+'/'+total+' dosya · Kalemler hazır (Müşteri Master opsiyonel)')
-        : ('Kalemler bekleniyor (zorunlu)'));
+        : (loadedCount+'/'+total+' dosya · Kalemler ve Müşteri Master opsiyonel'));
   if(kalemlerLoaded) statusPill.classList.add('ok');
 }
 
@@ -1488,13 +1606,32 @@ async function raporuOlusturVeyaGuncelleAkisiniCalistir(){
     // geçilip Kalemler o gün için hiç yüklenmediyse bilerek BOŞ bırakılır (bkz.
     // grupATekilDosyalariHazirla ve KALEMLER_BUGUN_ZORUNLU açıklaması).
     await grupATekilDosyalariHazirla();
-    // GÜVENLİK KONTROLÜ: Kalemler bugün için hiç yüklenmediyse (ne bu oturumda ne tek-slot kaydında)
-    // hiçbir dosya işlenmez — kullanıcı isteği: "Kalemleri yüklemediği hiçbir gün veri yüklemesi
-    // yapamamalı" (bugün Kalemler yüklenip yarın unutulup sadece Sipariş yüklenmesi senaryosunun
-    // önüne geçmek için). Eskiden bu durumda "Cannot read properties of null (reading 'data')" diye
-    // anlamsız bir hata fırlatılıyordu, artık net bir mesaj veriliyor.
-    if(!state.files.kalemler || !state.files.kalemler.data || !state.files.kalemler.data.length){
-      throw new Error('Bugün için Kalemler dosyası henüz yüklenmedi. Diğer dosyalar (Sipariş/Tahsilat/Fatura vb.) işlenmeden önce bugün en az bir kez Kalemler dosyasını yüklemeniz gerekir.');
+    // GÜVENLİK KONTROLÜ KALDIRILDI (kullanıcı kararı — büyük mimari değişiklik): Önceden Kalemler
+    // hiç yüklenmemişse burada hata fırlatılıp TÜM işlem durduruluyordu. Artık kart oluşturma
+    // Müşteri Master'a, bakiye Cari Ekstre'ye bağlı olduğundan Kalemler'in varlığı ZORUNLU değil —
+    // Kalemler yalnızca (varsa) mevcut kartlara açık fatura detayı ekler. state.files.kalemler boş
+    // olsa bile buildReport artık normal şekilde çalışabilir (bkz. buildReport'un başındaki
+    // "files.kalemler || {data:[]}" güvenli varsayılanı).
+    // ÇEK/SENET RİSKİ — ARŞİV BİRLEŞTİRME (kullanıcı isteği): buildReport'tan ÖNCE, bu oturumda
+    // yeni bir Çek/Senet Riski dosyası seçildiyse (state.files.cekSenet doluysa) kalıcı arşivle
+    // birleştirilir — yeni/güncellenen kayıtlar arşive işlenir, eski arşivde olup bu dosyada
+    // OLMAYAN kayıtlar SİLİNMEZ, cekSenetEksikKalanlar listesine düşer (aşağıda rapor
+    // oluşturulduktan sonra kullanıcıya "Tahsil Edildi mi, İptal mi?" olarak sorulur).
+    if(state.files.cekSenet && state.files.cekSenet.data && state.files.cekSenet.data.length){
+      const {arsiv, eksikKalanlar} = cekSenetArsiviniBirlestir(state.cekSenetArsivi, state.files.cekSenet.data);
+      state.cekSenetArsivi = arsiv;
+      state.cekSenetEksikKalanlar = eksikKalanlar;
+      await cekSenetArsiviniKaydet(arsiv);
+    }
+    // TAHSİLAT DÖKÜMÜ — YENİ TEK FORMAT, KALICI ARŞİV (kullanıcı isteği): çek/senetle BİREBİR AYNI
+    // desen. buildReport'tan ÖNCE, bu oturumda yeni bir Tahsilat Dökümü dosyası seçildiyse kalıcı
+    // arşivle birleştirilir (belge no bazlı ekle/güncelle + Ters Kayıt ile sil + Ön Kayıt yaşam
+    // döngüsü temizliği — bkz. 01-cekirdek-ve-arsiv.js: tahsilatArsiviniBirlestir). Bu, YIL
+    // BOYUNCA tek seferde toplu yüklenen bir dosyanın her satırının kendi Tarih gününe doğru
+    // dağıtılabilmesini sağlar; sonraki kısmi (ör. son hafta) yüklemeler diğer günlere dokunmaz.
+    if(state.files.tahsilat && state.files.tahsilat.data && state.files.tahsilat.data.length){
+      state.tahsilatArsivi = tahsilatArsiviniBirlestir(state.tahsilatArsivi, state.files.tahsilat.data);
+      await tahsilatArsiviniKaydet(state.tahsilatArsivi);
     }
     state.report = buildReport(state.files, musteriMasterMapKullanilacak);
     // Bu noktada Kalemler kesinlikle yüklü ve grupATekilDosyalariHazirla ile bugünün tarihiyle
@@ -1507,6 +1644,12 @@ async function raporuOlusturVeyaGuncelleAkisiniCalistir(){
     document.getElementById('reportSection').style.display='block';
     document.body.classList.add('has-sidebar');
     resetBtn.style.display='inline-block';
+    // ÇEK/SENET EKSİK KALAN UYARISI: rapor başarıyla oluşturulup ekrana yansıdıktan SONRA tetiklenir
+    // (kullanıcı isteği: "dosya yüklenip rapor tekrar oluştuktan sonra tetiklenecek"). Modal, arşivde
+    // kalan ama son yüklenen Çek/Senet Riski dosyasında olmayan kayıtları listeler.
+    if(state.cekSenetEksikKalanlar && state.cekSenetEksikKalanlar.length){
+      cekSenetEksikOnayModalAc(state.cekSenetEksikKalanlar);
+    }
     // ÖNEMLİ: Cihaz depolama (IndexedDB) tamamen devre dışı (kullanıcı isteği) — saveReportToStorage
     // artık gerçekte HİÇBİR YERE yazmayan bir no-op'tur, her zaman true döner. Bu yüzden onun
     // sonucuna güvenip "kaydedildi" demek YANLIŞ OLURDU; gerçek kalıcılık YALNIZCA bulut yazması
@@ -1548,6 +1691,7 @@ async function raporuOlusturVeyaGuncelleAkisiniCalistir(){
   }
 }
 buildBtn.addEventListener('click', raporuOlusturVeyaGuncelleAkisiniCalistir);
+if(gvyAnaBuildBtn) gvyAnaBuildBtn.addEventListener('click', raporuOlusturVeyaGuncelleAkisiniCalistir);
 
 syncBtn.addEventListener('click', async ()=>{
   if(!cloudEnabled()) return;

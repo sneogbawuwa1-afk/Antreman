@@ -71,9 +71,19 @@ function gbSparkline(seed, color){
 function renderGenelBakisView(report){
   const view = document.getElementById('genelBakisView');
   if(!view) return;
+  const bosPanel = document.getElementById('genelBakisBosPanel');
+  const icerik = document.getElementById('genelBakisIcerik');
   if(!report){
+    // DÜZELTME: Fatura Kontrol bugüne ait kayıtları bulut arşivinden bağımsız gösterebildiği
+    // için, kullanıcı "veri var ama Genel Bakış boş" diye bir tutarsızlıkla karşılaşıyordu.
+    // Genel Bakış (Sevk gibi) yalnızca state.report'a (işlenmiş Kalemler'e) dayanabilir —
+    // artık sessizce boş kalmak yerine sebebi ve tek adımlı çözümü söylüyor.
+    if(bosPanel) bosPanel.style.display = 'block';
+    if(icerik) icerik.style.display = 'none';
     return;
   }
+  if(bosPanel) bosPanel.style.display = 'none';
+  if(icerik) icerik.style.display = 'block';
 
   const musteriler = gbTumMusteriler(report);
   const kpi = report.kpi || computeGenelKPI(report, '');
@@ -291,7 +301,7 @@ function renderGbMusteriGrid(report){
       <div class="htk-inline-stats">
         <div class="htk-stat-item"><span class="l">Sipariş</span><span class="v${m.siparisTutari>0?' c-siparis':' zero'}">${m.siparisTutari>0?TL(m.siparisTutari):'—'}</span></div>
         <div class="htk-stat-item"><span class="l">Sevk Ert.</span><span class="v${m.emanetSiparis>0?' c-sevk':' zero'}">${m.emanetSiparis>0?TL(m.emanetSiparis):'—'}</span></div>
-        <div class="htk-stat-item"><span class="l">Tahsilat</span><span class="v${m.alinanTahsilat>0?' c-tahsilat':' zero'}">${m.alinanTahsilat>0?TL(m.alinanTahsilat):'—'}</span></div>
+        <div class="htk-stat-item"><span class="l">Tahsilat</span><span class="v${m.alinanTahsilatKartGosterge>0?' c-tahsilat':' zero'}">${m.alinanTahsilatKartGosterge>0?TL(m.alinanTahsilatKartGosterge):'—'}</span></div>
       </div>
       <div class="htk-alt">
         <span class="htk-ceksenet">Çek/Senet: ${TL(m.cekSenet||0)}</span>
@@ -467,7 +477,6 @@ function raporuNormalizeEt(report){
   if(!Array.isArray(report.faturaArsiv)) report.faturaArsiv = [];
   if(!Array.isArray(report.bayiHakedis)) report.bayiHakedis = [];
   if(!Array.isArray(report.bozukIadeTahsilat)) report.bozukIadeTahsilat = [];
-  if(!Array.isArray(report.depozitoTahsilat)) report.depozitoTahsilat = [];
   if(!report.kpi || typeof report.kpi !== 'object'){
     report.kpi = { toplamTahsilat:0, tahsilatEslesmeyenToplam:0 };
   }else{
@@ -593,7 +602,38 @@ SB_SUBMENUS.forEach(s=>{
   });
 });
 
-function setActiveView(view){
+// ===== RAPOR GEÇİŞ YÜKLEME OVERLAY'İ =====
+// setActiveView() içinde bazı render fonksiyonları async'tir (bazıları buluttan veri çeker —
+// örn. sellOutYenile). Bu çağrılar await edilmeden önce kullanıcı geçtiği view'ı boş/eski
+// haliyle görüyordu, veri "aniden" beliriyordu. Aşağıdaki iki yardımcı, ilgili view'ın kendi
+// kapsayıcısı üzerine (yalnızca o alanı kaplayan, sidebar/başlığı etkilemeyen) markaya uygun
+// bir "Rapor yükleniyor" kartı bindirir/kaldırır.
+function viewYuklemeOverlayGoster(viewId){
+  const el = document.getElementById(viewId+'View');
+  if(!el) return;
+  if(getComputedStyle(el).position === 'static') el.style.position = 'relative';
+  let overlay = el.querySelector(':scope > .view-yukleme-overlay');
+  if(!overlay){
+    overlay = document.createElement('div');
+    overlay.className = 'view-yukleme-overlay';
+    overlay.innerHTML = '<div class="view-yukleme-karti"><div class="view-yukleme-spin"></div><span class="view-yukleme-metin">Rapor yükleniyor…</span></div>';
+    el.appendChild(overlay);
+  }
+  overlay.style.display = 'flex';
+}
+function viewYuklemeOverlayGizle(viewId){
+  const el = document.getElementById(viewId+'View');
+  const overlay = el && el.querySelector(':scope > .view-yukleme-overlay');
+  if(overlay) overlay.style.display = 'none';
+}
+// Hangi view'ların render fonksiyonu async'tir (buluttan veri çekebilir/ağır hesaplama
+// yapabilir) — sadece bunlar için geçiş overlay'i gösterilir; senkron olanlarda (genelBakis,
+// sevk, yaslandirma, ticariStok, bayiHakedis, supheliAlacak) zaten anlık render olduğundan
+// overlay'e gerek yoktur.
+const ASYNC_RENDER_VIEWLER = new Set(['yukleme','faturaKontrol','sellOut','modernKanal',
+  'stokGun','tahsilatVerimlilik','dsoTrend','nakitAkis','temsilciKarnesi','yonetimOzeti','cei']);
+
+async function setActiveView(view){
   // Üst sekme çubuğu (mobil/dar ekran) ve sidebar linklerini birlikte senkronize et.
   document.querySelectorAll('.tab-btn[data-view]').forEach(b=>{
     const match = b.getAttribute('data-view')===view;
@@ -621,23 +661,62 @@ function setActiveView(view){
     if(el) el.style.display = (id===view) ? 'block' : 'none';
   });
 
-  if(view==='genelBakis') renderGenelBakisView(state.report);
-  if(view==='sevk' && state.report) renderSevkView(state.report);
-  if(view==='yukleme') renderYuklemeView();
-  if(view==='yaslandirma' && state.report) renderYaslandirmaView(state.report);
-  if(view==='ticariStok' && state.report) renderTicariStokView(state.report);
-  if(view==='faturaKontrol' && state.report) renderFaturaKontrolView(state.report);
-  if(view==='bayiHakedis') renderBayiHakedisView();
-  if(view==='sellOut') renderSellOutView();
-  if(view==='modernKanal') renderModernKanalView();
-  if(view==='stokGun') renderStokGunView();
-  if(view==='tahsilatVerimlilik' && state.report) renderTahsilatVerimlilikView(state.report);
-  if(view==='dsoTrend' && state.report) renderDsoTrendView(state.report);
-  if(view==='nakitAkis' && state.report) renderNakitAkisView(state.report);
-  if(view==='supheliAlacak' && state.report) renderSupheliAlacakView(state.report);
-  if(view==='temsilciKarnesi' && state.report) renderTemsilciKarnesiView(state.report);
-  if(view==='yonetimOzeti' && state.report) renderYonetimOzetiView(state.report);
-  if(view==='cei' && state.report) renderCeiView(state.report);
+  if(ASYNC_RENDER_VIEWLER.has(view)) viewYuklemeOverlayGoster(view);
+  try{
+    if(view==='genelBakis') renderGenelBakisView(state.report);
+    if(view==='sevk') renderSevkView(state.report);
+    if(view==='yukleme') await renderYuklemeView();
+    if(view==='yaslandirma' && state.report) renderYaslandirmaView(state.report);
+    if(view==='ticariStok' && state.report) renderTicariStokView(state.report);
+    if(view==='faturaKontrol' && state.report) await renderFaturaKontrolView(state.report);
+    if(view==='bayiHakedis') renderBayiHakedisView();
+    if(view==='sellOut') await renderSellOutView();
+    if(view==='modernKanal') await renderModernKanalView();
+    if(view==='stokGun') await renderStokGunView();
+    if(view==='tahsilatVerimlilik' && state.report) await renderTahsilatVerimlilikView(state.report);
+    if(view==='dsoTrend' && state.report) await renderDsoTrendView(state.report);
+    if(view==='nakitAkis' && state.report) await renderNakitAkisView(state.report);
+    if(view==='supheliAlacak' && state.report) renderSupheliAlacakView(state.report);
+    if(view==='temsilciKarnesi' && state.report) await renderTemsilciKarnesiView(state.report);
+    if(view==='yonetimOzeti' && state.report) await renderYonetimOzetiView(state.report);
+    if(view==='cei' && state.report) await renderCeiView(state.report);
+  }finally{
+    if(ASYNC_RENDER_VIEWLER.has(view)) viewYuklemeOverlayGizle(view);
+  }
+  // AÇILIŞ EKRANI KALDIRILDI (kullanıcı kararı): report yokken YUKARIDAKİ "&& state.report" şartı
+  // yüzünden bu render fonksiyonları hiç çağrılmıyor — ama view'ın kendi HTML kapsayıcısı zaten
+  // ALL_VIEW_IDS döngüsünde display:block yapılmış oluyor. Düzeltme öncesi kullanıcı, rapor yokken
+  // bu sekmelere tıklarsa TAMAMEN BOŞ bir sayfa görüyordu (dsoTrend/cei hariç, onların zaten kendi
+  // bosPanel'i vardı). Şimdi, henüz kendi özel boş-durum paneli olmayan sekmeler için TEK NOKTADAN,
+  // güvenli/genel bir "Rapor henüz oluşturulmadı" mesajı gösterilir. ÖNEMLİ (veri güvenliği):
+  // view'ın innerHTML'i DEĞİŞTİRİLMEZ (bu, ileride rapor oluştuğunda render fonksiyonlarının
+  // aradığı elementleri kalıcı olarak silip onları sessizce bozabilirdi) — bunun yerine görünmez/
+  // absolute bir overlay div EKLENIR, orijinal içerik CSS ile (visibility) gizlenir ama DOM'da
+  // olduğu gibi kalır; rapor geldiğinde overlay kaldırılır ve içerik normal şekilde render edilir.
+  const KENDI_BOS_PANELI_OLMAYAN_VIEWLER = new Set(['yaslandirma','ticariStok','faturaKontrol',
+    'tahsilatVerimlilik','nakitAkis','supheliAlacak','temsilciKarnesi','yonetimOzeti']);
+  if(KENDI_BOS_PANELI_OLMAYAN_VIEWLER.has(view)){
+    const el = document.getElementById(view+'View');
+    if(el){
+      let overlay = el.querySelector(':scope > .gvy-genel-bos-durum');
+      if(!state.report){
+        if(!overlay){
+          overlay = document.createElement('div');
+          overlay.className = 'bos-durum gvy-genel-bos-durum';
+          overlay.style.cssText = 'padding:60px 20px;text-align:center;';
+          overlay.innerHTML = `<i class="fa-solid fa-file-circle-question" aria-hidden="true" style="font-size:28px;color:var(--ink-faint);"></i>
+            <div style="font-size:15px;font-weight:600;margin:12px 0 4px;">Bugünün raporu henüz oluşturulmadı</div>
+            <div style="font-size:12.5px;color:var(--ink-soft);">Bu ekran, işlenmiş rapor verisine dayanır. Üst köşedeki <b>Veri Yükle</b> panelinden Kalemler/Müşteri Master/Cari Ekstre yükleyip "Raporu Oluştur"a basın.</div>`;
+          el.insertBefore(overlay, el.firstChild);
+        }
+        Array.from(el.children).forEach(child=>{ if(child!==overlay) child.style.display='none'; });
+        overlay.style.display = 'block';
+      }else if(overlay){
+        overlay.style.display = 'none';
+        Array.from(el.children).forEach(child=>{ if(child!==overlay) child.style.removeProperty('display'); });
+      }
+    }
+  }
 
   try{ window.scrollTo({top:0, behavior:'instant'}); }catch(e){ window.scrollTo(0,0); }
 }
@@ -732,6 +811,13 @@ document.querySelectorAll('.sb-nav-link[data-view]').forEach(btn=>{
       if(leftViewport || e.clientX > sbHoverCloseThresholdX()){
         sidebar.classList.remove('sb-hover-peek');
         sidebar.classList.add('collapsed');
+        // DÜZELTME (kullanıcı isteği): hover-peek eskiden sadece sidebar'ı görsel olarak
+        // genişletip .app-shell'e dokunmuyordu ("içerik yer değiştirmesin, sidebar üzerine
+        // yüzen bir panel gibi genişlesin" tasarımı) — bu da header'ın sidebar'ın ALTINDA/
+        // ARKASINDA kalmış gibi görünmesine (sidebar header'ın üstüne binmesine) yol açıyordu.
+        // Artık fare ayrılınca sidebar tekrar daraldığı gibi .app-shell de tekrar
+        // sb-collapsed'e dönüyor — yani header/içerik de sidebar'la birlikte genişleyip daralıyor.
+        shell.classList.add('sb-collapsed');
         closeAllFlyouts();
         sbStopHoverWatch();
       }
@@ -745,6 +831,10 @@ document.querySelectorAll('.sb-nav-link[data-view]').forEach(btn=>{
     sbStopHoverWatch();
     sidebar.classList.add('sb-hover-peek');
     sidebar.classList.remove('collapsed');
+    // DÜZELTME (kullanıcı isteği): header/içerik artık sidebar ile AYNI ANDA genişliyor —
+    // sidebar sadece görsel olarak büyüyüp header'ın üstüne binmiyor, header da gerçekten
+    // sağa kayıp yer açıyor (tıpkı kalıcı aç/kapa butonundaki davranış gibi).
+    shell.classList.remove('sb-collapsed');
   });
   sidebar.addEventListener('mouseleave', ()=>{
     if(!sidebar.classList.contains('sb-hover-peek')) return;
@@ -1562,6 +1652,19 @@ function refreshGenelKPIs(report){
 }
 
 function renderSevkView(report){
+  const bosPanel = document.getElementById('sevkBosPanel');
+  const icerik = document.getElementById('sevkIcerik');
+  // DÜZELTME: bkz. renderGenelBakisView'daki aynı not — bu fonksiyon eskiden çağrıldığında
+  // report zaten var olmak ZORUNDAYDI (setActiveView'da "&& state.report" şartı sayesinde),
+  // ama rapor yokken sekmeye tıklanınca kullanıcı hiçbir açıklama görmeden boş bir sayfayla
+  // karşılaşıyordu. Artık savunmacı: report yoksa boş durumu gösterip çıkar.
+  if(!report){
+    if(bosPanel) bosPanel.style.display = 'block';
+    if(icerik) icerik.style.display = 'none';
+    return;
+  }
+  if(bosPanel) bosPanel.style.display = 'none';
+  if(icerik) icerik.style.display = 'block';
   renderSevkMusteriTable(report);
   renderSevkOzet(report);
 }

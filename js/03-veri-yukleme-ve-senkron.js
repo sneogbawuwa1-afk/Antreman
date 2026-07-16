@@ -33,7 +33,7 @@
     toggleBtn.setAttribute('aria-expanded','false');
   }
 
-  // ---- Sekme geçişi (Günlük Veri / Arşiv Verisi) ----
+  // ---- Sekme geçişi (Ana Veri / Günlük Veri / Arşiv Verisi) ----
   const tabButtons = panel.querySelectorAll('.gvy-tab');
   const tabPanes = panel.querySelectorAll('.gvy-tabpane');
   tabButtons.forEach(tb=>{
@@ -41,32 +41,31 @@
       const hedef = tb.getAttribute('data-gvy-tab');
       tabButtons.forEach(b=>{ const aktif=b===tb; b.classList.toggle('active',aktif); b.setAttribute('aria-selected', aktif?'true':'false'); });
       tabPanes.forEach(p=>{
-        const aktif = (hedef==='gunluk' && p.id==='gvyPaneGunluk') || (hedef==='arsiv' && p.id==='gvyPaneArsiv');
+        const aktif = (hedef==='ana' && p.id==='gvyPaneAna') || (hedef==='gunluk' && p.id==='gvyPaneGunluk') || (hedef==='arsiv' && p.id==='gvyPaneArsiv');
         p.classList.toggle('active', aktif);
       });
     });
   });
 
-  // Bugün Kalemler yüklendi mi? (Grup C/B için ön koşul.) Ana ekrandaki state.files.kalemler O GÜN
-  // yüklenmiş bir dosya varsa doludur (grupATekilDosyalariHazirla yalnızca bugüne ait Kalemler'i geri
-  // yükler). Bu yüzden bugün Kalemler yoksa uyarı gösterilir ve güncelleme butonları kilitlenir.
-  // Senkron hızlı kontrol: bellekte VEYA (en son tazelemede belirlenen) bugüne ait tek-slot kaydı.
+  // Bugün Kalemler yüklendi mi? (Artık Grup B/C için ZORUNLU bir ön koşul DEĞİL — kullanıcı
+  // kararıyla kaldırıldı. Bu fonksiyon yalnızca bilgilendirme amaçlı "uyarı" göstergesi için
+  // korunmuştur, artık hiçbir butonu kilitlemez.)
   function bugunKalemlerVarMi(){
     if(state.files && state.files.kalemler && state.files.kalemler.data && state.files.kalemler.data.length) return true;
     return !!state.bugunKalemlerHazir;
   }
-  // Asenkron: önce tek-slot arşivini tazeler (bugüne ait Kalemler var mı?), sonra UI'ı günceller.
-  // Böylece rapor oluşturulmuş ama state.files bellekte boş olsa bile doğru sonucu verir.
+  // Asenkron: önce tek-slot arşivini tazeler (Kalemler var mı?), sonra UI'ı günceller.
   async function gvyKalemlerUyariGuncelle(){
     try{ if(typeof bugunKalemlerDurumTazele === 'function') await bugunKalemlerDurumTazele(); }catch(_){}
     const uyari = document.getElementById('gvyKalemlerUyari');
     const kalemlerYok = !bugunKalemlerVarMi();
     if(uyari) uyari.classList.toggle('goster', kalemlerYok);
-    // Grup B ve Grup C güncelleme butonlarını da senkronla.
+    // KİLİT KALDIRILDI (kullanıcı kararı): Grup B/C güncelleme butonları artık Kalemler'in varlığına
+    // bağlı DEĞİL — yalnızca kendi grubunda seçili dosya olup olmamasına bakar.
     const gb = document.getElementById('gvyUpdateBtn');
     const gc = document.getElementById('gvcUpdateBtn');
-    if(gb) gb.disabled = kalemlerYok || (GVY_DOSYA_TIPLERI.filter(t=>state.files[t]).length===0);
-    if(gc) gc.disabled = kalemlerYok || GRUP_C_HAZIR_SAYISI()===0;
+    if(gb) gb.disabled = GVY_DOSYA_TIPLERI.filter(t=>state.files[t]).length===0;
+    if(gc) gc.disabled = GRUP_C_HAZIR_SAYISI()===0;
   }
   window.gvyKalemlerUyariGuncelle = gvyKalemlerUyariGuncelle;
   toggleBtn.addEventListener('click', async (e)=>{
@@ -119,10 +118,9 @@
   // tutuluyorsa (Yükleme Raporu hariç — o ayrı bir arşivde, state.yuklemeArsivCache), o alanı taşıyan
   // EN GÜNCEL (en büyük tarihli) günü bulur. Böylece "bu dosya türü için arşivde en son hangi günün
   // verisi var" bilgisi GVY panelinde ilgili satırın altında gösterilebilir.
-  // NOT: Depozito Tahsilat AYRI bir arşiv alanına yazılmaz — Bozuk İade Faturası ile birlikte
-  // tahsilatArsiv'in İÇİNE, formatKaynagi==='DepozitoTahsilat' etiketiyle karışık olarak eklenir
-  // (bkz. tahsilatKredisiGunlereEkleVeDegistir). Bu yüzden 'depozitoTahsilat' tipi için ayrı bir
-  // özel kontrol gerekir — diğer tipler gibi düz bir alan adı eşlemesiyle bulunamaz.
+  // NOT: Depozito Tahsilat dosyası (ayrı bir dosya/tip olarak) SİSTEMDEN TAMAMEN KALDIRILDI
+  // (kullanıcı kararı) — Depozito İade artık Fatura Dökümü içindeki "Depozito İade Faturası"
+  // türünden, 'FaturaIade' etiketiyle geliyor (bkz. buildReport'taki İade Grubu mantığı).
   const GVY_ARSIV_ALAN_ESLEME = {
     siparis: 'siparisArsiv',
     tahsilat: 'tahsilatArsiv',
@@ -140,15 +138,6 @@
       const gunler = Object.keys(state.yuklemeArsivCache || {}).filter(g=>{
         const g2 = state.yuklemeArsivCache[g];
         return g2 && (g2.sevkiyatVerisiVarMi || g2.tahsilatVerisiVarMi);
-      });
-      const enGuncelGun = gunler.length ? gunler.sort()[gunler.length-1] : null;
-      return { gunKey: enGuncelGun, kayitZamani: gvyTipiIcinSonKayitZamani(tip) };
-    }
-    if(tip === 'depozitoTahsilat'){
-      const arsiv = state.faturaArsivCache || {};
-      const gunler = Object.keys(arsiv).filter(g=>{
-        const kayit = (arsiv[g] && arsiv[g].tahsilatArsiv) || [];
-        return kayit.some(r=> r && r.formatKaynagi === 'DepozitoTahsilat');
       });
       const enGuncelGun = gunler.length ? gunler.sort()[gunler.length-1] : null;
       return { gunKey: enGuncelGun, kayitZamani: gvyTipiIcinSonKayitZamani(tip) };
@@ -181,19 +170,14 @@
       });
       return enGuncelIso;
     }
-    const alan = (tip==='depozitoTahsilat') ? null : GVY_ARSIV_ALAN_ESLEME[tip];
+    const alan = GVY_ARSIV_ALAN_ESLEME[tip];
     const arsiv = state.faturaArsivCache || {};
     let enGuncelIso = null;
     Object.keys(arsiv).forEach(gunKey=>{
       const gun = arsiv[gunKey];
       if(!gun || !gun.kayitZamani) return;
-      let buGundeVarMi;
-      if(tip === 'depozitoTahsilat'){
-        buGundeVarMi = ((gun.tahsilatArsiv)||[]).some(r=> r && r.formatKaynagi === 'DepozitoTahsilat');
-      }else{
-        const kayit = alan ? gun[alan] : null;
-        buGundeVarMi = Array.isArray(kayit) ? kayit.length>0 : Boolean(kayit);
-      }
+      const kayit = alan ? gun[alan] : null;
+      const buGundeVarMi = Array.isArray(kayit) ? kayit.length>0 : Boolean(kayit);
       if(buGundeVarMi && (!enGuncelIso || gun.kayitZamani > enGuncelIso)) enGuncelIso = gun.kayitZamani;
     });
     return enGuncelIso;
@@ -459,7 +443,7 @@
 })();
 
 async function resetAll(){
-  state.files = {kalemler:null, siparis:null, tahsilat:null, cekSenet:null, ticariStok:null, fatura:null, bayiHakedis:null, yukleme:null, musteriMaster:null, ciroPrimi:null, donemselIskonto:null, sellOut:null, depozitoTahsilat:null, cariEkstre:null};
+  state.files = {kalemler:null, siparis:null, tahsilat:null, cekSenet:null, ticariStok:null, fatura:null, bayiHakedis:null, yukleme:null, musteriMaster:null, ciroPrimi:null, donemselIskonto:null, sellOut:null, cariEkstre:null};
   state.filesC = {}; // Grup C seçim kuyruğu da sıfırlanır
   state.report = null;
   state.expanded.clear();
@@ -469,7 +453,7 @@ async function resetAll(){
   state.bayiHakedisHata = null;
   state.sellOutReport = null;
   await clearStoredReport();
-  const ICON_NUMS = {kalemler:'', siparis:'', tahsilat:'', cekSenet:'', ticariStok:'', fatura:'', bayiHakedis:'', yukleme:'', musteriMaster:'', ciroPrimi:'', donemselIskonto:'', sellOut:'', depozitoTahsilat:''};
+  const ICON_NUMS = {kalemler:'', siparis:'', tahsilat:'', cekSenet:'', ticariStok:'', fatura:'', bayiHakedis:'', yukleme:'', musteriMaster:'', ciroPrimi:'', donemselIskonto:'', sellOut:''};
   document.querySelectorAll('.check-item').forEach(el=>{
     el.classList.remove('done');
     el.querySelector('.check-icon').textContent = ICON_NUMS[el.getAttribute('data-type')] || '';
@@ -477,6 +461,7 @@ async function resetAll(){
   });
   buildBtn.disabled = true;
   buildBtn.textContent = 'Raporu Oluştur';
+  if(typeof gvyAnaBuildBtn !== 'undefined' && gvyAnaBuildBtn){ gvyAnaBuildBtn.disabled = true; gvyAnaBuildBtn.textContent = 'Raporu Oluştur'; }
   statusPillMsg.textContent = 'Veri bekleniyor';
   statusPill.classList.remove('ok');
   document.getElementById('uploadCard').style.display='block';
@@ -521,23 +506,24 @@ async function resetAll(){
    not) — modalı açan tek çağrı (kalemlerKilitModalAc) ile birlikte kapatma/geri sayım zinciri
    (kalemlerKilitModalKapat, GeriSayimGuncelle/Baslat/Durdur) ve modal DOM'u da kaldırıldı. */
 // ===================== ARŞİV VERİSİ: TARİH ARALIKLI SİLME (GENEL) =====================
-// Sipariş/Tahsilat/Fatura/Depozito Tahsilat/Bayi Hak Ediş/Yükleme Raporu arşiv satırlarındaki
-// çöp kutusu ikonlarının hepsi bu tek modalı ve tek genel silme fonksiyonunu kullanır. Kullanıcı
+// Sipariş/Tahsilat/Fatura/Bayi Hak Ediş/Yükleme Raporu arşiv satırlarındaki çöp kutusu
+// ikonlarının hepsi bu tek modalı ve tek genel silme fonksiyonunu kullanır. Kullanıcı
 // "Tek bir gün / Belirli bir ay / Tarih aralığı / Bugünden önceki tüm kayıtlar" seçeneklerinden
 // birini seçip [baslangicKey, bitisKey] (dahil-dahil, YYYY-MM-DD) aralığını belirler; silme bu
 // aralıktaki günlerin SADECE ilgili tipe ait alanını temizler, diğer tiplere dokunmaz.
 //
 // Veri yapısı özeti (state.faturaArsivCache[gunKey] = {...}):
 //   siparis      -> gun.siparisArsiv (dizi)
-//   tahsilat     -> gun.tahsilatArsiv (dizi) — formatKaynagi 'DepozitoTahsilat'/'FaturaIade' OLMAYAN satırlar
+//   tahsilat     -> gun.tahsilatArsiv (dizi) — formatKaynagi 'FaturaIade' OLMAYAN satırlar
 //   fatura       -> gun.faturaArsiv (dizi)
 //   bayiHakedis  -> gun.bayiHakedisArsiv (dizi)
-//   depozitoTahsilat -> gun.tahsilatArsiv İÇİNDEKİ formatKaynagi==='DepozitoTahsilat' satırları
-//                       (bkz. tahsilatKredisiGunlereEkleVeDegistir) — ayrı bir alan DEĞİL.
 //   yukleme      -> state.yuklemeArsivCache[gunKey] (AYRI bir arşiv, faturaArsivCache'te değil)
+// NOT: Depozito Tahsilat dosyası (ayrı tip/dosya olarak) SİSTEMDEN TAMAMEN KALDIRILDI — Depozito
+// İade artık Fatura Dökümü'ndeki "Depozito İade Faturası" türünden, 'FaturaIade' etiketiyle geliyor
+// (bkz. buildReport'taki İade Grubu mantığı), bu yüzden ayrı bir silme dalına gerek kalmadı.
 const ARSIV_SIL_TIP_ETIKET = {
   siparis:'Sipariş Dökümü', tahsilat:'Tahsilat Dökümü', fatura:'Fatura Dökümü',
-  depozitoTahsilat:'Depozito Tahsilat', bayiHakedis:'Bayi Hak Ediş', yukleme:'Yükleme Raporu',
+  bayiHakedis:'Bayi Hak Ediş', yukleme:'Yükleme Raporu',
 };
 async function arsivTarihAraligindaSil(tip, baslangicKey, bitisKey){
   if(tip === 'yukleme'){
@@ -569,26 +555,33 @@ async function arsivTarihAraligindaSil(tip, baslangicKey, bitisKey){
     const gun = yeniArsivTumu[gunKey];
     if(!gun) return;
 
-    if(tip === 'depozitoTahsilat'){
+    const alan = {siparis:'siparisArsiv', tahsilat:'tahsilatArsiv', fatura:'faturaArsiv', bayiHakedis:'bayiHakedisArsiv'}[tip];
+    if(!alan) return;
+    if(tip === 'tahsilat'){
+      // Tahsilat Dökümü sadece "gerçek" tahsilat satırlarını kapsar; İade Grubu (FaturaIade
+      // etiketli — Bozuk/Sağlam/Depozito İade Faturası) bu tipin silme kapsamına dahil edilmez
+      // (bu satırlar yalnızca Fatura Dökümü'nün yeniden yüklenmesiyle güncellenir) — bu yüzden
+      // SADECE o etiketli satırlar korunur (kalan), etiketsiz/normal tahsilat satırları silinir.
       const eski = gun.tahsilatArsiv || [];
-      const kalan = eski.filter(r=> !(r && r.formatKaynagi === 'DepozitoTahsilat'));
+      const kalan = eski.filter(r=> r && r.formatKaynagi === 'FaturaIade');
       if(kalan.length !== eski.length){
         yeniArsivTumu[gunKey] = Object.assign({}, gun, {tahsilatArsiv: kalan});
         etkilenenGunSayisi++;
       }
       return;
     }
-
-    const alan = {siparis:'siparisArsiv', tahsilat:'tahsilatArsiv', fatura:'faturaArsiv', bayiHakedis:'bayiHakedisArsiv'}[tip];
-    if(!alan) return;
-    if(tip === 'tahsilat'){
-      // Tahsilat Dökümü sadece "gerçek" tahsilat satırlarını kapsar; Depozito Tahsilat/Bozuk İade
-      // Faturası etiketli satırlar bu tipin silme kapsamına dahil edilmez (kendi butonları vardır) —
-      // bu yüzden SADECE o iki etiketli satırlar korunur (kalan), etiketsiz/normal tahsilat satırları silinir.
-      const eski = gun.tahsilatArsiv || [];
-      const kalan = eski.filter(r=> r && (r.formatKaynagi === 'DepozitoTahsilat' || r.formatKaynagi === 'FaturaIade'));
-      if(kalan.length !== eski.length){
-        yeniArsivTumu[gunKey] = Object.assign({}, gun, {tahsilatArsiv: kalan});
+    if(tip === 'fatura'){
+      // Fatura Dökümü silinirken, o günün faturaArsiv'i (satış tutarları) temizlenir VE aynı
+      // yüklemeden türeyen 'FaturaIade' etiketli tahsilat kredileri de (İade Grubu) birlikte
+      // temizlenir — ikisi de AYNI kaynak dosyadan (Fatura Dökümü) geldiği için, kullanıcı bu
+      // dosyanın verisini silerken iade tahsilatlarının arşivde "yetim" kalmaması gerekir.
+      const eskiFatura = gun.faturaArsiv || [];
+      const eskiTahsilat = gun.tahsilatArsiv || [];
+      const kalanTahsilat = eskiTahsilat.filter(r=> !(r && r.formatKaynagi === 'FaturaIade'));
+      const faturaDegisti = eskiFatura.length>0;
+      const tahsilatDegisti = kalanTahsilat.length !== eskiTahsilat.length;
+      if(faturaDegisti || tahsilatDegisti){
+        yeniArsivTumu[gunKey] = Object.assign({}, gun, {faturaArsiv: [], tahsilatArsiv: kalanTahsilat});
         etkilenenGunSayisi++;
       }
       return;
@@ -766,6 +759,11 @@ async function uygulamayiBaslat(){
   if(uygulamaBaslatildiMi) return;
   uygulamaBaslatildiMi = true;
 
+  // BULUT YÜKLEME EKRANI: rapor gelene (ya da rapor yok kararı verilene) kadar #reportSection'ın
+  // çıplak/boş KPI iskeleti yerine tam ekran, tek bir yükleniyor göstergesi sunulur. Fonksiyon
+  // içindeki TÜM çıkış yollarında (rapor bulundu / bulunamadı / hata) en altta kapatılır.
+  const bulutYukleEkran = document.getElementById('bulutYuklemeEkrani');
+
   let report = null, source = null;
 
   // ÖNEMLİ PERFORMANS DÜZELTMESİ: Bu 9 veri türü (Müşteri Master, Bayi Hakediş, Sell Out
@@ -793,9 +791,13 @@ async function uygulamayiBaslat(){
     modernKanalArsivYenile(),
     malzemelerStokYenile(),
     loadSenetTahsilOnaylariFromLocal(),
+    (async()=>{ state.cekSenetArsivi = await cekSenetArsiviniOku(); })(),
+    (async()=>{ state.tahsilatArsivi = await tahsilatArsiviniOku(); })(),
   ].map(p=> zamanAsimliYaris(p, ACILIS_ISTEK_TIMEOUT_MS, null)));
   if(cloudEnabled()){
     statusPillMsg.textContent = 'Bulut verisi kontrol ediliyor…';
+    const bulutYukleMsg = document.getElementById('bulutYuklemeMesaj');
+    if(bulutYukleMsg) bulutYukleMsg.textContent = 'Bulut verisi kontrol ediliyor…';
     // Skeleton: bulut kontrolü sürerken kullanıcı boş bir kartla değil, gelecek içeriğin
     // silüetiyle karşılansın (bekleme algısını kısaltır, "dondu mu?" hissini önler).
     const acilisSk = document.getElementById('acilisSkeleton');
@@ -865,9 +867,48 @@ async function uygulamayiBaslat(){
   }else if(cloudEnabled()){
     statusPillMsg.textContent = 'Veri bekleniyor';
   }
+  // AÇILIŞ EKRANI KALDIRILDI (kullanıcı kararı — büyük mimari değişiklik): Rapor HİÇ yoksa bile
+  // (hem cihazda hem buluttan hiç veri gelmediyse) uygulama artık boş bir dropzone değil, doğrudan
+  // rapor arayüzünü (sidebar + Genel Bakış'ın "Bugünün raporu henüz oluşturulmadı" boş durumu)
+  // gösterir. Daha önce bu durumda hiçbir render tetiklenmiyordu (yalnızca "Veri bekleniyor" yazısı
+  // güncelleniyordu) — bu satırlar olmadan kullanıcı, dropzone kalktıktan sonra tamamen BOŞ bir
+  // sayfa (sidebar'sız, içeriksiz) görürdü.
+  if(!state.report){
+    document.body.classList.add('has-sidebar');
+    setActiveView('genelBakis');
+  }
+  // BULUT YÜKLEME EKRANI KAPAT: rapor durumu (var/yok) artık kesinleşti, arkadaki
+  // reportSection de (doluysa/boşsa) doğru haliyle render edilmiş durumda — overlay'i
+  // kaldırıp kullanıcıya gerçek ekranı gösterebiliriz.
+  if(bulutYukleEkran) bulutYukleEkran.style.display = 'none';
+  // OTOMATİK GÜNLÜK SNAPSHOT (kullanıcı kararı): Önceden musteriSnapshot SADECE kullanıcı "Raporu
+  // Oluştur"/"Veri Güncelle" butonuna bastığında yazılıyordu — kullanıcı Kalemler'i bir kez
+  // yükleyip günlerce hiç butona basmazsa (artık zorunlu olmadığı için sıkça olacak bir senaryu),
+  // Trend Analizi/Tahsilat Verimliliği/Yönetim Özeti gibi raporlar o günleri "musteriSnapshot yok"
+  // sayıp boş/eksik gösteriyordu — halbuki fatura/tahsilat verisi zaten yüklenmiş olabiliyordu.
+  // Şimdi: rapor (Kalemler/Master/Ekstre'den en az biri) zaten varsa VE bugün için henüz hiç
+  // snapshot alınmadıysa, uygulama açılışta/sekmeye dönüşte SESSİZCE kendi kendine bir snapshot
+  // alır — kullanıcı hiçbir şey yapmasa bile. Bu, cari bakiye/borç durumunu DEĞİŞTİRMEZ (buildReport
+  // zaten aynı veriyle hesaplanmıştı), sadece o günün "fotoğrafını" arşive kalıcı olarak ekler.
+  if(state.report) await gunlukSnapshotGerekiyorsaAl();
   // Açılıştaki bilinen "son değişiklik zamanı" ile otomatik arka plan senkronizasyonuna başla —
   // bkz. otomatikBulutSenkronizasyonuBaslat() tanımı ve açıklaması.
   if(cloudEnabled()) otomatikBulutSenkronizasyonuBaslat();
+}
+
+// Bugün için musteriSnapshot arşivde yoksa (hiç "Raporu Oluştur"a basılmamışsa bile) sessizce
+// alır. state.faturaArsivCache zaten uygulamayiBaslat akışında önceden yüklenmiş olur (bkz.
+// faturaArsivBaslangicYukle) — burada sadece bugünün anahtarını kontrol ediyoruz, tüm arşivi
+// yeniden taramıyoruz (ucuz bir işlem).
+async function gunlukSnapshotGerekiyorsaAl(){
+  try{
+    const bugunKey = dateKeyLocal(turkiyeBugun());
+    const bugunKaydi = (state.faturaArsivCache||{})[bugunKey];
+    if(bugunKaydi && bugunKaydi.musteriSnapshot && bugunKaydi.musteriSnapshot.length) return; // zaten var, tekrar alma
+    await faturaKontrolArsivineKaydetVeSenkronizeEt(state.report);
+  }catch(err){
+    console.error('Otomatik günlük snapshot alınamadı:', err);
+  }
 }
 window.addEventListener('DOMContentLoaded', async ()=>{
   if(!authAktif) await uygulamayiBaslat();
@@ -938,7 +979,13 @@ function otomatikBulutSenkronizasyonuBaslat(){
   cloudMetaOkuUzaktan(CLOUD.path).then(meta=>{ if(meta) otomatikSenkronBilinenZaman = meta.updatedAt; });
   otomatikSenkronTimerId = setInterval(otomatikBulutSenkronizasyonuKontrolEt, OTOMATIK_SENKRON_POLL_ARALIK_MS);
   document.addEventListener('visibilitychange', ()=>{
-    if(document.visibilityState==='visible') otomatikBulutSenkronizasyonuKontrolEt();
+    if(document.visibilityState==='visible'){
+      otomatikBulutSenkronizasyonuKontrolEt();
+      // OTOMATİK GÜNLÜK SNAPSHOT: kullanıcı sekmeyi/uygulamayı GÜNLER SONRA tekrar açtığında
+      // (bulutta değişiklik olmasa bile, sadece takvim günü ilerlediği için) bugünün henüz hiç
+      // snapshot'ı yoksa sessizce alınır — bkz. gunlukSnapshotGerekiyorsaAl.
+      if(state.report) gunlukSnapshotGerekiyorsaAl();
+    }
   });
 }
 
@@ -949,7 +996,27 @@ function buildReport(files, musteriMasterMap){
   const invoices = [];
   const musteriMap = new Map();
 
-  files.kalemler.data.forEach(r=>{
+  // GÖRÜNÜRLÜK FİLTRESİ ÖN-HESAPLAMASI (kullanıcı kararı — büyük mimari değişiklik): Pasif/İptal
+  // müşterilerin "tüm-zamanların arşivinde tahsilat/fatura kaydı var mı" kontrolü için, HER
+  // müşteride ayrı ayrı tüm arşivi taramak yerine (O(müşteri × gün × satır), çok yavaş), arşiv BİR
+  // KEZ taranıp geçmişi olan müşteri kodlarının bir Set'i çıkarılır (O(gün × satır) + O(1) sorgu).
+  // İki kaynak taranır: (1) state.faturaArsivCache (her günün faturaArsiv/tahsilatArsiv dizileri —
+  // eski/mevcut fatura arşivleme mekanizması), (2) state.tahsilatArsivi (yeni tek-format kalıcı
+  // tahsilat arşivi, belge no bazlı). Bu Set yalnızca görünürlük kararı için kullanılır, hiçbir
+  // tutar/toplam hesabına karışmaz.
+  const gecmisiOlanMusteriler = new Set();
+  Object.values(state.faturaArsivCache || {}).forEach(gun=>{
+    (gun.faturaArsiv||[]).forEach(r=>{ if(r && r.musteri) gecmisiOlanMusteriler.add(String(r.musteri).trim()); });
+    (gun.tahsilatArsiv||[]).forEach(r=>{ if(r && r.musteri) gecmisiOlanMusteriler.add(String(r.musteri).trim()); });
+  });
+  Object.values(state.tahsilatArsivi || {}).forEach(r=>{ if(r && r.musteriKod) gecmisiOlanMusteriler.add(String(r.musteriKod).trim()); });
+
+  // KALEMLER ARTIK OPSİYONEL (kullanıcı kararı — büyük mimari değişiklik): Önceden bu dosya
+  // zorunluydu ve doğrudan files.kalemler.data.forEach ile başlanıyordu (dosya yoksa çökerdi).
+  // Artık kart iskeleti Müşteri Master'dan, bakiye Cari Ekstre'den geliyor — Kalemler yalnızca
+  // (varsa) mevcut kartlara açık fatura detayı/vade bilgisi ekler. Dosya yoksa bu blok sessizce
+  // atlanır, aşağıdaki Müşteri Master/Cari Ekstre blokları kartları zaten oluşturmuş olur.
+  (files.kalemler ? files.kalemler.data : []).forEach(r=>{
     const musteri = String(r['Müşteri']||'').trim();
     if(!musteri) return;
     const kalanBorc = Number(r['Kalan Borç'])||0;
@@ -971,7 +1038,6 @@ function buildReport(files, musteriMasterMap){
     }
     const m = musteriMap.get(musteri);
     m.faturaSayisi += 1;
-    if(!m.temsilciFromKalemler && r['Satış Temsilcisi Adı']) m.temsilciFromKalemler = r['Satış Temsilcisi Adı'];
     m.invoices.push(inv);
   });
 
@@ -1005,6 +1071,14 @@ function buildReport(files, musteriMasterMap){
     // Raporu hiç yüklenmemişse, dosyadaki İstenilen Tsl. Trh. günleri arasından bugüne en yakın
     // olan seçilir. Hiçbir tarihli veri yoksa hiçbir sipariş KPI'sı gösterilmez.
     const bugunGunKey = dateKeyLocal(today);
+    // Sipariş dosyasının kendi teslim günleri — hem "yükleme yok" dalında kullanılır hem de
+    // aşağıdaki güvenlik ağında (yükleme günü siparişlerle çakışmıyorsa geri dönülecek küme).
+    const siparisGunleri = new Set();
+    siparisSatirlari.forEach(r=>{
+      const t = excelDateToJSArti1Gun(r['İstenilen Tsl. Trh.']);
+      const gk = t ? dateKeyLocal(t) : null;
+      if(gk) siparisGunleri.add(gk);
+    });
     let siparisGosterimGunKey = null;
     if(files.yukleme){
       const yuklemeGunleri = new Set();
@@ -1014,13 +1088,17 @@ function buildReport(files, musteriMasterMap){
         if(gk) yuklemeGunleri.add(gk);
       });
       siparisGosterimGunKey = enYakinGunKey(Array.from(yuklemeGunleri), bugunGunKey);
+      // GÜVENLİK AĞI (eski Yükleme Raporu düzeltmesi): Yükleme Raporu, Sipariş dökümünden DAHA ESKİ
+      // kalabiliyor (ör. bugünün siparişleri girildi ama Yükleme Raporu henüz dünkü halinde). Böyle
+      // bir durumda yükleme gününe göre seçilen gösterim günü, sipariş dosyasında HİÇ bulunmayan bir
+      // güne işaret ediyor ve TÜM siparişler "—" görünüyordu. Seçilen gün sipariş dosyasında yoksa,
+      // sipariş dosyasının KENDİ günlerinden bugüne en yakınına geri düşülür — böylece güncel
+      // siparişler, eski bir Yükleme Raporu yüzünden gizlenmez. (Yükleme günü siparişlerle
+      // çakışıyorsa davranış eskisiyle birebir aynı kalır.)
+      if(!siparisGosterimGunKey || !siparisGunleri.has(siparisGosterimGunKey)){
+        siparisGosterimGunKey = enYakinGunKey(Array.from(siparisGunleri), bugunGunKey);
+      }
     }else{
-      const siparisGunleri = new Set();
-      siparisSatirlari.forEach(r=>{
-        const t = excelDateToJSArti1Gun(r['İstenilen Tsl. Trh.']);
-        const gk = t ? dateKeyLocal(t) : null;
-        if(gk) siparisGunleri.add(gk);
-      });
       siparisGosterimGunKey = enYakinGunKey(Array.from(siparisGunleri), bugunGunKey);
     }
 
@@ -1069,63 +1147,46 @@ function buildReport(files, musteriMasterMap){
     });
   }
 
+  // TAHSİLAT DÖKÜMÜ — YENİ TEK FORMAT (kullanıcı isteği, eski Format A/B ayrımı tamamen kaldırıldı):
+  // Bu oturumda yeni bir Tahsilat Dökümü dosyası seçildiyse (files.tahsilat doluysa), kalıcı
+  // arşivle birleştirilir (bkz. 01-cekirdek-ve-arsiv.js: tahsilatArsiviniBirlestir — Belge
+  // Numarası bazlı ekleme/güncelleme + Ters Kayıt ile silme). Birleştirme SENKRON (await'siz)
+  // yapılamayacağı için bu iş raporuOlusturVeyaGuncelleAkisiniCalistir'de buildReport'tan HEMEN
+  // ÖNCE yapılır (çek/senet ile birebir aynı desen) — state.tahsilatArsivi burada zaten güncel
+  // kabul edilir. tahsilatArsivindenGunlukDiziyeCevir, kalıcı arşivi eski kodun beklediği
+  // {musteri,belgeTarihi,tutar,formatKaynagi,gecerli,tahsilatTuru} satır dizisine çevirir —
+  // böylece aşağıdaki efektifGunMap/KPI mantığına dokunmadan aynı arayüzle beslenir.
   const tahsilatMap = new Map();
-  const tahsilatArsiv = [];
-  let tahsilatFormatB = false; // bu yüklemenin Format B (nihai rapor) olup olmadığı — Format A arşiv temizliği tetikleyicisi
-  if(files.tahsilat){
-    const tHeaders = new Set(files.tahsilat.headers);
-    const formatA = tHeaders.has('Tutar') && tHeaders.has('Tahsilat Alan');
-    tahsilatFormatB = !formatA;
-    // Format A (Ön Kayıt dökümü) belge tarihini "Tarih" kolonunda taşır; Format B (nihai rapor) ise "Belge Tarihi" kolonunu kullanır.
-    const tarihKolonu = formatA ? 'Tarih' : 'Belge Tarihi';
-
-    files.tahsilat.data.forEach(r=>{
-      const musteriArsiv = String((formatA ? r['Müşteri'] : r['Müşt. Kodu'])||'').trim();
-      const tutarArsiv = Math.abs(Number(formatA ? r['Tutar'] : r['Belge Tutarı'])||0);
-      if(musteriArsiv && musteriGecerliMi(musteriArsiv)){
-        // TAHSİLAT TÜRÜ SINIFLANDIRMASI (kullanıcı isteği): "Ödeme Tipi" kolonuna göre dört kategori:
-        //   Normal -> Nakit / Kredi Kartı / Banka havalesi (ve tanımadığımız diğer tipler, güvenli varsayılan)
-        //   Cek    -> Alınan Çek   (OTOMATİK SAYILMAZ — kullanıcı manuel "Tahsil Edildi" onayı
-        //   Senet  -> Alınan Senet  vermeden risk olarak kalır; bkz. state.cekSenetTahsilOnaylari / satır altı not)
-        //   SanalPos -> Sanal Pos
-        const odemeTipiHam = String(r['Ödeme Tipi']||'').trim();
-        const odemeTipi = odemeTipiHam.toLocaleLowerCase('tr-TR');
-        const cekMi = odemeTipi.includes('çek');
-        const senetMi = odemeTipi.includes('senet');
-        const sanalPosMu = odemeTipi.includes('sanal');
-        const tahsilatTuru = cekMi ? 'Cek' : (senetMi ? 'Senet' : (sanalPosMu ? 'SanalPos' : 'Normal'));
-        // ÇEK/SENET İÇİN TARİH: kullanıcı isteği üzerine, çek/senet kayıtlarının TÜM hesaplamalarında
-        // (tahsilat arşivi günlere dağıtma, Genel Rapor/Sevk KPI'ları, Trend Analizi/Aylık Ortalama)
-        // belge/alınan tarihi değil, "Vade Tarihi" kolonu baz alınır — bu tarih, çekin/senedin fiilen
-        // paraya döneceği (vadesinin geldiği) günü yansıttığından tahsilat gerçekleşme zamanlaması
-        // olarak daha doğrudur. Normal/Sanal Pos kayıtlar eskisi gibi belge tarihini kullanmaya devam eder.
-        const vadeTarihiHam = r['Vade Tarihi'];
-        const vadeTarihi = vadeTarihiHam!=null ? excelDateToJSArti1Gun(vadeTarihiHam) : null;
-        const belgeTarihiHam = excelDateToJSArti1Gun(r[tarihKolonu]);
-        const belgeTarihi = ((cekMi||senetMi) && vadeTarihi) ? vadeTarihi : belgeTarihiHam;
-        // Çek/Senet için benzersiz anahtar: manuel "Tahsil Edildi" onayının hangi çek/senede ait
-        // olduğunu (state.cekSenetTahsilOnaylari Set'inde) eşleştirmek için kullanılır. Çek/Senet No
-        // varsa o baz alınır (en güvenilir); yoksa müşteri+tutar+vade kombinasyonuna düşülür.
-        const cekSenetNo = r['Çek/Senet No']||null;
-        const cekSenetAnahtari = (cekMi||senetMi) ? ('musteri:'+musteriArsiv+'|no:'+(cekSenetNo||'')+'|tutar:'+tutarArsiv+'|vade:'+(vadeTarihi?dateKeyLocal(vadeTarihi):'')) : null;
-        // "gecerli": bu satırın Genel Rapor/Sevk Raporu KPI'sında sayılıp sayılmayacağını önceden
-        // hesaplayıp satıra etiketler. ÖNEMLİ (kullanıcı isteği): hem Çek hem Senet OTOMATİK SAYILMAZ
-        // — kullanıcı bu çek/senedi state.cekSenetTahsilOnaylari setinde MANUEL olarak
-        // "Tahsil Edildi" işaretlemediği sürece gecerli=false kalır (yani risk olarak görünmeye
-        // devam eder, tahsilat toplamına girmez). Normal/Sanal Pos kayıtlar etkilenmez.
-        let gecerli = true;
-        if(r['Belge Türü'] && r['Belge Türü'] !== 'Müşteri Tahsilat' && r['Belge Türü'] !== 'Müşteri Çek Tahsilat') gecerli = false;
-        if(formatA && String(r['Belge Tipi']||'').trim() !== 'Ön Kayıt') gecerli = false;
-        if((cekMi||senetMi) && !(state.cekSenetTahsilOnaylari && state.cekSenetTahsilOnaylari.has(cekSenetAnahtari))) gecerli = false;
-        // formatKaynagi: bu kayıt Format A (geçici Ön Kayıt) mı yoksa Format B (nihai) mı ile mi
-        // arşivlendi — Format B yüklendiğinde, kendi Belge Tarihi günlerine denk gelen Format A
-        // kayıtlarının silinebilmesi için gerekli (bkz. tahsilatEfektifGunMapHesapla).
-        tahsilatArsiv.push({musteri: musteriArsiv, belgeTarihi, tutar: tutarArsiv, formatKaynagi: formatA ? 'A' : 'B', gecerli,
-          tahsilatTuru, cekSenetNo, cekSenetDurumu: r['Çek/Senet Durumu']||null, senetAnahtari: cekSenetAnahtari,
-          vadeTarihi, belgeTarihiHam, odemeTipiHam});
-      }
-    });
+  const bugunGunKeyTahsilatTumYil = dateKeyLocal(today);
+  const dunTarihiTumYil = new Date(bugunGunKeyTahsilatTumYil+'T00:00:00'); dunTarihiTumYil.setDate(dunTarihiTumYil.getDate()-1);
+  const dunGunKeyTahsilatTumYil = dateKeyLocal(dunTarihiTumYil);
+  // KULLANICI İSTEĞİ (bugüne en yakın dolu güne kayan tahsilat KPI'sı): eskiden HER ZAMAN sabit
+  // olarak dünün gününe bakılırdı, o gün boşsa KPI 0/boş kalırdı. Artık dünden geriye doğru en
+  // fazla 30 gün taranır ve ARŞİVDE (bozukIadeTahsilat henüz efektifGunMap'e eklenmeden ÖNCEKİ ham
+  // Tahsilat Dökümü verisine göre) veri bulunan İLK (bugüne en yakın) gün
+  // hedef alınır. Bugünün kendisi bu aramaya DAHİL DEĞİLDİR (kullanıcı isteği: "bugün ve sonrası
+  // için geçerli değil") — arama en erken dünden başlar, en geç 30 gün öncesine kadar gider.
+  const TAHSILAT_GERIYE_ARAMA_GUN_LIMITI = 30;
+  const aramaBaslangicTarihi = new Date(dunGunKeyTahsilatTumYil+'T00:00:00');
+  aramaBaslangicTarihi.setDate(aramaBaslangicTarihi.getDate() - (TAHSILAT_GERIYE_ARAMA_GUN_LIMITI - 1));
+  const aramaBaslangicGunKey = dateKeyLocal(aramaBaslangicTarihi);
+  const tahsilatAralikHavuzu = tahsilatArsivindenAralikDiziyeCevir(state.tahsilatArsivi || {}, aramaBaslangicGunKey, dunGunKeyTahsilatTumYil);
+  const tahsilatDoluGunler = new Set(tahsilatAralikHavuzu.map(r=> dateKeyLocal(new Date(r.belgeTarihi))));
+  let hedefTahsilatGunKeyTumYil = null;
+  {
+    const aday = new Date(dunGunKeyTahsilatTumYil+'T00:00:00');
+    for(let i=0;i<TAHSILAT_GERIYE_ARAMA_GUN_LIMITI;i++){
+      const adayGunKey = dateKeyLocal(aday);
+      if(tahsilatDoluGunler.has(adayGunKey)){ hedefTahsilatGunKeyTumYil = adayGunKey; break; }
+      aday.setDate(aday.getDate()-1);
+    }
+    // Arşivde 30 gün içinde hiç veri yoksa eski davranışla tutarlı kalınır: hedef "dün" olarak
+    // sabitlenir (KPI o zaman 0/boş görünür) — sessizce çok eski bir tarihe kayıp yanıltmaz.
+    if(!hedefTahsilatGunKeyTumYil) hedefTahsilatGunKeyTumYil = dunGunKeyTahsilatTumYil;
   }
+  const tahsilatArsiv = hedefTahsilatGunKeyTumYil
+    ? tahsilatArsivindenGunlukDiziyeCevir(state.tahsilatArsivi || {}, hedefTahsilatGunKeyTumYil)
+    : [];
 
   const faturaArsiv = [];
   const bozukIadeTahsilat = [];
@@ -1148,33 +1209,47 @@ function buildReport(files, musteriMasterMap){
       // benzersiz belge numarasına dayanabilmesi için taşınır (bkz. tekillestir()).
       const belgeNo = String(r['Fatura Numarası']||'').trim() || null;
 
-      // "Bozuk İade Faturası": Ödenecek Tutar burada NEGATİF gelir (müşterinin borcundan düşülen
-      // bir iade/mahsup tutarıdır) — bu yüzden SATIŞ/FATURA tutarı olarak değil, müşteri TAHSİLATI
-      // olarak sayılır ve tüm analiz raporlarına (Trend Analiz, DSO, CEI, Yönetim Özeti, Şüpheli
-      // Alacak, Temsilci Karnesi vb.) tahsilatArsiv üzerinden aynı şekilde yansır (bkz.
-      // bozukIadeTahsilatGunlereEkleVeDegistir).
+      // ============================== İADE GRUBU (KULLANICI KARARI — 3 tür TEK grupta) ==============================
+      // "Bozuk İade Faturası", "Sağlam İade Faturası", "Depozito İade Faturası" (SAP'ın tam metni
+      // değişebildiği için "depozito" VE "iade" kelimelerinin ikisini birden içeren varyasyonlar da
+      // dahil): üçü de bir SATIŞ değil, müşteriye yapılan bir PARA İADESİDİR/TAHSİLATIDIR. Bu üç tür
+      // ARTIK TEK bir "İade" grubunda birleşir — hepsi aynı formatKaynagi:'FaturaIade' etiketiyle
+      // bozukIadeTahsilat listesine yönlendirilir, faturaArsiv'e (satış) HİÇ eklenmez. Bu grubun
+      // tutarı tüm analiz raporlarına (Trend Analiz, DSO, CEI, Yönetim Özeti, Şüpheli Alacak,
+      // Temsilci Karnesi, Tahsilat Verimliliği, Nakit Akış Tahmini, Müşteri Analiz Modalı'ndaki
+      // "İade/Depozito" kategorisi vb.) MÜŞTERİ TAHSİLATI olarak yansır.
       //
-      // "Depozito İade" (örn. "Depozito İade Faturası" gibi varyasyonlar da dahil — SAP'ın tam
-      // metni değişebildiği için "depozito" VE "iade" kelimelerinin ikisini birden içeren fatura
-      // türleri eşleşir): bu da bir SATIŞ değil, müşteriye yapılan bir PARA İADESİDİR — Trend
-      // Analizi'ndeki "Fatura · Aylık Ortalama" KPI'sına satış gibi dahil edilmemesi, sadece
-      // "Tahsilat · Aylık Ortalama" altında İade/Depozito kalemi olarak görünmesi gerekir. Bu
-      // yüzden Bozuk İade Faturası ile AYNI şekilde bozukIadeTahsilat listesine (FaturaIade
-      // etiketiyle) yönlendirilir, faturaArsiv'e HİÇ eklenmez.
+      // ÖNEMLİ (kullanıcı kararı): Ödenecek Tutar'ın işareti (pozitif/negatif) ÖNEMSİZDİR — "Bozuk
+      // İade Faturası"/"Sağlam İade Faturası"nda bu değer genelde NEGATİF gelir (müşterinin
+      // borcundan düşülen bir mahsup), "Depozito İade Faturası"nda ise genelde POZİTİF gelir — ama
+      // her iki durumda da mutlak değer (Math.abs) alınıp AYNI ŞEKİLDE pozitif bir tahsilat tutarı
+      // olarak sayılır. Örn. -4.000 ₺ de yazsa +4.000 ₺ de yazsa, müşteri raporlarına 4.000 ₺
+      // tahsilat olarak işlenir.
       //
-      // Diğer fatura türleri (Satış Fatura, Boş Kap İade vb.) eskisi gibi faturaArsiv'e (satış
-      // tutarı) eklenmeye devam eder.
+      // "Boş Kap İade" ve "Efes İade Satınalma": KA Sanal İade Sip. ile AYNI şekilde HİÇBİR
+      // hesaplamaya dahil edilmez — ne satış/fatura tutarı olarak faturaArsiv'e, ne müşteri
+      // tahsilatı olarak bozukIadeTahsilat'a. Bu satırlar tamamen göz ardı edilir (Trend Analiz,
+      // DSO, CEI, Yönetim Özeti, Şüpheli Alacak, Temsilci Karnesi vb. hiçbirine yansımaz).
+      //
+      // Diğer fatura türleri (Satış Fatura vb.) eskisi gibi faturaArsiv'e (satış tutarı)
+      // eklenmeye devam eder.
       const faturaTuruKucuk = faturaTuru.toLocaleLowerCase('tr');
-      const depozitoIadeMi = faturaTuruKucuk.includes('depozito') && faturaTuruKucuk.includes('iade');
+      const iadeGrubuMu = (
+        faturaTuru === 'Bozuk İade Faturası' ||
+        faturaTuru === 'Sağlam İade Faturası' ||
+        (faturaTuruKucuk.includes('depozito') && faturaTuruKucuk.includes('iade'))
+      );
 
-      // "KA Sanal İade Sip.": HİÇBİR hesaplamaya dahil edilmez — ne satış/fatura tutarı olarak
-      // faturaArsiv'e, ne müşteri tahsilatı olarak bozukIadeTahsilat'a. Bu satırlar tamamen göz
-      // ardı edilir (Trend Analiz, DSO, CEI, Yönetim Özeti, Şüpheli Alacak, Temsilci Karnesi vb.
-      // hiçbirine yansımaz).
-      const kaSanalIadeMi = faturaTuruKucuk.includes('ka sanal') && faturaTuruKucuk.includes('iade');
-      if(kaSanalIadeMi) return;
+      // "KA Sanal İade Sip.", "Boş Kap İade", "Efes İade Satınalma": HİÇBİR hesaplamaya dahil
+      // edilmez (görmezden gelinenler seti).
+      const gormezdenGelinenMi = (
+        (faturaTuruKucuk.includes('ka sanal') && faturaTuruKucuk.includes('iade')) ||
+        faturaTuru === 'Boş Kap İade' ||
+        faturaTuru === 'Efes İade Satınalma'
+      );
+      if(gormezdenGelinenMi) return;
 
-      if(faturaTuru === 'Bozuk İade Faturası' || depozitoIadeMi){
+      if(iadeGrubuMu){
         bozukIadeTahsilat.push({musteri, musteriAdi, belgeTarihi: faturaTarihi, tutar: Math.abs(tutar), formatKaynagi:'FaturaIade', gecerli:true, faturaNo: r['Fatura Numarası']});
         return;
       }
@@ -1182,89 +1257,76 @@ function buildReport(files, musteriMasterMap){
     });
   }
 
-  // Depozito Tahsilatı: "Bozuk İade Faturası" ile AYNI mantık — Fatura Belge No dolu olan satırlar
-  // müşteri TAHSİLATI olarak sayılır (Sipariş Net Tutar tutarınca), Fatura Belge No BOŞ olan
-  // satırlar tamamen es geçilir (ne tahsilatArsiv'e, ne başka bir yere eklenir, ne kaydedilir).
-  const depozitoTahsilat = [];
-  if(files.depozitoTahsilat){
-    files.depozitoTahsilat.data.forEach(r=>{
-      const faturaBelgeNo = String(r['Fatura Belge No']||'').trim();
-      if(!faturaBelgeNo) return; // tek kriter: Fatura Belge No zorunlu — yoksa satır tamamen es geçilir
-      const musteri = String(r['Müşteri Numarası']||'').trim();
-      if(!musteri) return;
-      if(!musteriGecerliMi(musteri)) return; // EFES gibi dahili kayıtlar burada da göz ardı edilir
-      const musteriAdi = r['Müşteri Adı'] || musteri;
-      const tutar = Number(r['Sipariş Net Tutar'])||0;
-      // Not: excelDateToJSArti1Gun kullanılır — Türkiye (+3) saat dilimi düzeltmesi (bkz. yukarıdaki
-      // faturaTarihi notu ile aynı sebep).
-      const belgeTarihi = excelDateToJSArti1Gun(r['Fatura Tarihi']);
-      depozitoTahsilat.push({musteri, musteriAdi, belgeTarihi, tutar: Math.abs(tutar), formatKaynagi:'DepozitoTahsilat', gecerli:true, faturaBelgeNo});
-    });
-  }
+  // NOT: Depozito Tahsilat dosyası (ayrı bir dosya/kaynak olarak) SİSTEMDEN TAMAMEN KALDIRILDI
+  // (kullanıcı kararı) — Depozito İade artık yalnızca Fatura Dökümü'ndeki "Depozito İade Faturası"
+  // türünden, yukarıdaki İade Grubu mantığıyla (bozukIadeTahsilat listesi, 'FaturaIade' etiketi)
+  // geliyor. Bu, aynı zamanda önceden var olan bir MÜKERRER SAYIM sorununu da ortadan kaldırır:
+  // eskiden aynı fatura/belge numarası hem Fatura Dökümü'nde (depozitoIadeMi kontrolüyle) hem de
+  // ayrı Depozito Tahsilat dosyasında (Fatura Belge No kontrolüyle) bağımsız olarak işlenip iki
+  // kez tahsilat kredisi olarak sayılabiliyordu.
 
-  // Genel Rapor/Sevk Raporu'ndaki tahsilat KPI'sı: ARTIK "bugüne en yakın dolu gün" değil, HER ZAMAN
-  // SABİT olarak bugünden bir gün önceki takvim gününe göre gösterilir — o günde arşivde/bu
-  // yüklemede hiç veri yoksa KPI 0/boş görünür (başka bir güne kaymaz). Format A/Format B farkı
-  // gözetilmeksizin, hangi formatın kaydı o güne aitse o kullanılır. Fatura Dökümü'ndeki "Bozuk
-  // İade Faturası" ve Depozito Tahsilatı'ndaki (Fatura Belge No'lu) satırlardan türeyen tahsilat
-  // kredileri de (bkz. bozukIadeTahsilat, depozitoTahsilat) bu hesaba dahildir — bunlar Tahsilat
-  // Dökümü'nden gelmese bile aynı KPI'ya katkı sağlar. Bunun için, arşive gerçekten kaydedilecek
-  // durumun AYNISI (bkz. tahsilatEfektifGunMapHesapla) burada da -henüz kaydetmeden- simüle edilip,
-  // üzerine bu krediler eklenir, sonra SABİT "dün" gününe ait satırlar okunur.
-  const bugunGunKeyTahsilat = dateKeyLocal(today);
-  const efektifGunMap = tahsilatEfektifGunMapHesapla(state.faturaArsivCache || {}, tahsilatArsiv, tahsilatFormatB, bugunGunKeyTahsilat);
+  // Genel Rapor/Sevk Raporu'ndaki tahsilat KPI'sı (KULLANICI İSTEĞİYLE GÜNCELLENDİ): artık sabit
+  // "dün" gününe değil, dünden geriye doğru en fazla 30 gün içinde veri bulunan İLK (bugüne en
+  // yakın) güne göre gösterilir — bkz. yukarıdaki hedefTahsilatGunKeyTumYil hesaplaması. Bugünün
+  // kendisi bu aramaya dahil değildir (kural yalnızca bugünden ÖNCEKİ günler için geçerli); 30 gün
+  // içinde hiç veri bulunamazsa eski davranışla tutarlı olarak "dün" hedef alınır ve KPI 0/boş
+  // görünür. Fatura Dökümü'ndeki İade Grubu'ndan (bkz. bozukIadeTahsilat) türeyen tahsilat
+  // kredileri de bu hesaba dahildir — bunlar Tahsilat Dökümü'nden gelmese bile, hedef günle
+  // eşleştiklerinde aynı KPI'ya katkı sağlar.
+  const bugunGunKeyTahsilat = bugunGunKeyTahsilatTumYil;
+  const hedefTahsilatGunKey = hedefTahsilatGunKeyTumYil;
+  const efektifGunMap = new Map();
+  if(hedefTahsilatGunKey) efektifGunMap.set(hedefTahsilatGunKey, tahsilatArsiv); // zaten "dün" gününe göre hesaplanmış
   bozukIadeTahsilat.forEach(r=>{
     const gk = r.belgeTarihi ? dateKeyLocal(new Date(r.belgeTarihi)) : null;
     if(!gk) return;
     const mevcut = (efektifGunMap.get(gk) || []).filter(x=>x.formatKaynagi!=='FaturaIade');
     efektifGunMap.set(gk, mevcut.concat([r]));
   });
-  depozitoTahsilat.forEach(r=>{
-    const gk = r.belgeTarihi ? dateKeyLocal(new Date(r.belgeTarihi)) : null;
-    if(!gk) return;
-    const mevcut = (efektifGunMap.get(gk) || []).filter(x=>x.formatKaynagi!=='DepozitoTahsilat');
-    efektifGunMap.set(gk, mevcut.concat([r]));
-  });
-  const dunTarihi = new Date(bugunGunKeyTahsilat+'T00:00:00'); dunTarihi.setDate(dunTarihi.getDate()-1);
-  const hedefTahsilatGunKey = dateKeyLocal(dunTarihi);
 
-  const tahsilatKaynakMap = new Map(); // musteri -> {normal, bozukIade, depozito}
+  const tahsilatKaynakMap = new Map(); // musteri -> {normal, bozukIade, depozito, hakedis}
   if(hedefTahsilatGunKey){
     (efektifGunMap.get(hedefTahsilatGunKey)||[]).forEach(r=>{
       if(r.gecerli === false) return;
       tahsilatMap.set(r.musteri, (tahsilatMap.get(r.musteri)||0) + r.tutar);
-      if(!tahsilatKaynakMap.has(r.musteri)) tahsilatKaynakMap.set(r.musteri, {normal:0, bozukIade:0, depozito:0});
+      if(!tahsilatKaynakMap.has(r.musteri)) tahsilatKaynakMap.set(r.musteri, {normal:0, bozukIade:0, depozito:0, hakedis:0});
       const kay = tahsilatKaynakMap.get(r.musteri);
+      // NOT: 'DepozitoTahsilat' etiketi artık üretilmiyor (Depozito Tahsilat dosyası kaldırıldı) —
+      // Depozito İade Faturası da dahil TÜM İade Grubu artık 'FaturaIade' etiketiyle geliyor, bu
+      // yüzden kay.depozito alanı kalıcı olarak 0 kalır (geriye dönük uyumluluk için alan korunur —
+      // bkz. 06-senet-ve-detay.js'deki kay.depozito render noktası).
       if(r.formatKaynagi==='FaturaIade') kay.bozukIade += r.tutar;
-      else if(r.formatKaynagi==='DepozitoTahsilat') kay.depozito += r.tutar;
+      else if(r.formatKaynagi==='TahsilatHakedis') kay.hakedis += r.tutar;
       else kay.normal += r.tutar;
     });
   }
 
-  // ÇEK/SENET BİLGİSİ ARTIK AYRI "Çek/Senet Riski" DOSYASINDAN DEĞİL (kullanıcı isteği), doğrudan
-  // Tahsilat Dökümü'ndeki "Alınan Çek"/"Alınan Senet" satırlarından besleniyor — ayrı bir Grup B
-  // dosyası yüklemeye gerek kalmaz, müşteri kartlarındaki Çek/Senet bilgisi Tahsilat Dökümü ile
-  // otomatik güncel kalır. cekSenetDetayMap TÜM çek+senet satırlarını (tahsil edilmiş/edilmemiş
-  // fark etmeksizin) listeler — kart üzerindeki detay tablosunda hepsi görünür, "Durum" kolonuyla
-  // ayırt edilir. cekSenetMap (Toplam Risk'e eklenen tutar) ise SADECE HENÜZ TAHSİL EDİLMEMİŞ
-  // ÇEK/SENETLERİ toplar (kullanıcı isteği — GÜNCELLEME: Çek de Senet gibi artık OTOMATİK
-  // tahsilat sayılmaz; ikisi de risk olarak kalır ve kullanıcı ilgili çek/senet için "Tahsil
-  // Edildi" onayı verince (gecerli=true) risk olmaktan çıkar). Onaylanmamış çek/senetler
-  // (gecerli=false) hâlâ riskli/portföydeki alacak olarak kalır.
+  // ÇEK/SENET — KALICI ARŞİVDEN (kullanıcı isteği): Artık Tahsilat Dökümü'nden değil, kendi Grup B
+  // alanından yüklenen ve state.cekSenetArsivi'nde (bkz. 01-cekirdek-ve-arsiv.js) kalıcı olarak
+  // saklanan Çek/Senet Riski dosyasından besleniyor. Arşivdeki HER kayıt (durum='risk' veya
+  // 'tahsilEdildi' fark etmeksizin) cekSenetDetayMap'e (detay tablosu için) girer; yalnızca
+  // durum='risk' olanlar cekSenetMap'e (Toplam Risk'e eklenen tutar) girer.
+  // tahsilEdilenCekSenetMap (tahsilEdildi olanların toplamı) HÂLÂ hesaplanır ama artık
+  // m.alinanTahsilat'a (Alınan Tahsilat KPI'sı) EKLENMEZ — kullanıcı kararı: "Tahsil Edildi"
+  // işaretlemesinin bir tarih damgası olmadığı için "bugünü asla baz alma" kuralına tabi
+  // tutulamıyor, bu yüzden KPI'dan tamamen çıkarıldı (bkz. aşağıdaki m.alinanTahsilat ataması).
+  // Harita yine de ileride (örn. bir tarih damgası eklenirse) tekrar kullanılabilsin diye korunuyor.
   const cekSenetMap = new Map();
   const cekSenetDetayMap = new Map();
-  tahsilatArsiv.forEach(r=>{
-    if(r.tahsilatTuru !== 'Cek' && r.tahsilatTuru !== 'Senet') return;
-    const musteri = r.musteri;
+  const tahsilEdilenCekSenetMap = new Map();
+  Object.entries(state.cekSenetArsivi||{}).forEach(([anahtar, r])=>{
+    const musteri = r.musteriKod;
     if(!musteri) return;
-    if(!r.gecerli){
+    if(r.durum === 'tahsilEdildi'){
+      tahsilEdilenCekSenetMap.set(musteri, (tahsilEdilenCekSenetMap.get(musteri)||0) + r.tutar);
+    }else{
       cekSenetMap.set(musteri, (cekSenetMap.get(musteri)||0) + r.tutar);
     }
     if(!cekSenetDetayMap.has(musteri)) cekSenetDetayMap.set(musteri, []);
     cekSenetDetayMap.get(musteri).push({
-      no: r.cekSenetNo, tip: r.odemeTipiHam, tutar: r.tutar, tahsilatTuru: r.tahsilatTuru,
-      tahsilEdildiMi: !!r.gecerli, senetAnahtari: r.senetAnahtari,
-      vade: r.vadeTarihi || r.belgeTarihi, belgeTarihi: r.belgeTarihiHam || r.belgeTarihi,
+      no: r.no, tip: r.odemeTipiHam, tutar: r.tutar, tahsilatTuru: r.tahsilatTuru,
+      tahsilEdildiMi: r.durum === 'tahsilEdildi', senetAnahtari: anahtar,
+      vade: r.vadeTarihi ? new Date(r.vadeTarihi) : null, belgeTarihi: r.belgeTarihi ? new Date(r.belgeTarihi) : null,
     });
   });
 
@@ -1305,11 +1367,55 @@ function buildReport(files, musteriMasterMap){
     });
   }
 
+  // MÜŞTERİ MASTER — KART OLUŞTURUCU (kullanıcı kararı — büyük mimari değişiklik): Artık kart
+  // iskeletini oluşturan ANA kaynak Müşteri Master'dır, Kalemler değil. Kural (kullanıcının tarif
+  // ettiği gibi):
+  //   • Müşteri Master'da "Aktif" olan HER müşteri için kart İSTİSNASIZ oluşturulur (Kalemler/Cari
+  //     Ekstre'de kaydı olsun olmasın). Böyle bir müşterinin ne bakiyesi ne geçmiş tahsilat/fatura
+  //     arşivi yoksa, kart yine de OLUŞUR ama görünürlük filtresinde (aşağıda, tüm musteriMap
+  //     doldurulduktan SONRA) gizlenir — bu yüzden burada m.__masterAktifMi=true olarak işaretlenir.
+  //   • Müşteri Master'da "Pasif" veya "İptal" olan müşteriler için kart SADECE bakiyesi (Cari
+  //     Ekstre'den) sıfır değilse VEYA tüm-zamanların arşivinde (state.faturaArsivCache) tahsilat/
+  //     fatura kaydı varsa oluşturulur — bu ikisi de yoksa kart HİÇ AÇILMAZ. Bu kontrol de
+  //     musteriMap tamamlandıktan SONRA (görünürlük filtresi aşamasında) yapılır; burada Pasif/
+  //     İptal müşteriler geçici olarak "aday" şeklinde eklenir, sonra elenir/kalır.
+  (state.musteriMasterDurum || new Map()).forEach((durumHam, kod)=>{
+    if(musteriMap.has(kod)) return; // Kalemler veya Cari Ekstre zaten kart açmış, tekrar oluşturma
+    const pasifVeyaIptal = noktaPasifVeyaIptalMi(durumHam);
+    // İSİM ÖNCELİĞİ (kullanıcı kararı): önce Cari Ekstre'deki Müşteri Ad/Ünvan, o yoksa Müşteri
+    // Master'daki musteriAdi (state.musteriMasterDetay), o da yoksa müşteri kodunun kendisi.
+    const cariAdayKayit = cariEkstreMap.get(kod);
+    const masterDetay = (state.musteriMasterDetay && state.musteriMasterDetay.get(kod)) || null;
+    const musteriAdi = (cariAdayKayit && cariAdayKayit.ad) || (masterDetay && masterDetay.musteriAdi) || kod;
+    const musteriUnvan = (cariAdayKayit && cariAdayKayit.unvan) || '';
+    musteriMap.set(kod, {
+      musteri: kod, musteriAdi, musteriUnvan, kalanBorc:0, faturaSayisi:0,
+      vadeAgirlikliToplam:0, agirlikBorc:0, avgVadeGun:0, invoices:[], temsilci:null,
+      cekSenet:0, cekSenetDetay:[], siparisTutari:0, emanetSiparis:0, alinanTahsilat:0,
+      // Görünürlük filtresi bu iki bayrağı kullanır (aşağıda, musteriMap tam dolduktan sonra):
+      __masterKaynakli: true, __masterAktifMi: !pasifVeyaIptal,
+    });
+  });
+
   musteriMap.forEach((m, musteri)=>{
     m.siparisTutari = siparisNormalMap.get(musteri)||0;
     m.emanetSiparis = emanetSiparisMap.get(musteri)||0;
     m.cekSenet = cekSenetMap.get(musteri)||0;
+    // TAHSİL EDİLDİ ÇEK/SENET — KULLANICI KARARIYLA GÜNCELLENDİ (önceki davranış: bu tutar
+    // m.alinanTahsilat'a — yani Genel Bakış/Sevk Raporu KPI toplamına — da dahil ediliyordu).
+    // Sorun: "Tahsil Edildi" işaretlemesinin bir TARİH damgası yok (sadece durum='tahsilEdildi'
+    // olarak state.cekSenetArsivi'nde tutuluyor), bu yüzden "Alınan Tahsilat" KPI'sının "bugünü asla
+    // baz alma, bugünden önceki en yakın veri gününü göster" kuralına (bkz. yukarıdaki
+    // hedefTahsilatGunKeyTumYil/TAHSILAT_GERIYE_ARAMA_GUN_LIMITI) hiç tabi tutulamıyordu — kullanıcı
+    // bugün bir çek/senedi tahsil edildi işaretlediğinde bu tutar hangi gün olursa olsun ANINDA
+    // KPI'ya giriyor, kuralı sessizce bypass ediyordu. Kullanıcı kararı: çek/senet tahsilatları
+    // Alınan Tahsilat KPI'sine (m.alinanTahsilat) ARTIK HİÇ DAHİL EDİLMEZ — yalnızca Tahsilat
+    // Dökümü + Bozuk İade Faturası + Depozito Tahsilatı kaynaklı tahsilatlar (tahsilatMap, hepsi
+    // aynı gün kuralına tabi) sayılır. tahsilEdilenCekSenetMap hâlâ hesaplanıyor ve cekSenetDetayMap
+    // üzerinden Nokta Detay popup'ındaki "Tahsil Edildi" rozetinde/listesinde gösterilmeye devam
+    // ediyor — sadece genel KPI toplamına eklenmiyor.
     m.alinanTahsilat = tahsilatMap.get(musteri)||0;
+    m.alinanTahsilatKartGosterge = tahsilatMap.get(musteri)||0;
     m.alinanTahsilatKaynak = tahsilatKaynakMap.get(musteri)||null;
     m.cekSenetDetay = cekSenetDetayMap.get(musteri)||[];
 
@@ -1332,7 +1438,11 @@ function buildReport(files, musteriMasterMap){
       // faturadan başlayarak düş — böylece kalan açık faturalar toplamı cari bakiyeye eşitlenir.
       // Çek/senet mahsubu YAPILMAZ (cari bakiye zaten tahsilatları içerir; çift düşme önlenir).
       const acikFaturaToplam = sortedOldestFirst.reduce((s,inv)=> s + (inv.kalanBorc>0 ? inv.kalanBorc : 0), 0);
-      const hedefBakiye = cariKayit ? cariKayit.bakiye : acikFaturaToplam;
+      // Bu müşterinin Cari Ekstre'de HİÇ kaydı yoksa hedef 0'dır (kullanıcı kararı: Cari Ekstre'de
+      // yoksa bakiye 0 sayılır) — bu, üstte gösterilen m.kalanBorc=0 ile TUTARLI olsun diye
+      // buradaki açık fatura listesi de tamamen "kapatılmış" sayılır (aksi halde toplam 0 derken
+      // fatura listesi hâlâ açık görünüp çelişki yaratırdı).
+      const hedefBakiye = cariKayit ? cariKayit.bakiye : 0;
       // Düşülecek fark: açık fatura toplamı hedeften fazlaysa aradaki tutar (negatif olamaz).
       let dusulecek = Math.max(0, acikFaturaToplam - hedefBakiye);
       sortedOldestFirst.forEach(inv=>{
@@ -1401,11 +1511,12 @@ function buildReport(files, musteriMasterMap){
         vadesiGelmisBakiye += inv.kalanBorc;
       }
     });
-    // Kartta görünen BAKİYE: Cari Ekstre yüklüyse GERÇEK cari bakiye (kullanıcı isteği), yoksa
-    // açık faturaların (mahsup sonrası) toplamı. Açık faturaların düşürülmüş hali (kalanBorcToplam)
-    // vade/yaşlandırma hesabı için zaten kullanıldı; ama gösterilen bakiye cari ekstreye eşitlenir.
+    // Kartta görünen BAKİYE: Cari Ekstre yüklüyse GERÇEK cari bakiye (kullanıcı isteği) — bu
+    // müşterinin Cari Ekstre'de HİÇ kaydı yoksa bakiye 0 sayılır (Kalemler'deki açık fatura
+    // toplamına ARTIK DÜŞÜLMEZ — kullanıcı kararı: "Cari Ekstre'de yoksa bakiye 0 görünsün").
+    // Cari Ekstre HİÇ yüklenmemişse mevcut davranış (açık faturaların toplamı) DEĞİŞMEDEN kalır.
     m.kalanBorc = cariEkstreVar
-      ? (cariKayit ? cariKayit.bakiye : kalanBorcToplam)
+      ? (cariKayit ? cariKayit.bakiye : 0)
       : kalanBorcToplam;
     m.vadeAgirlikliToplam = vAgirlikliToplam;
     m.agirlikBorc = agirlikBorc;
@@ -1417,8 +1528,14 @@ function buildReport(files, musteriMasterMap){
     // faturalanmamış, tahakkuk etmemiş bir borç olmadığından risk toplamını şişirmemesi istendi.
     // Toplam Risk artık sadece gerçek borç (Kalan Borç) ve çek/senet riskinden oluşur.
     m.toplamRisk = m.kalanBorc + m.cekSenet;
-    const sp = siparisMusterileri.get(musteri);
-    m.temsilci = musteriMasterMap.get(musteri) || m.temsilciFromKalemler || (sp && sp.temsilci) || '—';
+    // TEMSİLCİ ATAMASI — SADECE MÜŞTERİ MASTER (kullanıcı kararı): Önceden Kalemler/Sipariş
+    // dosyalarındaki isim yedek olarak kullanılıyordu; bu, aynı müşterinin zaman içinde farklı
+    // dosyalarda farklı temsilciyle görünmesine (rota/personel değişikliği geçmişte "yanlış"
+    // görünmesine) yol açabiliyordu. Artık TEK kaynak Müşteri Master'daki GÜNCEL eşleşme —
+    // Master'da o müşteri yoksa "—" (Tanımsız) yazılır, başka hiçbir yedeğe bakılmaz. Bu, Genel
+    // Bakış/Sevk/Fatura Kontrol/Trend Analizi/Temsilci Karnesi dahil TÜM raporlarda tutarlı,
+    // güncel tek bir müşteri↔temsilci eşleşmesi sağlar.
+    m.temsilci = musteriMasterMap.get(musteri) || '—';
     m.invoices.sort((a,b)=> (b.faturaTarihi||0) - (a.faturaTarihi||0));
   });
 
@@ -1428,7 +1545,8 @@ function buildReport(files, musteriMasterMap){
     if(musteriMap.has(musteri)) return;
     const sp = siparisMusterileri.get(musteri) || {};
     bakiyesiz.push({
-      musteri, musteriAdi: sp.musteriAdi || musteri, temsilci: musteriMasterMap.get(musteri) || sp.temsilci || '—',
+      // TEMSİLCİ ATAMASI — SADECE MÜŞTERİ MASTER (bkz. yukarıdaki musteriler döngüsündeki aynı not).
+      musteri, musteriAdi: sp.musteriAdi || musteri, temsilci: musteriMasterMap.get(musteri) || '—',
       siparisTutari: siparisNormalMap.get(musteri)||0, emanetSiparis: emanetSiparisMap.get(musteri)||0,
       cekSenet: cekSenetMap.get(musteri)||0, cekSenetDetay: cekSenetDetayMap.get(musteri)||[],
     });
@@ -1436,6 +1554,33 @@ function buildReport(files, musteriMasterMap){
   bakiyesiz.sort((a,b)=> (b.siparisTutari+b.emanetSiparis+b.cekSenet)-(a.siparisTutari+a.emanetSiparis+a.cekSenet));
 
   const musteriler = Array.from(musteriMap.values());
+
+  // GÖRÜNÜRLÜK FİLTRESİ (kullanıcı kararı — büyük mimari değişiklik, NETLEŞTİRİLMİŞ HALİ): Bu,
+  // kartı SİLMEZ (kpi toplamlarını etkilememesi ve ileride bir hata olursa "veri kayboldu" değil
+  // "görünmüyor" gibi daha az riskli bir durum yaratması için) — yalnızca m.__gizli bayrağını set
+  // eder. Render fonksiyonları (renderMusteriTable vb.) bu bayrağı görüp kartı listeden çıkarır.
+  // Kart, gizli olsa bile musteriMap'te durmaya devam eder — bu yüzden geçmiş
+  // ödeme/tahsilat/fatura verileri Trend Analizi/Temsilci Karnesi/Tahsilat Verimliliği gibi TÜM
+  // rapor hesaplamalarında kullanılmaya devam eder, yalnızca kart LİSTEDE görünmez. Kural:
+  //   • Müşteri Master kaynaklı DEĞİLSE (yani Kalemler/Cari Ekstre'den geldiyse — normal, eski
+  //     davranış): hiç filtrelenmez, her zaman görünür (bu ikisi zaten "veri var" demek).
+  //   • Müşteri Master'da "Aktif" (m.__masterAktifMi===true): kart HER ZAMAN oluşur ama bakiyesi
+  //     0 VE tüm-zamanların arşivinde (gecmisiOlanMusteriler) hiç kaydı yoksa GİZLENİR.
+  //   • Müşteri Master'da "Pasif/İptal" (m.__masterAktifMi===false): kart SADECE BAKİYESİ≠0 İSE
+  //     GÖRÜNÜR — geçmiş arşiv kaydı (gecmisiOlanMusteriler) burada görünürlüğe HİÇ ETKİ ETMEZ
+  //     (kullanıcı kararı: "bakiyesi 0 olan pasif/iptal müşteri geçmiş kaydı olsa da gözükmesin,
+  //     sadece rapor hesaplamalarında geçmiş verisi kullanılsın").
+  musteriler.forEach(m=>{
+    if(!m.__masterKaynakli){ m.__gizli = false; return; }
+    const bakiyeVar = Math.abs(m.kalanBorc||0) > 0;
+    if(m.__masterAktifMi){
+      const gecmisiVar = gecmisiOlanMusteriler.has(String(m.musteri).trim());
+      m.__gizli = !bakiyeVar && !gecmisiVar;
+    }else{
+      m.__gizli = !bakiyeVar;
+    }
+  });
+
   const tahsilatToplamHam = Array.from(tahsilatMap.values()).reduce((a,b)=>a+b,0);
   const tahsilatEslesenToplam = sum(musteriler,'alinanTahsilat');
   const kpi = {
@@ -1527,7 +1672,7 @@ function buildReport(files, musteriMasterMap){
   return {
     asOf: today, musteriler, invoices, bakiyesiz, kpi, ticariStok,
     temsilciler: Array.from(repMap.values()).sort((a,b)=>b.kalanBorc-a.kalanBorc),
-    siparisArsiv, tahsilatArsiv, faturaArsiv, bayiHakedis, bozukIadeTahsilat, depozitoTahsilat, tahsilatFormatB,
+    siparisArsiv, tahsilatArsiv, faturaArsiv, bayiHakedis, bozukIadeTahsilat,
     cariEkstreUnvanMap,
   };
 }
